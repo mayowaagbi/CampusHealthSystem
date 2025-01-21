@@ -47,9 +47,11 @@ function Navbar() {
         >
           Contact
         </Link>
-        <Button variant="outline" size="sm">
-          Login
-        </Button>
+        <Link to="/login">
+          <Button variant="outline" size="sm">
+            Login
+          </Button>
+        </Link>
       </nav>
     </>
   );

@@ -10,6 +10,9 @@ import EducationPage from "./pages/EducationPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import ServicesPage from "./pages/ServicesPage";
 import ContactPage from "./pages/ContactPage";
+import LoginPage from "./pages/LoginPage";
+import TSPage from "./pages/TSpage";
+import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -22,8 +25,10 @@ export default function App() {
           <Route path="/facilities" element={<FacilitiesPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          {/* <Route path="*" element={<NotFound />} />
-            <Route path="/" element={<Navigate to="/dashbo" />} /> */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/Terms&Services" element={<TSPage />} />
+          <Route path="*" element={<NotFound />} />
+          {/* <Route path="/" element={<Navigate to="/dashbo" />} /> */}
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
