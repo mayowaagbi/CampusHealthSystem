@@ -20,7 +20,7 @@ import {
 } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 
-export default function ProfilePage() {
+export default function StudentProfilePage() {
   const [profile, setProfile] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -76,31 +76,31 @@ export default function ProfilePage() {
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/dashboard"
+            to="/student/dashboard"
           >
             Dashboard
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/appointments"
+            to="/student/appointments"
           >
             Appointments
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-records"
+            to="/student/health-records"
           >
             Health Records
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-goals"
+            to="/student/health-goals"
           >
             Health Goals
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/notifications"
+            to="/student/notifications"
           >
             Notifications
           </Link>

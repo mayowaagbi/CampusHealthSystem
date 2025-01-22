@@ -49,7 +49,7 @@ export default function NotFound() {
             Oops! The page you're looking for doesn't exist.
           </p>
           <Button asChild>
-            <Link to="/dashboard">Return to Dashboard</Link>
+            <Link to="/">Return to Homepage</Link>
           </Button>
         </motion.div>
       </main>

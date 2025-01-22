@@ -21,7 +21,7 @@ import {
 } from "../../components/ui/table";
 import { FileUp, Download, Trash } from "lucide-react";
 
-export default function HealthRecordsPage() {
+export default function StudentHealthRecordsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,31 +58,31 @@ export default function HealthRecordsPage() {
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/dashboard"
+            to="/student/dashboard"
           >
             Dashboard
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/appointments"
+            to="/student/appointments"
           >
             Appointments
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-goals"
+            to="/student/health-goals"
           >
             Health Goals
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/notifications"
+            to="/student/notifications"
           >
             Notifications
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/profile"
+            to="/student/profile"
           >
             Profile
           </Link>

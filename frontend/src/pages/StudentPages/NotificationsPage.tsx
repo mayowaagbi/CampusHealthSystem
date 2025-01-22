@@ -11,7 +11,7 @@ import {
 import { Button } from "../../components/ui/button";
 import { Bell, Calendar, FileText, Target } from "lucide-react";
 
-export default function NotificationsPage() {
+export default function StudentNotificationsPage() {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -75,31 +75,31 @@ export default function NotificationsPage() {
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/dashboard"
+            to="/student/dashboard"
           >
             Dashboard
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/appointments"
+            to="/student/appointments"
           >
             Appointments
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-records"
+            to="/student/health-records"
           >
             Health Records
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-goals"
+            to="/student/health-goals"
           >
             Health Goals
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/profile"
+            to="/student/profile"
           >
             Profile
           </Link>

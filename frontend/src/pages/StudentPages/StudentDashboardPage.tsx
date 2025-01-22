@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Card,
@@ -18,7 +18,6 @@ import {
   User,
   Plus,
   Minus,
-  Droplet,
   Heart,
   PhoneCall,
   BookOpen,
@@ -32,11 +31,12 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useToast } from "../..//hooks/use-toast";
+import { useToast } from "../../hooks/use-toast";
 import { ToastAction } from "../../components/ui/toast";
 import { MoodTracker } from "../../components/MoodTracker";
 import { JournalEntry } from "../../components/JournalEntry";
 import { EmergencyContacts } from "../../components/EmergencyContacts";
+import StudentNavBar from "./components/StudentNavBar";
 
 const healthData = [
   { day: "Mon", steps: 6000, calories: 2100, sleep: 7 },
@@ -48,7 +48,7 @@ const healthData = [
   { day: "Sun", steps: 7800, calories: 2300, sleep: 7.5 },
 ];
 
-export default function DashboardPage() {
+export default function StudentDashboardPage() {
   const [waterIntake, setWaterIntake] = useState(1.5);
   const [stepCount, setStepCount] = useState(8000);
   const [sleepHours, setSleepHours] = useState(7.5);
@@ -89,47 +89,7 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" to="/">
-          <span className="sr-only">Campus Health Management System</span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
-          <span className="ml-2 text-lg font-semibold">CHMS</span>
-        </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/appointments"
-          >
-            Appointments
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-records"
-          >
-            Health Records
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-goals"
-          >
-            Health Goals
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/notifications"
-          >
-            Notifications
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            to="/profile"
-          >
-            Profile
-          </Link>
-        </nav>
+        <StudentNavBar />
       </header>
       <main className="flex-1 py-6 px-4 md:px-6">
         <motion.div
@@ -414,27 +374,28 @@ export default function DashboardPage() {
           </Card>
           <div className="grid gap-4 md:grid-cols-4 mt-6">
             <Button asChild>
-              <Link to="/appointments">
+              <Link to="/student/appointments">
                 <Calendar className="mr-2 h-4 w-4" /> Book Appointment
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/health-records">
+              <Link to="/student/health-records">
                 <FileText className="mr-2 h-4 w-4" /> View Health Records
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/health-goals">
+              <Link to="/student/health-goals">
                 <Target className="mr-2 h-4 w-4" /> Set New Goal
               </Link>
             </Button>
             <Button asChild variant="outline">
-              <Link to="/profile">
+              <Link to="/student/profile">
                 <User className="mr-2 h-4 w-4" /> Update Profile
               </Link>
             </Button>
           </div>
         </motion.div>
+        <Outlet />
       </main>
     </div>
   );

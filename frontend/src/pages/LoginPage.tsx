@@ -1,13 +1,43 @@
-import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+
 import { Button } from "../components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../components/ui/form";
 import { Input } from "../components/ui/input";
-import { Heart } from "lucide-react";
 import Footer from "../components/footer";
+import { Heart } from "lucide-react";
+
+// Zod schema for login validation
+const loginSchema = z.object({
+  id: z.string().min(6, {
+    message: "ID must be at least 6 characters.",
+  }),
+  password: z.string().min(8, {
+    message: "Password must be at least 8 characters.",
+  }),
+});
+
+// Type inference from schema
+type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      id: "",
+      password: "",
+    },
+  });
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -15,17 +45,14 @@ export default function LoginPage() {
     transition: { duration: 0.6 },
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    // Simulate login process
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    // Here you would typically handle the login lohgic
+  const onSubmit = async (data: LoginFormValues) => {
+    console.log("Form Submitted:", data);
+    // Add login logic here
   };
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header */}
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link className="flex items-center justify-center" to="/">
           <motion.div
@@ -45,6 +72,8 @@ export default function LoginPage() {
           </motion.span>
         </Link>
       </header>
+
+      {/* Main Content */}
       <main className="flex-1 flex items-center justify-center">
         <motion.div
           className="w-full max-w-md p-6 space-y-6 bg-white rounded-lg shadow-lg"
@@ -53,33 +82,51 @@ export default function LoginPage() {
           variants={fadeIn}
         >
           <div className="text-center">
-            {/* <LogIn className="mx-auto h-12 w-12 text-primary" /> */}
             <Heart className="mx-auto h-12 w-12 text-primary" />
             <h1 className="mt-4 text-2xl font-bold">Login to Health Bridge</h1>
           </div>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label
-                htmlFor="ID"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                ID
-              </label>
-              <Input id="ID" placeholder="e.g 123456" type="ID" required />
-            </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                Password
-              </label>
-              <Input id="password" type="password" required />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Logging in..." : "Log In"}
-            </Button>
-          </form>
+
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {/* ID Field */}
+              <FormField
+                control={form.control}
+                name="id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ID</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g 123456" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Password Field */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter your password"
+                        type="password"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Submit Button */}
+              <Button type="submit" className="w-full">
+                Log In
+              </Button>
+            </form>
+          </Form>
+
           <div className="text-center text-sm">
             <Link to="#" className="text-primary hover:underline">
               Forgot password?
@@ -87,6 +134,7 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </main>
+
       <Footer />
     </div>
   );

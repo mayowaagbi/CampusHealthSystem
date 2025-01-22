@@ -39,7 +39,7 @@ const goalData = [
   { day: "Sun", progress: 85 },
 ];
 
-export default function HealthGoalsPage() {
+export default function StudentHealthGoalsPage() {
   const [goalType, setGoalType] = useState("");
   const [goalTarget, setGoalTarget] = useState("");
 
@@ -64,31 +64,31 @@ export default function HealthGoalsPage() {
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/dashboard"
+            to="/student/student"
           >
             Dashboard
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/appointments"
+            to="/student/appointments"
           >
             Appointments
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/health-records"
+            to="/student/health-records"
           >
             Health Records
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/notifications"
+            to="/student/notifications"
           >
             Notifications
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/profile"
+            to="/student/profile"
           >
             Profile
           </Link>
@@ -104,7 +104,7 @@ export default function HealthGoalsPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Set New Goal</CardTitle>
+                <CardTitle>Set New Goal hello</CardTitle>
                 <CardDescription>Define a new health objective</CardDescription>
               </CardHeader>
               <CardContent>
