@@ -1,0 +1,277 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = ""
+}
+
+// Enhanced Enums
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  RESCHEDULED
+}
+
+enum UserRole {
+  ADMIN
+  STUDENT
+  PROVIDER
+}
+
+enum NotificationType {
+  ALERT
+  REMINDER
+  APPOINTMENT
+  MESSAGE
+  EMERGENCY
+}
+
+enum MoodType {
+  HAPPY
+  SAD
+  STRESSED
+  ANXIOUS
+  NEUTRAL
+  DEPRESSED
+}
+
+enum FeedbackType {
+  SERVICE
+  APPOINTMENT
+  GENERAL
+  MEDICAL
+}
+
+enum FileType {
+  PDF
+  IMAGE
+  DOCUMENT
+  MEDICAL_RECORD
+  PRESCRIPTION
+}
+
+enum ConfidentialityLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CONFIDENTIAL
+}
+
+enum HealthAlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AppointmentPriority {
+  ROUTINE
+  URGENT
+  EMERGENCY
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  role      UserRole
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student            Student?
+  admin              Admin?
+  healthcareProvider HealthcareProvider?
+  activityLogs       ActivityLog[]
+  notifications      Notification[]
+}
+
+model Student {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  user           User     @relation(fields: [userId], references: [id])
+  name           String
+  phone          String
+  dateOfBirth    DateTime
+  address        String
+  profilePicture String?
+
+  emergencyContact EmergencyContact?
+  appointments     Appointment[]
+  healthRecords    HealthRecord[]
+  journals         Journal[]
+  moodTrackers     MoodTracker[]
+  feedbacks        Feedback[]
+}
+
+model Admin {
+  id     Int    @id @default(autoincrement())
+  userId Int    @unique
+  user   User   @relation(fields: [userId], references: [id])
+  name   String
+
+  healthAlerts HealthAlert[]
+  reports      Report[]
+}
+
+model HealthcareProvider {
+  id             Int    @id @default(autoincrement())
+  userId         Int    @unique
+  user           User   @relation(fields: [userId], references: [id])
+  name           String
+  specialization String
+  phone          String
+
+  appointments  Appointment[]
+  healthRecords HealthRecord[]
+  healthAlerts  HealthAlert[]
+  reports       Report[]
+  feedbacks     Feedback[] // Add this line to create the opposite relation
+}
+
+model Appointment {
+  id         Int                 @id @default(autoincrement())
+  studentId  Int
+  providerId Int
+  date       DateTime
+  time       DateTime
+  status     AppointmentStatus   @default(PENDING)
+  priority   AppointmentPriority @default(ROUTINE)
+
+  student  Student              @relation(fields: [studentId], references: [id])
+  provider HealthcareProvider   @relation(fields: [providerId], references: [id])
+  history  AppointmentHistory[]
+
+  @@index([studentId, providerId, date])
+}
+
+model AppointmentHistory {
+  id            Int      @id @default(autoincrement())
+  appointmentId Int
+  status        String
+  changedBy     Int
+  timestamp     DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model HealthRecord {
+  id              Int                  @id @default(autoincrement())
+  studentId       Int
+  providerId      Int
+  diagnosis       String
+  prescription    String
+  notes           String
+  confidentiality ConfidentialityLevel @default(MEDIUM)
+  isVerified      Boolean              @default(false)
+
+  student  Student            @relation(fields: [studentId], references: [id])
+  provider HealthcareProvider @relation(fields: [providerId], references: [id])
+  files    File[]
+
+  @@index([studentId, providerId])
+}
+
+model HealthAlert {
+  id          Int                 @id @default(autoincrement())
+  title       String
+  message     String
+  severity    HealthAlertSeverity @default(LOW)
+  createdById Int
+
+  createdByAdmin    Admin?              @relation(fields: [createdById], references: [id], map: "HealthAlert_admin_fkey")
+  createdByProvider HealthcareProvider? @relation(fields: [createdById], references: [id], map: "HealthAlert_provider_fkey")
+}
+
+model EmergencyContact {
+  id           Int    @id @default(autoincrement())
+  studentId    Int    @unique
+  name         String
+  phone        String
+  relationship String
+
+  student Student @relation(fields: [studentId], references: [id])
+}
+
+model Journal {
+  id        Int    @id @default(autoincrement())
+  studentId Int
+  title     String
+  content   String
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@index([studentId])
+}
+
+model MoodTracker {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  mood      MoodType
+  notes     String?
+
+  student Student @relation(fields: [studentId], references: [id])
+
+  @@index([studentId, mood])
+}
+
+model Feedback {
+  id         Int          @id @default(autoincrement())
+  studentId  Int
+  providerId Int
+  rating     Int          @db.SmallInt
+  comments   String
+  type       FeedbackType @default(GENERAL)
+
+  student  Student            @relation(fields: [studentId], references: [id])
+  provider HealthcareProvider @relation(fields: [providerId], references: [id])
+}
+
+model Notification {
+  id      Int              @id @default(autoincrement())
+  userId  Int
+  title   String
+  message String
+  type    NotificationType
+  isRead  Boolean          @default(false)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ActivityLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  action    String
+  timestamp DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model File {
+  id       Int      @id @default(autoincrement())
+  recordId Int
+  fileName String
+  fileType FileType
+  filePath String
+
+  record HealthRecord @relation(fields: [recordId], references: [id])
+}
+
+model SystemSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+}
+
+model Report {
+  id            Int    @id @default(autoincrement())
+  generatedById Int
+  type          String
+  data          Json
+
+  generatedByAdmin    Admin?              @relation(fields: [generatedById], references: [id], map: "Report_admin_fkey")
+  generatedByProvider HealthcareProvider? @relation(fields: [generatedById], references: [id], map: "Report_provider_fkey")
+}

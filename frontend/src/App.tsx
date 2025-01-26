@@ -20,6 +20,12 @@ import SettingsPage from "./pages/AdminPages/SettingsPage";
 import AdminHealthRecordsPage from "./pages/AdminPages/AdminHealthRecordsPage";
 import AdminStudentsPage from "./pages/AdminPages/AdminStudentsPage";
 import AdminHealthAlertsPage from "./pages/AdminPages/AdminHealthAlertsPage";
+import HealthcareProviderDashboard from "./pages/HealthCareProvider/HealthcareProviderDashboard";
+import AppointmentManagementPage from "./pages/HealthCareProvider/HealthcareAppointmentManagementPage";
+import PatientManagementPage from "./pages/HealthCareProvider/HealthcarePatientManagementPage";
+import AlertsPage from "./pages/HealthCareProvider/HealthcareAlertsPage";
+import HealthRecordsPage from "./pages/HealthCareProvider/HealthcareHealthRecordsPage";
+import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescriptionsPage";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +79,32 @@ export default function App() {
             <Route
               path="/admin/health-alerts"
               element={<AdminHealthAlertsPage />}
+            />
+
+            {/* Healthcare Pages */}
+            <Route
+              path="/healthcare-provider/dashboard"
+              element={<HealthcareProviderDashboard />}
+            />
+            <Route
+              path="/healthcare-provider/appointments"
+              element={<AppointmentManagementPage />}
+            />
+            <Route
+              path="/healthcare-provider/patients"
+              element={<PatientManagementPage />}
+            />
+            <Route
+              path="/healthcare-provider/alerts"
+              element={<AlertsPage />}
+            />
+            <Route
+              path="/healthcare-provider/health-records"
+              element={<HealthRecordsPage />}
+            />
+            <Route
+              path="/healthcare-provider/prescriptions"
+              element={<PrescriptionsPage />}
             />
           </Routes>
         </BrowserRouter>
