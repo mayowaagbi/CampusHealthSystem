@@ -1,10 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider             = "prisma-client-py"
+  recursive_type_depth = 5
 }
-
 datasource db {
   provider = "postgresql"
-  url      = ""
+  url      = "postgresql://postgres:password@localhost:5432/campus_health_system"
 }
 
 // Enhanced Enums
@@ -274,4 +274,15 @@ model Report {
 
   generatedByAdmin    Admin?              @relation(fields: [generatedById], references: [id], map: "Report_admin_fkey")
   generatedByProvider HealthcareProvider? @relation(fields: [generatedById], references: [id], map: "Report_provider_fkey")
+}
+model FileMetadata {
+  id                     Int      @id @default(autoincrement())
+  filename               String
+  original_filename      String
+  file_type              String
+  user_id                Int
+  upload_date            DateTime @default(now())
+  description            String?
+  file_path              String
+  confidentiality_level  String?
 }

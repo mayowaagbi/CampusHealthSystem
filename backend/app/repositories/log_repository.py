@@ -17,15 +17,6 @@ class LogRepository:
     ) -> Dict:
         """
         Create a new activity log entry.
-
-        Args:
-            user_id (int): ID of the user performing the action.
-            action (str): Description of the action.
-            ip_address (Optional[str]): IP address of the user.
-            user_agent (Optional[str]): User agent string.
-
-        Returns:
-            Dict: The created activity log entry.
         """
         try:
             new_log = await self.prisma.activitylog.create(
@@ -46,13 +37,6 @@ class LogRepository:
         """
         Retrieve activity logs with optional filtering.
 
-        Args:
-            skip (int): Number of logs to skip.
-            limit (int): Maximum number of logs to return.
-            user_id (Optional[int]): Filter by user ID.
-
-        Returns:
-            List[Dict]: List of activity logs.
         """
         try:
             # Prepare filters
@@ -71,12 +55,6 @@ class LogRepository:
     async def get_log_summary(self, days: int = 7) -> Dict:
         """
         Generate a summary of recent activity logs.
-
-        Args:
-            days (int): Number of days to look back.
-
-        Returns:
-            Dict: Summary of activity logs.
         """
         try:
             # Set date range
@@ -115,12 +93,6 @@ class LogRepository:
         """
         Get the number of activities for a specific user within a given time frame.
 
-        Args:
-            user_id (int): ID of the user.
-            days (int): Number of days to look back.
-
-        Returns:
-            int: Number of activities for the user.
         """
         try:
             end_date = datetime.now(datetime.timezone.utc)

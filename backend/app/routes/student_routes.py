@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from prisma import Prisma
 from typing import List, Optional
-
 from app.services.student_service import StudentService
 from app.schemas.student_schemas import (
     StudentProfileUpdateSchema,

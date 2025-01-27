@@ -1,3 +1,8 @@
+from typing import List, Dict
+import app.schemas.notification_schemas as NotificationSchema
+import app.services.notification_service as NotificationService
+
+
 class NotificationController:
     @staticmethod
     async def get_notifications(

@@ -1,9 +1,10 @@
 # app/models/log.py
 from sqlalchemy import Column, Integer, String, DateTime, Enum
-from database import Base
+from datetime import datetime
+from app.database import prisma
 
 
-class SystemLog(Base):
+class SystemLog(prisma):
     __tablename__ = "system_logs"
     id = Column(Integer, primary_key=True, index=True)
     timestamp = Column(DateTime, default=datetime.utcnow)

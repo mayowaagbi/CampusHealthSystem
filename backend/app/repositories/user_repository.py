@@ -1,4 +1,4 @@
-from app.models import User
+from app.models.user import User
 from prisma import Prisma
 from app.schemas.auth_schemas import UserRegisterSchema  # Import the UserRegisterSchema
 

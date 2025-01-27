@@ -1,5 +1,5 @@
 # app/controllers/log_controller.py
-from typing import List, Dict
+from typing import List, Dict, Optional
 from app.services.log_service import LogService
 from app.schemas.log_schemas import SystemLogSchema, LogFilterSchema, LogLevel
 
@@ -11,14 +11,6 @@ class LogController:
     ) -> List[SystemLogSchema]:
         """
         Retrieve system logs with optional filtering
-
-        Args:
-            skip (int): Number of logs to skip for pagination
-            limit (int): Maximum number of logs to return
-            filters (LogFilterSchema): Optional filtering parameters
-
-        Returns:
-            List of system logs
         """
         try:
             # Prepare filter parameters
@@ -49,12 +41,6 @@ class LogController:
     async def get_log_summary(days: int = 7) -> Dict:
         """
         Generate a summary of recent system logs
-
-        Args:
-            days (int): Number of days to look back
-
-        Returns:
-            Dictionary with log summary
         """
         try:
             summary = await LogService.get_log_summary(days)

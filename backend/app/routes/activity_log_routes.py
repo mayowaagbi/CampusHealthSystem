@@ -1,6 +1,7 @@
 # app/routes/activity_log_routes.py
 from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional, List
+from datetime import datetime
 
 from app.controllers.activity_log_controller import ActivityLogController
 from app.schemas.activity_log_schemas import ActivityLogSchema, ActivityLogFilterSchema

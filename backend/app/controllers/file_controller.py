@@ -1,7 +1,7 @@
 # app/controllers/file_controller.py
 import os
 import uuid
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fastapi import UploadFile, File
 
 from app.services.file_service import FileService
@@ -137,15 +137,6 @@ class FileController:
     ) -> List[FileMetadataSchema]:
         """
         Retrieve files for a user
-
-        Args:
-            current_user_id (int): ID of the current user
-            file_type (Optional[FileType]): Optional filter by file type
-            skip (int): Pagination offset
-            limit (int): Maximum number of files to return
-
-        Returns:
-            List of file metadata
         """
         try:
             files = await FileService.get_user_files(

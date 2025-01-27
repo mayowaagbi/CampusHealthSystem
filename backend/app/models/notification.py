@@ -1,9 +1,10 @@
 # app/models/notification.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from database import Base
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from datetime import datetime
+from app.database import prisma
 
 
-class Notification(Base):
+class Notification(prisma):
     __tablename__ = "notifications"
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))

@@ -6,7 +6,7 @@ from app.schemas.token_schema import TokenSchema
 
 
 class AuthService:
-    SECRET_KEY = "your-secret-key"
+    SECRET_KEY = "jHs9z8DLq5rXPN12xVyBQFGmr3oTKUJEX4MAycWafZkw"
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
     REFRESH_TOKEN_EXPIRE_DAYS = 7

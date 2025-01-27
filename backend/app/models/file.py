@@ -1,9 +1,9 @@
 # app/models/file.py
 from sqlalchemy import Column, Integer, String, DateTime
-from database import Base
+from app.database import prisma
 
 
-class FileMetadata(Base):
+class FileMetadata(prisma):
     __tablename__ = "file_metadata"
     id = Column(Integer, primary_key=True, index=True)
     filename = Column(String)

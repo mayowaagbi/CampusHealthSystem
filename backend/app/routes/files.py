@@ -196,8 +196,6 @@ async def list_files():
     """
     List all files in the uploads directory
 
-    Returns:
-        List[str]: List of filenames
     """
     try:
         files = os.listdir(FileUploadConfig.UPLOAD_DIR)

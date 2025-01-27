@@ -1,5 +1,5 @@
 # app/controllers/activity_log_controller.py
-from typing import List, Dict
+from typing import List, Dict, Optional
 from app.services.activity_log_service import ActivityLogService
 from app.schemas.activity_log_schemas import ActivityLogSchema, ActivityLogFilterSchema
 
@@ -14,15 +14,6 @@ class ActivityLogController:
     ) -> List[ActivityLogSchema]:
         """
         Retrieve activity logs with optional filtering
-
-        Args:
-            user_id (Optional[int]): Filter logs by specific user
-            skip (int): Number of logs to skip for pagination
-            limit (int): Maximum number of logs to return
-            filters (ActivityLogFilterSchema): Additional filtering options
-
-        Returns:
-            List of activity logs
         """
         try:
             # Prepare filter parameters
@@ -51,12 +42,6 @@ class ActivityLogController:
     async def get_activity_log_summary(days: int = 7) -> Dict:
         """
         Generate a summary of recent activity logs
-
-        Args:
-            days (int): Number of days to look back
-
-        Returns:
-            Dictionary with activity log summary
         """
         try:
             summary = await ActivityLogService.get_activity_log_summary(days)

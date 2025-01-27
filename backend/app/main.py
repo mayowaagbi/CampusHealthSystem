@@ -1,13 +1,19 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
 import os
 import uuid
 
-# Simplified imports
-from app.routes import student_routes, appointment_routes, auth_routes, user_routes
+# Import routes
+from app.routes import (
+    student_routes,
+    appointment_routes,
+    auth_routes,
+    user_routes,
+    healthcare_routes,
+    admin_routes,
+)
 
 # Basic logging configuration
 logging.basicConfig(level=logging.INFO)
@@ -18,12 +24,15 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
-        # Database connection setup
+        # Here you can add database connection setup if needed
         logger.info("Application startup complete")
         yield
     except Exception as e:
         logger.error(f"Startup failed: {e}")
         raise
+    finally:
+        # Here you can add database disconnection logic if needed
+        logger.info("Application shutdown complete")
 
 
 # Create FastAPI app
@@ -50,9 +59,11 @@ app.include_router(
 )
 app.include_router(auth_routes.router, prefix="/auth", tags=["Authentication"])
 app.include_router(user_routes.router, prefix="/users", tags=["Users"])
+app.include_router(healthcare_routes.router, prefix="/healthcare", tags=["Healthcare"])
+app.include_router(admin_routes.router, prefix="/admin", tags=["Admin"])
 
 
-# Simplified file upload endpoint
+# File upload endpoint
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     try:
@@ -64,6 +75,7 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as f:
             f.write(await file.read())
 
+        logger.info(f"File uploaded successfully: {unique_filename}")
         return {"filename": unique_filename, "message": "Upload successful"}
 
     except Exception as e:
@@ -85,3 +97,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+# Entry point for running the application
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -16,12 +16,6 @@ class AnalyticsController:
     ) -> AnalyticsResultSchema:
         """
         Generate health-related trend analytics
-
-        Args:
-            request (HealthTrendRequestSchema): Parameters for health trend analysis
-
-        Returns:
-            AnalyticsResultSchema: Detailed health trend analytics
         """
         try:
             # Validate and process request parameters
@@ -49,12 +43,6 @@ class AnalyticsController:
     ) -> AnalyticsResultSchema:
         """
         Generate appointment-related statistics
-
-        Args:
-            request (AppointmentStatsRequestSchema): Parameters for appointment stats
-
-        Returns:
-            AnalyticsResultSchema: Detailed appointment statistics
         """
         try:
             # Validate and process request parameters
@@ -81,12 +69,6 @@ class AnalyticsController:
     ) -> AnalyticsResultSchema:
         """
         Analyze user engagement metrics
-
-        Args:
-            request (UserEngagementRequestSchema): Parameters for user engagement analysis
-
-        Returns:
-            AnalyticsResultSchema: Detailed user engagement analytics
         """
         try:
             # Validate and process request parameters
