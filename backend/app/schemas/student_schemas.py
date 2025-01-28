@@ -277,3 +277,71 @@ class JournalFilterSchema(BaseModel):
     keyword: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class FeedbackType(str, Enum):
+    """
+    Enum for different types of feedback
+    """
+
+    GENERAL = "GENERAL"
+    HEALTH_SERVICE = "HEALTH_SERVICE"
+    COUNSELING = "COUNSELING"
+    FACILITY = "FACILITY"
+    ACADEMIC = "ACADEMIC"
+
+
+class FeedbackSchema(BaseModel):
+    """
+    Schema for student feedback
+    """
+
+    id: Optional[int] = None
+    student_id: int
+    title: str = Field(..., min_length=3, max_length=100)
+    description: str = Field(..., min_length=10, max_length=1000)
+    feedback_type: FeedbackType = Field(default=FeedbackType.GENERAL)
+    is_anonymous: bool = Field(default=False)
+    status: str = Field(default="PENDING")  # e.g., PENDING, IN_PROGRESS, RESOLVED
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+    # Pydantic V2 configuration for ORM mode
+    model_config = ConfigDict(from_attributes=True)
+
+
+class FeedbackCreateSchema(BaseModel):
+    """
+    Schema for creating a new feedback
+    """
+
+    student_id: int
+    title: str = Field(..., min_length=3, max_length=100)
+    description: str = Field(..., min_length=10, max_length=1000)
+    feedback_type: FeedbackType = Field(default=FeedbackType.GENERAL)
+    is_anonymous: bool = Field(default=False)
+
+
+class FeedbackUpdateSchema(BaseModel):
+    """
+    Schema for updating an existing feedback
+    """
+
+    title: Optional[str] = Field(None, min_length=3, max_length=100)
+    description: Optional[str] = Field(None, min_length=10, max_length=1000)
+    feedback_type: Optional[FeedbackType] = None
+    status: Optional[str] = None
+
+
+class FeedbackFilterSchema(BaseModel):
+    """
+    Schema for filtering feedbacks
+    """
+
+    student_id: Optional[int] = None
+    feedback_type: Optional[FeedbackType] = None
+    status: Optional[str] = None
+    is_anonymous: Optional[bool] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    keyword: Optional[str] = None

@@ -14,7 +14,7 @@ class TokenService:
     """
 
     # Configuration constants
-    SECRET_KEY = "your-secret-key-here"  # Replace with a strong, unique secret key
+    SECRET_KEY = "7a859f9a543ff252aff61ebdac20247f3da2c5cee7100172a3b8e20b4485d789"
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -56,7 +56,7 @@ class TokenService:
         Create a token for a specific user
 
         Args:
-            user (User): User object to create token for
+            user (User ): User object to create token for
 
         Returns:
             UserTokenResponse: Token with user information
@@ -130,3 +130,32 @@ class TokenService:
         )
 
         return reset_token
+
+    @staticmethod
+    def generate_verification_token(
+        user_id: int, expires_delta: Optional[timedelta] = None
+    ) -> str:
+        """
+        Generate a verification token for email verification
+
+        Args:
+            user_id (int): ID of the user to verify
+            expires_delta (Optional[timedelta]): Token expiration time
+
+        Returns:
+            str: Encoded verification token
+        """
+        if not expires_delta:
+            expires_delta = timedelta(days=1)  # Default 1 day expiration
+
+        verification_payload = {
+            "sub": str(user_id),
+            "type": "email_verification",
+            "exp": datetime.utcnow() + expires_delta,
+        }
+
+        verification_token = jwt.encode(
+            verification_payload, SECRET_KEY, algorithm=ALGORITHM
+        )
+
+        return verification_token

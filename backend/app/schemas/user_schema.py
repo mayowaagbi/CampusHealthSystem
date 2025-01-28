@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from typing import Optional
 from enum import Enum
 from datetime import datetime
@@ -29,6 +29,21 @@ class BaseUserSchema(BaseModel):
     )
     role: UserRole
     gender: Optional[UserGender] = None
+
+
+class UserCreate(BaseModel):
+    """
+    Schema for creating a new user
+    """
+
+    email: EmailStr = Field(..., example="user@example.com")
+    password: str = Field(..., min_length=8, example="SecurePassword123!")
+    role: UserRole = Field(default=UserRole.STUDENT)
+    is_active: bool = Field(default=True)
+
+    # Optional additional fields
+    name: Optional[str] = Field(None, example="John Doe")
+    phone: Optional[str] = Field(None, example="+1234567890")
 
 
 class UserCreateSchema(BaseUserSchema):
@@ -62,6 +77,35 @@ class UserUpdateSchema(BaseUserSchema):
     name: Optional[str] = None
     role: Optional[UserRole] = None
     gender: Optional[UserGender] = None
+
+
+class UserUpdate(BaseModel):
+    """
+    Schema for updating user information
+    """
+
+    email: Optional[EmailStr] = Field(None, example="newemail@example.com")
+    password: Optional[str] = Field(None, min_length=8)
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+    name: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class UserResponse(BaseModel):
+    """
+    Schema for user response (without sensitive information)
+    """
+
+    id: int
+    email: EmailStr
+    role: UserRole
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    # Pydantic V2 configuration for ORM mode
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserResponseSchema(BaseUserSchema):

@@ -1,5 +1,5 @@
 # app/controllers/auth_controller.py
-import jwt
+from jose import jwt
 from datetime import datetime, timedelta
 from app.services.auth_service import AuthService
 from typing import Dict

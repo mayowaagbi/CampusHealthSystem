@@ -3,11 +3,42 @@ from typing import List, Optional, Dict
 from prisma import Prisma
 from prisma.errors import UniqueViolationError, RecordNotFoundError
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
-from app.schemas import UserCreate, UserUpdate, UserResponse
+from app.schemas.user_schema import UserCreate, UserUpdate, UserResponse
 from app.services.activity_log_service import ActivityLogService
 from app.services.notification_service import NotificationService
-from app.utils.token_generator import generate_verification_token
+
+# from app.utils.token_generator import generate_verification_token
+
+
+def generate_verification_token(
+    user_id: int, expires_delta: Optional[timedelta] = None
+) -> str:
+    """
+    Generate a verification token for email verification
+
+    Args:
+        user_id (int): ID of the user to verify
+        expires_delta (Optional[timedelta]): Token expiration time
+
+    Returns:
+        str: Encoded verification token
+    """
+    if not expires_delta:
+        expires_delta = timedelta(days=1)  # Default 1 day expiration
+
+    verification_payload = {
+        "sub": str(user_id),
+        "type": "email_verification",
+        "exp": datetime.utcnow() + expires_delta,
+    }
+
+    verification_token = jwt.encode(
+        verification_payload, SECRET_KEY, algorithm=ALGORITHM
+    )
+
+    return verification_token
 
 
 class UserService:

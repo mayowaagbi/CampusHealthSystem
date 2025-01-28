@@ -1,5 +1,5 @@
 # app/services/auth_service.py
-import jwt
+from jose import jwt
 from datetime import datetime, timedelta
 from app.services.user_service import UserService
 from app.schemas.token_schema import TokenSchema

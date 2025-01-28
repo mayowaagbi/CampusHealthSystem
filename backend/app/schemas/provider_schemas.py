@@ -1,6 +1,6 @@
 # app/schemas/provider_schemas.py
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 
 
@@ -112,3 +112,45 @@ class FeedbackSchema(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PatientRecordSchema(BaseModel):
+    """
+    Schema for patient records
+    """
+
+    id: Optional[int] = None
+    patient_id: int
+    provider_id: int
+    diagnosis: str = Field(..., min_length=3, max_length=500)
+    treatment: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=1000)
+    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
+
+    # Pydantic V2 configuration for ORM mode
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PatientRecordCreateSchema(BaseModel):
+    """
+    Schema for creating a new patient record
+    """
+
+    patient_id: int
+    provider_id: int
+    diagnosis: str = Field(..., min_length=3, max_length=500)
+    treatment: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=1000)
+
+
+class UpdatePatientSchema(BaseModel):
+    """
+    Schema for updating an existing patient record
+    """
+
+    diagnosis: Optional[str] = Field(None, min_length=3, max_length=500)
+    treatment: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=1000)
+
+    # Pydantic V2 configuration for ORM mode
+    model_config = ConfigDict(from_attributes=True)

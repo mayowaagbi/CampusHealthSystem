@@ -3,7 +3,7 @@ from typing import Dict, Any, Optional
 from prisma import Prisma
 from prisma.errors import RecordNotFoundError
 
-from app.schemas import SystemSettingUpdate
+from app.schemas.system_setting_schema import SystemSettingUpdate
 
 
 class SystemSettingService:

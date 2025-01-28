@@ -11,7 +11,7 @@ from app.routes import (
     appointment_routes,
     auth_routes,
     user_routes,
-    healthcare_routes,
+    healthcare_provider_routes,
     admin_routes,
 )
 
@@ -59,7 +59,9 @@ app.include_router(
 )
 app.include_router(auth_routes.router, prefix="/auth", tags=["Authentication"])
 app.include_router(user_routes.router, prefix="/users", tags=["Users"])
-app.include_router(healthcare_routes.router, prefix="/healthcare", tags=["Healthcare"])
+app.include_router(
+    healthcare_provider_routes.router, prefix="/healthcare", tags=["Healthcare"]
+)
 app.include_router(admin_routes.router, prefix="/admin", tags=["Admin"])
 
 

@@ -4,12 +4,12 @@ from app.services.user_service import UserService
 from app.services.health_alert_service import HealthAlertService
 from app.services.report_service import ReportService
 from app.services.system_setting_service import SystemSettingService
-from app.schemas import (
+from app.schemas.user_schema import (
     UserCreate,
     UserUpdate,
-    HealthAlertCreate,
-    SystemSettingUpdate,
 )
+from app.schemas.system_setting_schema import SystemSettingUpdate
+from app.schemas.health_alert_schemas import HealthAlertCreate
 
 
 class AdminController:

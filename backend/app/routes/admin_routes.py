@@ -3,12 +3,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import List
 
 from app.controllers.admin_controller import AdminController
-from app.schemas import (
+from app.schemas.user_schema import (
     UserCreate,
     UserUpdate,
-    HealthAlertCreate,
-    SystemSettingUpdate,
 )
+from app.schemas.system_setting_schema import SystemSettingUpdate
+from app.schemas.health_alert_schemas import HealthAlertCreate
 from app.middleware.auth import admin_required
 
 router = APIRouter(prefix="/admin", tags=["Admin"])

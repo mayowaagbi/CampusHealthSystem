@@ -3,7 +3,7 @@ from typing import List
 from prisma import Prisma
 from prisma.errors import RecordNotFoundError
 
-from app.schemas.student_schemas import HealthRecordSchema
+from app.schemas.health_alert_schemas import HealthRecordSchema
 
 
 class HealthRecordService:
