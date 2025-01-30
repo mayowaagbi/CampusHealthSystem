@@ -29,4 +29,4 @@ class AppointmentController {
   });
 }
 
-export default new AppointmentController();
+module.export = new AppointmentController();

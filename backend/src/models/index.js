@@ -1,9 +1,6 @@
 const User = require("./user");
 const Profile = require("./Profile");
 const Appointment = require("./Appointment");
-const HealthRecord = require("./HealthRecord");
-const EmergencyContact = require("./EmergencyContact");
-const Notification = require("./Notification");
 const StudentDetails = require("./StudentDetails");
 const ProviderDetails = require("./ProviderDetails");
 const HealthRecord = require("./HealthRecord");
@@ -22,7 +19,6 @@ module.exports = {
   User,
   Profile,
   Appointment,
-  HealthRecord,
   EmergencyContact,
   Notification,
   StudentDetails,
@@ -35,8 +31,6 @@ module.exports = {
   AppointmentHistory,
   AppointmentDocument,
   Prescription,
-  EmergencyContact,
-  Notification,
   MedicalDocument,
   Session,
 };

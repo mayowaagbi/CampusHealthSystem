@@ -25,4 +25,4 @@ class EmergencyController {
   });
 }
 
-export default new EmergencyController();
+module.export = new EmergencyController();

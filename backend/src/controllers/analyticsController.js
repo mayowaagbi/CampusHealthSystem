@@ -19,4 +19,4 @@ class AnalyticsController {
   });
 }
 
-export default new AnalyticsController();
+module.export = new AnalyticsController();

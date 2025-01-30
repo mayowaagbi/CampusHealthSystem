@@ -1,11 +1,11 @@
-const { AuthService } = require("../services");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const { validateRequest } = require("../middleware/validationMiddleware");
 const {
   loginSchema,
   registerSchema,
 } = require("../validations/authValidation");
+const AuthService = require("../services/AuthService");
 
 class AuthController {
   register = asyncHandler(async (req, res) => {
@@ -31,4 +31,4 @@ class AuthController {
   });
 }
 
-export default new AuthController();
+module.exports = new AuthController();

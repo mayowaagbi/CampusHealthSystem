@@ -1,5 +1,5 @@
 const express = require("express");
-const { AuthController } = require("../controllers");
+const { AuthController } = require("../controllers/authController");
 const { validateRequest } = require("../middleware");
 const { loginSchema, registerSchema } = require("../validations");
 const router = express.Router();
@@ -13,4 +13,4 @@ router.post("/login", validateRequest(loginSchema), AuthController.login);
 router.post("/refresh-token", AuthController.refreshToken);
 router.post("/logout", AuthController.logout);
 
-export default router;
+module.exports = router;

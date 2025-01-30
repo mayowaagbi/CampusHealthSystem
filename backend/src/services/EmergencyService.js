@@ -20,4 +20,4 @@ class EmergencyService {
   }
 }
 
-export default new EmergencyService();
+module.export = new EmergencyService();

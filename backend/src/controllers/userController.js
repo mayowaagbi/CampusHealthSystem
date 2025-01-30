@@ -21,4 +21,4 @@ class UserController {
   });
 }
 
-export default new UserController();
+module.export = new UserController();

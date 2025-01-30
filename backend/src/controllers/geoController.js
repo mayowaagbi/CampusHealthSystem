@@ -8,4 +8,4 @@ class GeoController {
   }
 }
 
-export default new GeoController();
+module.export = new GeoController();

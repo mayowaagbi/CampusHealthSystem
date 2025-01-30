@@ -35,4 +35,4 @@ class AmbulanceController {
   });
 }
 
-export default new AmbulanceController();
+module.export = new AmbulanceController();

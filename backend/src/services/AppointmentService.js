@@ -38,4 +38,4 @@ class AppointmentService {
   }
 }
 
-export default new AppointmentService();
+module.export = new AppointmentService();

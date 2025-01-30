@@ -22,4 +22,4 @@ class HealthRecordService {
   }
 }
 
-export default new HealthRecordService();
+module.export = new HealthRecordService();

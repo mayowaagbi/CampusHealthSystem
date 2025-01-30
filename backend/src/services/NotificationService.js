@@ -1,11 +1,8 @@
-import { Notification } from "../models";
-import { sendEmail } from "../utils";
-import { sendSMS } from "../utils/twilio";
-
 const { Notification, User } = require("../models");
 const { sendEmail } = require("../utils/mailer");
 const { sendSMS } = require("../utils/smsService");
-const prisma = require("../prisma");
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
 class NotificationService {
   async sendBulkNotification(userIds, message) {
     const notifications = await Notification.batchCreate(userIds, message);
@@ -54,4 +51,4 @@ class NotificationService {
   }
 }
 
-export default new NotificationService();
+module.export = new NotificationService();

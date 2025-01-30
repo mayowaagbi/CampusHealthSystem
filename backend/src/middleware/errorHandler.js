@@ -1,7 +1,7 @@
 /**
  * Central error handling middleware
  */
-export const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
@@ -20,9 +20,11 @@ export const errorHandler = (err, req, res, next) => {
 /**
  * 404 Not Found handler
  */
-export const notFound = (req, res, next) => {
+const notFound = (req, res, next) => {
   res.status(404).json({
     success: false,
     message: `Cannot ${req.method} ${req.originalUrl}`,
   });
 };
+
+module.exports = { errorHandler, notFound };

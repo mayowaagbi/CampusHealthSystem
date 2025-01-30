@@ -1,11 +1,11 @@
-export const successResponse = (res, data, statusCode = 200) => {
+const successResponse = (res, data, statusCode = 200) => {
   res.status(statusCode).json({
     success: true,
     data,
   });
 };
 
-export const errorResponse = (res, error) => {
+const errorResponse = (res, error) => {
   const statusCode = error.statusCode || 500;
   const message = error.message || "Internal Server Error";
 
@@ -15,3 +15,5 @@ export const errorResponse = (res, error) => {
     error: process.env.NODE_ENV === "development" ? error.stack : {},
   });
 };
+
+module.exports = { successResponse, errorResponse };

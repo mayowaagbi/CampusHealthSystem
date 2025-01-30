@@ -6,7 +6,7 @@ const NotificationService = require("./NotificationService");
 const EmergencyService = require("./EmergencyService");
 const AnalyticsService = require("./AnalyticsService");
 
-export {
+module.exports = {
   UserService,
   AuthService,
   AppointmentService,

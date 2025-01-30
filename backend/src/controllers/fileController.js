@@ -35,4 +35,4 @@ class FileController {
   });
 }
 
-export default new FileController();
+module.export = new FileController();

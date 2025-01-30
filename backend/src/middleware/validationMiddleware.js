@@ -2,7 +2,7 @@ const { ZodError } = require("zod");
 /**
  * Zod schema validation middleware
  */
-export const validateRequest = (schema) => (req, res, next) => {
+const validateRequest = (schema) => (req, res, next) => {
   try {
     schema.parse({
       body: req.body,
@@ -21,3 +21,5 @@ export const validateRequest = (schema) => (req, res, next) => {
     next(err);
   }
 };
+
+module.exports = validateRequest;

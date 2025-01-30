@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async (to, subject, html) => {
+const sendEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
       from: `"Campus Health" <${process.env.EMAIL_FROM}>`,
@@ -26,7 +26,7 @@ export const sendEmail = async (to, subject, html) => {
   }
 };
 
-export const sendAppointmentConfirmation = (user, appointment) => {
+const sendAppointmentConfirmation = (user, appointment) => {
   const html = `
     <h1>Appointment Confirmed</h1>
     <p>Hello ${user.name},</p>
@@ -37,3 +37,5 @@ export const sendAppointmentConfirmation = (user, appointment) => {
 
   return sendEmail(user.email, "Appointment Confirmation", html);
 };
+
+module.exports = { sendEmail, sendAppointmentConfirmation };

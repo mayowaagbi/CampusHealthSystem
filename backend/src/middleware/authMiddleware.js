@@ -3,7 +3,7 @@ const { User } = require("../models");
 /**
  * Authentication middleware
  */
-export const authenticate = async (req, res, next) => {
+const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -27,7 +27,7 @@ export const authenticate = async (req, res, next) => {
 /**
  * Role-based access control
  */
-export const authorize =
+const authorize =
   (...roles) =>
   (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -35,3 +35,5 @@ export const authorize =
     }
     next();
   };
+
+module.exports = { authenticate, authorize };

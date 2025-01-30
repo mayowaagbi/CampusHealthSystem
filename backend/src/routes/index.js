@@ -17,4 +17,4 @@ router.use("/notifications", notificationRoutes);
 router.use("/emergency", emergencyRoutes);
 router.use("/analytics", analyticsRoutes);
 
-export default router;
+module.exports = router;

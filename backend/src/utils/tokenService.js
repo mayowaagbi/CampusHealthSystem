@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const logger = require("./logger");
 
-export const generateTokens = (payload) => {
+const generateTokens = (payload) => {
   try {
     const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, {
       expiresIn: "15m",
@@ -18,7 +18,7 @@ export const generateTokens = (payload) => {
   }
 };
 
-export const verifyToken = (token, type = "access") => {
+const verifyToken = (token, type = "access") => {
   try {
     const secret =
       type === "access"
@@ -31,3 +31,5 @@ export const verifyToken = (token, type = "access") => {
     throw new Error("Invalid token");
   }
 };
+
+module.exports = { generateTokens, verifyToken };

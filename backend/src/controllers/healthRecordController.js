@@ -27,4 +27,4 @@ class HealthRecordController {
   });
 }
 
-export default new HealthRecordController();
+module.export = new HealthRecordController();

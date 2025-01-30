@@ -4,7 +4,7 @@ const redisClient = require("../config/redis");
 /**
  * API rate limiter
  */
-export const apiLimiter = rateLimit({
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per window
   standardHeaders: true,
@@ -16,3 +16,5 @@ export const apiLimiter = rateLimit({
     : undefined,
   message: "Too many requests, please try again later",
 });
+
+module.exports = apiLimiter;

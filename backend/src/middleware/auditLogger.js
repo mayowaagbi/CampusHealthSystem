@@ -2,7 +2,7 @@ const { AuditLog } = require("../models");
 /**
  * Audit logging middleware
  */
-export const auditLogger = async (req, res, next) => {
+const auditLogger = async (req, res, next) => {
   const start = Date.now();
 
   res.on("finish", async () => {
@@ -25,3 +25,5 @@ export const auditLogger = async (req, res, next) => {
 
   next();
 };
+
+module.exports = { auditLogger };

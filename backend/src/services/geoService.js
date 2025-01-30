@@ -44,4 +44,4 @@ class GeoService {
   }
 }
 
-export default new GeoService();
+module.export = new GeoService();
