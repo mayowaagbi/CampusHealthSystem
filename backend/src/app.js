@@ -19,6 +19,7 @@ import {
 } from "./middleware";
 import { connectDB } from "./config/database";
 import { logger } from "./utils/logger";
+import fileUpload from "express-fileupload";
 
 // Load environment variables
 config();
@@ -52,7 +53,21 @@ app.use("/api/appointments", authMiddleware, appointmentRoutes);
 app.use("/api/health-records", authMiddleware, healthRoutes);
 app.use("/api/emergency", authMiddleware, emergencyRoutes);
 app.use("/api/notifications", authMiddleware, notificationRoutes);
+app.use("/api/files", fileRoutes);
+app.use("/api/ambulance", ambulanceRoutes);
+app.use("/api/water", waterRoutes);
 
+// Add after other middleware
+app.use(
+  fileUpload({
+    limits: { fileSize: 5 * 1024 * 1024 },
+    abortOnLimit: true,
+    useTempFiles: true,
+    tempFileDir: "/tmp/",
+  })
+);
+
+// Add routes
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });

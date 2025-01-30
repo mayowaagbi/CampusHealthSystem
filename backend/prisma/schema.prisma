@@ -29,6 +29,8 @@ enum FileCategory {
   IMAGING
   CONSENT_FORM
   IDENTIFICATION
+  AMBULANCE_REQUEST
+  OTHER
 }
 
 model User {
@@ -46,6 +48,11 @@ model User {
   sessions                    Session[]
   logs                        AuditLog[]
   notifications               Notification[]
+  locations                   UserLocation[]
+  stepEntries                 StepEntry[]
+  files                       File[]
+  ambulanceRequests           AmbulanceRequest[]
+  waterGoals                  WaterGoal[]
   appointmentHistoriesCreated AppointmentHistory[] @relation("UserAppointmentChanges")
 
   @@index([email, createdAt])
@@ -282,24 +289,75 @@ model SystemConfig {
 }
 
 model UserLocation {
-  id          String      @id @default(uuid())
-  userId      String
-  latitude    Float
-  longitude   Float
-  timestamp   DateTime    @default(now())
-  user        User        @relation(fields: [userId], references: [id])
-  
+  id        String   @id @default(uuid())
+  userId    String
+  latitude  Float
+  longitude Float
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
   @@index([userId, timestamp])
 }
 
 model StepEntry {
-  id          String      @id @default(uuid())
+  id     String   @id @default(uuid())
+  userId String
+  date   DateTime @default(now())
+  steps  Int
+  source String   @default("GEO") // GEO, MANUAL
+  user   User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model File {
+  id          String   @id @default(uuid())
   userId      String
-  date        DateTime    @default(now())
-  steps       Int
-  source      String      @default("GEO") // GEO, MANUAL
-  user        User        @relation(fields: [userId], references: [id])
-  
+  url         String
+  type        FileType
+  description String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+enum FileType {
+  AMBULANCE_REQUEST
+  PROFILE
+  MEDICAL_REPORT
+  OTHER
+}
+
+model AmbulanceRequest {
+  id        String        @id @default(uuid())
+  userId    String
+  status    RequestStatus @default(PENDING)
+  latitude  Float
+  longitude Float
+  address   String?
+  files     String[] // Array of file URLs
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  user      User          @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+}
+
+enum RequestStatus {
+  PENDING
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+model WaterGoal {
+  id      String   @id @default(uuid())
+  userId  String
+  target  Int      @default(2000) // Default 2000ml
+  current Int      @default(0)
+  date    DateTime @default(now()) @db.Date
+  user    User     @relation(fields: [userId], references: [id])
+
   @@unique([userId, date])
   @@index([userId, date])
 }
