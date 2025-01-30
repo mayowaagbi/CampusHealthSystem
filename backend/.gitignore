@@ -1,77 +1,86 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-*.so
-
-# C extensions
-*.o
-*.obj
-
-# Virtual environment
-env/
-venv/
-ENV/
-env.bak/
-.venv/
-
-# macOS system files
-.DS_Store
-
-# PostgreSQL dump files
-*.sql
-
-# Prisma files
-.prisma/
-
-# Logs and temporary files
-*.log
-*.tmp
-
-# Python specific
-*.env
-*.env.*
-*.sqlite3
-*.db
-instance/
-*.pyc
-
-# VSCode settings
-.vscode/
-
-# Dependency directories
-*.egg-info/
-.eggs/
-__pypackages__/
-.mypy_cache/
-pytest_cache/
-.coverage
-.tox/
-htmlcov/
-
-# System and IDE files
-.idea/
-*.swp
-*~
-
-# Cache files
-*.cache
-.cache/
-
-# JWT tokens and secrets
-*.key
-
-# Upload files and media
-uploads/
-
 # Node.js dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Docker files
-*.pid
+# Environment variables
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env.example
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations/
+prisma/generated/
+prisma/.cache/
+
+# Logs
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log*
+error.log*
+
+# Compiled files
+dist/
+build/
+.cache/
+
+# Database & Sessions
+*.sqlite
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.pid
+*.seed
+*.tgz
+dump.rdb
+session-store.json
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# MacOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Docker
 docker-compose.override.yml
+.dockerignore
+
+# Testing & Coverage
+jest.config.js
+coverage/
+.nyc_output/
+
+# Next.js & Nuxt.js
+.next/
+.nuxt/
+out/
+
+# Firebase & Google Cloud
+.firebase/
+.firebaserc
+*.firestore
+database.rules.json
+
+# Miscellaneous
+tmp/
+temp/

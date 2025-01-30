@@ -1,288 +1,305 @@
-generator client {
-  provider             = "prisma-client-py"
-  recursive_type_depth = 5
-}
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:password@localhost:5432/campus_health_system"
+  url      = env("DATABASE_URL")
 }
 
-// Enhanced Enums
+generator client {
+  provider = "prisma-client-js"
+}
+
 enum AppointmentStatus {
   PENDING
   CONFIRMED
   CANCELLED
   RESCHEDULED
+  MISSED
 }
 
 enum UserRole {
   ADMIN
   STUDENT
   PROVIDER
+  SUPPORT
 }
 
-enum NotificationType {
-  ALERT
-  REMINDER
-  APPOINTMENT
-  MESSAGE
-  EMERGENCY
-}
-
-enum MoodType {
-  HAPPY
-  SAD
-  STRESSED
-  ANXIOUS
-  NEUTRAL
-  DEPRESSED
-}
-
-enum FeedbackType {
-  SERVICE
-  APPOINTMENT
-  GENERAL
-  MEDICAL
-}
-
-enum FileType {
-  PDF
-  IMAGE
-  DOCUMENT
-  MEDICAL_RECORD
+enum FileCategory {
+  MEDICAL_REPORT
+  LAB_RESULT
   PRESCRIPTION
-}
-
-enum ConfidentialityLevel {
-  LOW
-  MEDIUM
-  HIGH
-  CONFIDENTIAL
-}
-
-enum HealthAlertSeverity {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum AppointmentPriority {
-  ROUTINE
-  URGENT
-  EMERGENCY
+  IMAGING
+  CONSENT_FORM
+  IDENTIFICATION
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      UserRole
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  role         UserRole
+  mfaEnabled   Boolean   @default(false)
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  stepGoal     Int       @default(10000)
 
-  student            Student?
-  admin              Admin?
-  healthcareProvider HealthcareProvider?
-  activityLogs       ActivityLog[]
-  notifications      Notification[]
+  profile                     Profile?
+  sessions                    Session[]
+  logs                        AuditLog[]
+  notifications               Notification[]
+  appointmentHistoriesCreated AppointmentHistory[] @relation("UserAppointmentChanges")
+
+  @@index([email, createdAt])
 }
 
-model Student {
-  id             Int      @id @default(autoincrement())
-  userId         Int      @unique
-  user           User     @relation(fields: [userId], references: [id])
-  name           String
-  phone          String
-  dateOfBirth    DateTime
-  address        String
-  profilePicture String?
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  phone       String   @unique
+  avatar      String?
+  bio         String?
 
-  emergencyContact EmergencyContact?
-  appointments     Appointment[]
-  healthRecords    HealthRecord[]
-  journals         Journal[]
-  moodTrackers     MoodTracker[]
-  feedbacks        Feedback[]
+  studentDetails    StudentDetails?
+  providerDetails   ProviderDetails?
+  emergencyContacts EmergencyContact[]
+
+  @@index([firstName, lastName])
 }
 
-model Admin {
-  id     Int    @id @default(autoincrement())
-  userId Int    @unique
-  user   User   @relation(fields: [userId], references: [id])
-  name   String
+model StudentDetails {
+  id                    String  @id @default(uuid())
+  profileId             String  @unique
+  profile               Profile @relation(fields: [profileId], references: [id])
+  studentId             String  @unique
+  insuranceNumber       String?
+  primaryCareProviderId String?
 
-  healthAlerts HealthAlert[]
-  reports      Report[]
-}
-
-model HealthcareProvider {
-  id             Int    @id @default(autoincrement())
-  userId         Int    @unique
-  user           User   @relation(fields: [userId], references: [id])
-  name           String
-  specialization String
-  phone          String
-
-  appointments  Appointment[]
-  healthRecords HealthRecord[]
-  healthAlerts  HealthAlert[]
-  reports       Report[]
-  feedbacks     Feedback[] // Add this line to create the opposite relation
-}
-
-model Appointment {
-  id         Int                 @id @default(autoincrement())
-  studentId  Int
-  providerId Int
-  date       DateTime
-  time       DateTime
-  status     AppointmentStatus   @default(PENDING)
-  priority   AppointmentPriority @default(ROUTINE)
-
-  student  Student              @relation(fields: [studentId], references: [id])
-  provider HealthcareProvider   @relation(fields: [providerId], references: [id])
-  history  AppointmentHistory[]
-
-  @@index([studentId, providerId, date])
-}
-
-model AppointmentHistory {
-  id            Int      @id @default(autoincrement())
-  appointmentId Int
-  status        String
-  changedBy     Int
-  timestamp     DateTime @default(now())
-
-  appointment Appointment @relation(fields: [appointmentId], references: [id])
-}
-
-model HealthRecord {
-  id              Int                  @id @default(autoincrement())
-  studentId       Int
-  providerId      Int
-  diagnosis       String
-  prescription    String
-  notes           String
-  confidentiality ConfidentialityLevel @default(MEDIUM)
-  isVerified      Boolean              @default(false)
-
-  student  Student            @relation(fields: [studentId], references: [id])
-  provider HealthcareProvider @relation(fields: [providerId], references: [id])
-  files    File[]
-
-  @@index([studentId, providerId])
-}
-
-model HealthAlert {
-  id          Int                 @id @default(autoincrement())
-  title       String
-  message     String
-  severity    HealthAlertSeverity @default(LOW)
-  createdById Int
-
-  createdByAdmin    Admin?              @relation(fields: [createdById], references: [id], map: "HealthAlert_admin_fkey")
-  createdByProvider HealthcareProvider? @relation(fields: [createdById], references: [id], map: "HealthAlert_provider_fkey")
-}
-
-model EmergencyContact {
-  id           Int    @id @default(autoincrement())
-  studentId    Int    @unique
-  name         String
-  phone        String
-  relationship String
-
-  student Student @relation(fields: [studentId], references: [id])
-}
-
-model Journal {
-  id        Int    @id @default(autoincrement())
-  studentId Int
-  title     String
-  content   String
-
-  student Student @relation(fields: [studentId], references: [id])
+  healthRecords  HealthRecord[]
+  appointments   Appointment[]
+  journalEntries JournalEntry[]
+  moodEntries    MoodEntry[]
 
   @@index([studentId])
 }
 
-model MoodTracker {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  mood      MoodType
+model ProviderDetails {
+  id             String  @id @default(uuid())
+  profileId      String  @unique
+  profile        Profile @relation(fields: [profileId], references: [id])
+  licenseNumber  String  @unique
+  specialization String
+  department     String
+  available      Boolean @default(true)
+
+  appointments   Appointment[]
+  qualifications ProviderQualification[]
+  schedules      AvailabilitySchedule[]
+  healthRecords  HealthRecord[]          @relation("ProviderHealthRecords")
+
+  @@index([licenseNumber, specialization])
+}
+
+model Appointment {
+  id         String            @id @default(uuid())
+  studentId  String
+  providerId String
+  startTime  DateTime
+  endTime    DateTime
+  duration   Int
+  status     AppointmentStatus @default(PENDING)
+  priority   Int               @default(3)
+  location   String?
+  videoLink  String?
+  notes      String?
+
+  student   StudentDetails        @relation(fields: [studentId], references: [id])
+  provider  ProviderDetails       @relation(fields: [providerId], references: [id])
+  histories AppointmentHistory[]
+  documents AppointmentDocument[]
+
+  @@index([studentId, providerId, startTime])
+}
+
+model HealthRecord {
+  id            String            @id @default(uuid())
+  studentId     String
+  providerId    String
+  recordedAt    DateTime          @default(now())
+  title         String
+  description   String
+  diagnosis     String
+  prescriptions Prescription[]
+  documents     MedicalDocument[]
+
+  student  StudentDetails  @relation(fields: [studentId], references: [id])
+  provider ProviderDetails @relation(fields: [providerId], references: [id], name: "ProviderHealthRecords")
+
+  @@index([studentId, recordedAt])
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid())
+  studentId String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+
+  student StudentDetails @relation(fields: [studentId], references: [id])
+}
+
+model MoodEntry {
+  id        String   @id @default(uuid())
+  studentId String
+  mood      String
   notes     String?
+  createdAt DateTime @default(now())
 
-  student Student @relation(fields: [studentId], references: [id])
-
-  @@index([studentId, mood])
+  student StudentDetails @relation(fields: [studentId], references: [id])
 }
 
-model Feedback {
-  id         Int          @id @default(autoincrement())
-  studentId  Int
-  providerId Int
-  rating     Int          @db.SmallInt
-  comments   String
-  type       FeedbackType @default(GENERAL)
+model ProviderQualification {
+  id            String @id @default(uuid())
+  providerId    String
+  qualification String
+  institution   String
+  yearObtained  Int
 
-  student  Student            @relation(fields: [studentId], references: [id])
-  provider HealthcareProvider @relation(fields: [providerId], references: [id])
+  provider ProviderDetails @relation(fields: [providerId], references: [id])
 }
 
-model Notification {
-  id      Int              @id @default(autoincrement())
-  userId  Int
-  title   String
-  message String
-  type    NotificationType
-  isRead  Boolean          @default(false)
+model AvailabilitySchedule {
+  id         String   @id @default(uuid())
+  providerId String
+  startTime  DateTime
+  endTime    DateTime
+  recurrence String?
+  createdAt  DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  provider ProviderDetails @relation(fields: [providerId], references: [id])
 }
 
-model ActivityLog {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  action    String
-  timestamp DateTime @default(now())
+model AppointmentHistory {
+  id            String   @id @default(uuid())
+  appointmentId String
+  status        String
+  changedById   String
+  timestamp     DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id])
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+  changedBy   User        @relation(fields: [changedById], references: [id], name: "UserAppointmentChanges")
 }
 
-model File {
-  id       Int      @id @default(autoincrement())
-  recordId Int
-  fileName String
-  fileType FileType
-  filePath String
+model AppointmentDocument {
+  id            String   @id @default(uuid())
+  appointmentId String
+  name          String
+  filePath      String
+  uploadedAt    DateTime @default(now())
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id])
+}
+
+model Prescription {
+  id           String @id @default(uuid())
+  recordId     String
+  medication   String
+  dosage       String
+  instructions String
+  refills      Int    @default(0)
 
   record HealthRecord @relation(fields: [recordId], references: [id])
 }
 
-model SystemSetting {
-  id    Int    @id @default(autoincrement())
+model EmergencyContact {
+  id           String  @id @default(uuid())
+  profileId    String
+  name         String
+  relationship String
+  phone        String
+  email        String?
+  priority     Int     @default(1)
+
+  profile Profile @relation(fields: [profileId], references: [id])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  content   String
+  read      Boolean   @default(false)
+  priority  Int       @default(3)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model MedicalDocument {
+  id          String       @id @default(uuid())
+  recordId    String
+  name        String
+  type        FileCategory
+  storagePath String
+  uploadedBy  String
+  uploadedAt  DateTime     @default(now())
+
+  record HealthRecord @relation(fields: [recordId], references: [id])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  actionType  String
+  targetId    String?
+  description String
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
   key   String @unique
   value String
+  type  String
 }
 
-model Report {
-  id            Int    @id @default(autoincrement())
-  generatedById Int
-  type          String
-  data          Json
-
-  generatedByAdmin    Admin?              @relation(fields: [generatedById], references: [id], map: "Report_admin_fkey")
-  generatedByProvider HealthcareProvider? @relation(fields: [generatedById], references: [id], map: "Report_provider_fkey")
+model UserLocation {
+  id          String      @id @default(uuid())
+  userId      String
+  latitude    Float
+  longitude   Float
+  timestamp   DateTime    @default(now())
+  user        User        @relation(fields: [userId], references: [id])
+  
+  @@index([userId, timestamp])
 }
-model FileMetadata {
-  id                     Int      @id @default(autoincrement())
-  filename               String
-  original_filename      String
-  file_type              String
-  user_id                Int
-  upload_date            DateTime @default(now())
-  description            String?
-  file_path              String
-  confidentiality_level  String?
+
+model StepEntry {
+  id          String      @id @default(uuid())
+  userId      String
+  date        DateTime    @default(now())
+  steps       Int
+  source      String      @default("GEO") // GEO, MANUAL
+  user        User        @relation(fields: [userId], references: [id])
+  
+  @@unique([userId, date])
+  @@index([userId, date])
 }
