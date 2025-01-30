@@ -1,8 +1,11 @@
-import { AuthService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware/validationMiddleware";
-import { loginSchema, registerSchema } from "../validations/authValidation";
+const { AuthService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware/validationMiddleware");
+const {
+  loginSchema,
+  registerSchema,
+} = require("../validations/authValidation");
 
 class AuthController {
   register = asyncHandler(async (req, res) => {

@@ -1,7 +1,7 @@
-import { Appointment, ProviderDetails } from "../models";
-import { sendEmail } from "../utils/mailer";
-import { ApiError } from "../utils/apiError";
-import logger from "../utils/logger";
+const { Appointment, ProviderDetails, User } = require("../models");
+const { sendEmail } = require("../utils/mailer");
+const { ApiError } = require("../utils/apiError");
+const logger = require("../utils/logger");
 
 class AppointmentService {
   async createAppointment(studentId, providerId, appointmentData) {

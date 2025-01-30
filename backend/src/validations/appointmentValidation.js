@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { AppointmentStatus } from "@prisma/client";
-
+const { z } = require("zod");
+const { AppointmentStatus } = require("../models/Appointment");
+// import { AppointmentStatus } from "@prisma/client";
 export const createAppointmentSchema = z.object({
   providerId: z.string().uuid(),
   startTime: z.coerce.date().refine((date) => date > new Date(), {

@@ -1,8 +1,7 @@
-import { AmbulanceService } from "../services";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware";
-import { ambulanceRequestSchema } from "../validations";
-
+const { AmbulanceService } = require("../services");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware");
+const { ambulanceRequestSchema } = require("../validations");
 class AmbulanceController {
   createRequest = asyncHandler(async (req, res) => {
     const { latitude, longitude, address } = ambulanceRequestSchema.parse(

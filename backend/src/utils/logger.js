@@ -1,5 +1,5 @@
-import winston from "winston";
-import DailyRotateFile from "winston-daily-rotate-file";
+const winston = require("winston");
+const DailyRotateFile = require("winston-daily-rotate-file");
 
 const { combine, timestamp, printf, colorize, errors } = winston.format;
 

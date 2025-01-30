@@ -1,4 +1,4 @@
-import { z } from "zod";
+const { z } = require("zod");
 
 export const notificationSchema = z.object({
   message: z.string().min(10).max(500),

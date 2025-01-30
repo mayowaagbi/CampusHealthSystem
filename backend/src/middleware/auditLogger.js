@@ -1,5 +1,4 @@
-import { AuditLog } from "../models";
-
+const { AuditLog } = require("../models");
 /**
  * Audit logging middleware
  */

@@ -1,5 +1,4 @@
-import { z } from "zod";
-
+const { z } = require("zod");
 export const emergencyContactSchema = z.object({
   name: z.string().min(2),
   relationship: z.string().min(2),

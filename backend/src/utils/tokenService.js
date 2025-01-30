@@ -1,5 +1,5 @@
-import jwt from "jsonwebtoken";
-import logger from "./logger.js";
+const jwt = require("jsonwebtoken");
+const logger = require("./logger");
 
 export const generateTokens = (payload) => {
   try {

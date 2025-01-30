@@ -1,5 +1,4 @@
-import { z } from "zod";
-
+const { z } = require("zod");
 export const emailSchema = z.string().email();
 export const passwordSchema = z.string().min(8).max(32);
 export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/);

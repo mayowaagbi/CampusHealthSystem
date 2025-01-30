@@ -1,5 +1,4 @@
-import { z } from "zod";
-
+const { z } = require("zod");
 const configSchema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]),
   PORT: z.number().int().positive(),

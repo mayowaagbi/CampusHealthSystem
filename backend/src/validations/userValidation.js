@@ -1,4 +1,4 @@
-import { z } from "zod";
+const { z } = require("zod");
 
 export const updateProfileSchema = z.object({
   firstName: z.string().min(2).optional(),

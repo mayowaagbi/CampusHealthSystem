@@ -1,6 +1,6 @@
 // services/geoService.js
-import { calculateDistance, metersToSteps } from "../utils/geolocation";
-
+const { prisma } = require("../prisma/client");
+const { calculateDistance, metersToSteps } = require("../utils/geolocation");
 class GeoService {
   async processLocation(userId, location) {
     // Get previous location

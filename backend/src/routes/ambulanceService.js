@@ -1,5 +1,5 @@
-import { prisma } from "../config";
-import { sendSMS } from "../utils/twilio";
+const { prisma } = require("../config");
+const { sendSMS } = require("../utils/twilio");
 
 class AmbulanceService {
   async createRequest(requestData) {

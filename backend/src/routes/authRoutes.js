@@ -1,8 +1,7 @@
-import express from "express";
-import { AuthController } from "../controllers";
-import { validateRequest } from "../middleware";
-import { loginSchema, registerSchema } from "../validations";
-
+const express = require("express");
+const { AuthController } = require("../controllers");
+const { validateRequest } = require("../middleware");
+const { loginSchema, registerSchema } = require("../validations");
 const router = express.Router();
 
 router.post(

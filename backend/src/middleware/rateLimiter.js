@@ -1,7 +1,6 @@
-import rateLimit from "express-rate-limit";
-import RedisStore from "rate-limit-redis";
-import redisClient from "../config/redis";
-
+const rateLimit = require("express-rate-limit");
+const RedisStore = require("rate-limit-redis");
+const redisClient = require("../config/redis");
 /**
  * API rate limiter
  */

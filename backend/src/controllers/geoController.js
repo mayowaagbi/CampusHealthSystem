@@ -1,5 +1,4 @@
-// controllers/geoController.js
-import GeoService from "../services/geoService";
+const GeoService = require("../services/geoService");
 
 class GeoController {
   async trackLocation(req, res) {

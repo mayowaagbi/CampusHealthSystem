@@ -1,8 +1,8 @@
-import express from "express";
-import { UserController } from "../controllers";
-import { authenticate, authorize } from "../middleware";
-import { validateRequest } from "../middleware";
-import { updateProfileSchema } from "../validations";
+const express = require("express");
+const { UserController } = require("../controllers");
+const { authenticate, authorize } = require("../middleware");
+const { validateRequest } = require("../middleware");
+const { updateProfileSchema } = require("../validations");
 
 const router = express.Router();
 

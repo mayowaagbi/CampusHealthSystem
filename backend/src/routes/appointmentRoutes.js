@@ -1,7 +1,7 @@
-import express from "express";
-import { AppointmentController } from "../controllers";
-import { authenticate, validateRequest } from "../middleware";
-import { createAppointmentSchema } from "../validations";
+const express = require("express");
+const { AppointmentController } = require("../controllers");
+const { authenticate, validateRequest } = require("../middleware");
+const { createAppointmentSchema } = require("../validations");
 
 const router = express.Router();
 

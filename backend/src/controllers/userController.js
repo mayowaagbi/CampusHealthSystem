@@ -1,8 +1,8 @@
-import { UserService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware/validationMiddleware";
-import { updateProfileSchema } from "../validations/userValidation";
+const { UserService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware/validationMiddleware");
+const { updateProfileSchema } = require("../validations/userValidation");
 
 class UserController {
   getProfile = asyncHandler(async (req, res) => {

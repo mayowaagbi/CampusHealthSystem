@@ -1,5 +1,4 @@
-import { Appointment, HealthRecord } from "../models";
-
+const { Appointment, HealthRecord } = require("../models");
 class AnalyticsService {
   async getAppointmentStats(period) {
     return Appointment.aggregate([

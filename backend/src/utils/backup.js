@@ -1,7 +1,6 @@
-import { exec } from "child_process";
-import { promisify } from "util";
-import logger from "./logger.js";
-
+const { exec } = require("child_process");
+const { promisify } = require("util");
+const logger = require("./logger.js");
 const execAsync = promisify(exec);
 
 export const createDatabaseBackup = async () => {

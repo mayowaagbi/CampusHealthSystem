@@ -1,10 +1,10 @@
-import UserService from "./UserService";
-import AuthService from "./AuthService";
-import AppointmentService from "./AppointmentService";
-import HealthRecordService from "./HealthRecordService";
-import NotificationService from "./NotificationService";
-import EmergencyService from "./EmergencyService";
-import AnalyticsService from "./AnalyticsService";
+const UserService = require("./UserService");
+const AuthService = require("./AuthService");
+const AppointmentService = require("./AppointmentService");
+const HealthRecordService = require("./HealthRecordService");
+const NotificationService = require("./NotificationService");
+const EmergencyService = require("./EmergencyService");
+const AnalyticsService = require("./AnalyticsService");
 
 export {
   UserService,

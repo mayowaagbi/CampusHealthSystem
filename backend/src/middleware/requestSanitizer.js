@@ -1,7 +1,6 @@
-import helmet from "helmet";
-import xss from "xss-clean";
-import mongoSanitize from "express-mongo-sanitize";
-
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const mongoSanitize = require("express-mongo-sanitize");
 /**
  * Security middleware stack
  */

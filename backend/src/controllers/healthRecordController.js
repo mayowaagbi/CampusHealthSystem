@@ -1,8 +1,8 @@
-import { HealthRecordService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware/validationMiddleware";
-import { createHealthRecordSchema } from "../validations/healthValidation";
+const { HealthRecordService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware/validationMiddleware");
+const { createHealthRecordSchema } = require("../validations/healthValidation");
 
 class HealthRecordController {
   createRecord = asyncHandler(async (req, res) => {

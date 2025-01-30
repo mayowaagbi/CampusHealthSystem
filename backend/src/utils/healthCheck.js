@@ -1,5 +1,5 @@
-import prisma from "../config/prismaClient.js";
-import redis from "../config/redis.js";
+const { prisma } = require("../db");
+const { redis } = require("../cache");
 
 export const checkDatabaseHealth = async () => {
   try {

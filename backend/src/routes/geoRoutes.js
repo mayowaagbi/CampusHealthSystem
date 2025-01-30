@@ -1,8 +1,7 @@
-// routes/geoRoutes.js
-import express from "express";
-import { authMiddleware } from "../middleware";
-import GeoController from "../controllers/geoController";
-import { validateRequest } from "../validations/geoValidation";
+const express = require("express");
+const { authMiddleware } = require("../middleware");
+const GeoController = require("../controllers/geoController");
+const { validateRequest } = require("../validations/geoValidation");
 
 const router = express.Router();
 

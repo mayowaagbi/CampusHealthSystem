@@ -1,6 +1,5 @@
-import sanitizeHtml from "sanitize-html";
-import xss from "xss";
-
+const sanitizeHtml = require("sanitize-html");
+const xss = require("xss");
 export const sanitizeInput = (input) => {
   if (typeof input === "object") {
     return Object.keys(input).reduce((acc, key) => {

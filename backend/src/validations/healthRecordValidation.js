@@ -1,5 +1,4 @@
-import { z } from "zod";
-
+const { z } = require("zod");
 export const healthRecordSchema = z.object({
   diagnosis: z.string().min(3),
   prescription: z.string().min(3),

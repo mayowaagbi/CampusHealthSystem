@@ -1,7 +1,7 @@
-import { FileService } from "../services";
-import { asyncHandler } from "../utils/asyncHandler";
-import path from "path";
-import fs from "fs";
+const { FileService } = require("../services");
+const { asyncHandler } = require("../utils/asyncHandler");
+const path = require("path");
+const fs = require("fs");
 
 class FileController {
   uploadFile = asyncHandler(async (req, res) => {

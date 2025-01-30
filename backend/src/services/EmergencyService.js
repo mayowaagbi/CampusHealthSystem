@@ -1,8 +1,7 @@
-import { EmergencyContact } from "../models";
-import { sendSMS } from "../utils/smsService";
-import { ApiError } from "../utils/apiError";
-import logger from "../utils/logger";
-
+const { EmergencyContact } = require("../models");
+const { sendSMS } = require("../utils/smsService");
+const { ApiError } = require("../utils/apiError");
+const logger = require("../utils/logger");
 class EmergencyService {
   async triggerEmergency(studentId, location) {
     const contacts = await EmergencyContact.findByStudent(studentId);

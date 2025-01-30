@@ -1,5 +1,4 @@
-import { ZodError } from "zod";
-
+const { ZodError } = require("zod");
 /**
  * Zod schema validation middleware
  */

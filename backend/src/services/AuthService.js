@@ -1,10 +1,16 @@
-import { User } from "../models";
-import { comparePassword } from "../utils/hash";
-import { generateTokens } from "../utils/tokenService";
-import { ApiError } from "../utils/apiError";
-import logger from "../utils/logger";
+const { User } = require("../models");
+const { comparePassword } = require("../utils/hash");
+const { generateTokens } = require("../utils/tokenService");
+const { ApiError } = require("../utils/apiError");
+const logger = require("../utils/logger");
 
 class AuthService {
+  async register(userData) {
+    const user = await User.create(userData);
+    logger.info(`User registered: ${user.id}`);
+    return user;
+  }
+
   async login(email, password) {
     const user = await User.findByEmail(email);
     if (!user || !(await comparePassword(password, user.passwordHash))) {

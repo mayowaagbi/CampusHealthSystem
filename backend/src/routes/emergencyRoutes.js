@@ -1,7 +1,7 @@
-import express from "express";
-import { EmergencyController } from "../controllers";
-import { authenticate, validateRequest } from "../middleware";
-import { emergencyContactSchema } from "../validations";
+const express = require("express");
+const { EmergencyController } = require("../controllers");
+const { authenticate, validateRequest } = require("../middleware");
+const { emergencyContactSchema } = require("../validations");
 
 const router = express.Router();
 

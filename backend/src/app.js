@@ -1,25 +1,28 @@
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import morgan from "morgan";
-import { config } from "dotenv";
-import {
+const express = require("express");
+const cors = require("cors");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const { config } = require("dotenv");
+const fileUpload = require("express-fileupload");
+
+const {
   authRoutes,
   userRoutes,
   appointmentRoutes,
   healthRoutes,
   emergencyRoutes,
   notificationRoutes,
-} from "./routes";
-import {
+} = require("./routes");
+
+const {
   errorHandler,
   notFound,
   rateLimiter,
   authMiddleware,
-} from "./middleware";
-import { connectDB } from "./config/database";
-import { logger } from "./utils/logger";
-import fileUpload from "express-fileupload";
+} = require("./middleware");
+
+const { connectDB } = require("./config/database");
+const { logger } = require("./utils/logger");
 
 // Load environment variables
 config();
@@ -91,4 +94,4 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-export default app;
+module.exports = app;

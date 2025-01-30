@@ -1,6 +1,5 @@
-import jwt from "jsonwebtoken";
-import { User } from "../models";
-
+const jwt = require("jsonwebtoken");
+const { User } = require("../models");
 /**
  * Authentication middleware
  */

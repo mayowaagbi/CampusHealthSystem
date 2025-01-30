@@ -1,7 +1,7 @@
-import { WaterService } from "../services";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware";
-import { waterGoalSchema } from "../validations";
+const { WaterService } = require("../services");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware");
+const { waterGoalSchema } = require("../validations");
 
 class WaterController {
   setGoal = asyncHandler(async (req, res) => {

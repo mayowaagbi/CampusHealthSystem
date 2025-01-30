@@ -1,6 +1,6 @@
-import express from "express";
-import FileController from "../controllers/fileController";
-import { authMiddleware } from "../middleware";
+const express = require("express");
+const FileController = require("../controllers/fileController");
+const { authMiddleware } = require("../middleware");
 
 const router = express.Router();
 

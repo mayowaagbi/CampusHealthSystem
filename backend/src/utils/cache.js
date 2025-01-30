@@ -1,5 +1,6 @@
-import redis from "../config/redis.js";
-
+const { promisify } = require("util");
+const exec = require("child_process").exec;
+const redis = require("../config/redis");
 export const cacheMiddleware =
   (keyPrefix, ttl = 300) =>
   async (req, res, next) => {

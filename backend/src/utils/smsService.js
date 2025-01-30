@@ -1,5 +1,5 @@
-import twilio from "twilio";
-import logger from "./logger.js";
+const twilio = require("twilio");
+const logger = require("./logger");
 
 const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_AUTH_TOKEN);
 

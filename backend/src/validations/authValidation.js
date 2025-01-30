@@ -1,5 +1,6 @@
-import { z } from "zod";
-import { UserRole } from "@prisma/client";
+const { z } = require("zod");
+const { UserRole } = require("../models/User");
+// import { UserRole } from "@prisma/client";
 
 export const registerSchema = z.object({
   email: z.string().email(),

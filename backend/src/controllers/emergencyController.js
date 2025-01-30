@@ -1,6 +1,6 @@
-import { EmergencyService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
+const { EmergencyService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
 
 class EmergencyController {
   triggerEmergency = asyncHandler(async (req, res) => {

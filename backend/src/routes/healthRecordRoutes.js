@@ -1,8 +1,8 @@
-import express from "express";
-import { HealthRecordController } from "../controllers";
-import { authenticate, validateRequest } from "../middleware";
-import { createHealthRecordSchema } from "../validations";
-import multer from "multer";
+const express = require("express");
+const { HealthRecordController } = require("../controllers");
+const { authenticate, validateRequest } = require("../middleware");
+const { createHealthRecordSchema } = require("../validations");
+const multer = require("multer");
 
 const upload = multer({ storage: multer.memoryStorage() });
 const router = express.Router();

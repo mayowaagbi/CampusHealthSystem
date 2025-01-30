@@ -1,7 +1,7 @@
-import { User, Profile } from "../models";
-import { hashPassword, comparePassword } from "../utils/hash";
-import { ApiError } from "../utils/apiError";
-import logger from "../utils/logger";
+const { User, Profile } = require("../models");
+const { hashPassword } = require("../utils/hash");
+const { ApiError } = require("../utils/apiError");
+const logger = require("../utils/logger");
 
 class UserService {
   async registerUser({ email, password, role, profileData }) {

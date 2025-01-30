@@ -1,6 +1,6 @@
-import { AnalyticsService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
+const { AnalyticsService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
 
 class AnalyticsController {
   getAppointmentAnalytics = asyncHandler(async (req, res) => {

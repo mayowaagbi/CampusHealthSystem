@@ -1,6 +1,6 @@
-import express from "express";
-import { AnalyticsController } from "../controllers";
-import { authenticate, authorize } from "../middleware";
+const express = require("express");
+const { AnalyticsController } = require("../controllers");
+const { authenticate, authorize } = require("../middleware");
 
 const router = express.Router();
 

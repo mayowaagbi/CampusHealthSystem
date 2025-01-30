@@ -1,8 +1,10 @@
-import { AppointmentService } from "../services";
-import { successResponse, errorResponse } from "../utils/responseHandler";
-import { asyncHandler } from "../utils/asyncHandler";
-import { validateRequest } from "../middleware/validationMiddleware";
-import { createAppointmentSchema } from "../validations/appointmentValidation";
+const { AppointmentService } = require("../services");
+const { successResponse, errorResponse } = require("../utils/responseHandler");
+const { asyncHandler } = require("../utils/asyncHandler");
+const { validateRequest } = require("../middleware/validationMiddleware");
+const {
+  createAppointmentSchema,
+} = require("../validations/appointmentValidation");
 
 class AppointmentController {
   createAppointment = asyncHandler(async (req, res) => {

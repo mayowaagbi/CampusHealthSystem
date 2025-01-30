@@ -1,11 +1,11 @@
-import express from "express";
-import authRoutes from "./authRoutes";
-import userRoutes from "./userRoutes";
-import appointmentRoutes from "./appointmentRoutes";
-import healthRecordRoutes from "./healthRecordRoutes";
-import notificationRoutes from "./notificationRoutes";
-import emergencyRoutes from "./emergencyRoutes";
-import analyticsRoutes from "./analyticsRoutes";
+const express = require("express");
+const authRoutes = require("./authRoutes");
+const userRoutes = require("./userRoutes");
+const appointmentRoutes = require("./appointmentRoutes");
+const healthRecordRoutes = require("./healthRecordRoutes");
+const notificationRoutes = require("./notificationRoutes");
+const emergencyRoutes = require("./emergencyRoutes");
+const analyticsRoutes = require("./analyticsRoutes");
 
 const router = express.Router();
 

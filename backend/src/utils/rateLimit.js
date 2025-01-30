@@ -1,4 +1,4 @@
-import rateLimit from "express-rate-limit";
+const rateLimit = require("express-rate-limit");
 
 export const apiRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes

@@ -1,8 +1,7 @@
-import { HealthRecord, MedicalDocument } from "../models";
-import { uploadFile } from "../utils/storage";
-import { ApiError } from "../utils/apiError";
-import logger from "../utils/logger";
-
+const { HealthRecord, MedicalDocument } = require("../models");
+const { uploadFile } = require("../utils/storage");
+const { ApiError } = require("../utils/apiError");
+const logger = require("../utils/logger");
 class HealthRecordService {
   async createHealthRecord(providerId, studentId, recordData) {
     return HealthRecord.create({
