@@ -1,5 +1,5 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 const GeoController = require("../controllers/geoController");
 const { validateRequest } = require("../validations/geoValidation");
 
@@ -12,4 +12,4 @@ router.post(
   GeoController.trackLocation
 );
 
-export default router;
+module.exports = router;

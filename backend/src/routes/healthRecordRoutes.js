@@ -1,7 +1,14 @@
 const express = require("express");
-const { HealthRecordController } = require("../controllers");
-const { authenticate, validateRequest } = require("../middleware");
-const { createHealthRecordSchema } = require("../validations");
+const {
+  HealthRecordController,
+} = require("../controllers/healthRecordController");
+const {
+  authenticate,
+  validateRequest,
+} = require("../middleware/authMiddleware");
+const {
+  createHealthRecordSchema,
+} = require("../validations/healthRecordValidation");
 const multer = require("multer");
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -21,4 +28,4 @@ router.post(
   HealthRecordController.uploadDocument
 );
 
-export default router;
+module.exports = router;

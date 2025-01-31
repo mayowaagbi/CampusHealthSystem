@@ -1,4 +1,4 @@
-const { prisma } = require("../config");
+const { prisma } = require("../config/prisma");
 const { sendSMS } = require("../utils/twilio");
 
 class AmbulanceService {
@@ -37,4 +37,4 @@ class AmbulanceService {
   }
 }
 
-export default new AmbulanceService();
+module.exports = new AmbulanceService();

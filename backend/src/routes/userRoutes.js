@@ -1,8 +1,8 @@
 const express = require("express");
-const { UserController } = require("../controllers");
-const { authenticate, authorize } = require("../middleware");
-const { validateRequest } = require("../middleware");
-const { updateProfileSchema } = require("../validations");
+const { UserController } = require("../controllers/userController");
+const { authenticate, authorize } = require("../middleware/authMiddleware");
+const { validateRequest } = require("../middleware/validationMiddleware");
+const { updateProfileSchema } = require("../validations/userValidation");
 
 const router = express.Router();
 
@@ -24,4 +24,4 @@ router.patch(
   UserController.updateUserStatus
 );
 
-export default router;
+module.exports = router;

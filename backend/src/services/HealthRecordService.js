@@ -1,4 +1,4 @@
-const { HealthRecord, MedicalDocument } = require("../models");
+const { HealthRecord, MedicalDocument } = require("../models/HealthRecord");
 const { uploadFile } = require("../utils/storage");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");

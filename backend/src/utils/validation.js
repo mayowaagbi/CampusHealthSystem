@@ -1,9 +1,10 @@
 const { z } = require("zod");
-export const emailSchema = z.string().email();
-export const passwordSchema = z.string().min(8).max(32);
-export const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/);
-export const uuidSchema = z.string().uuid();
+const emailSchema = z.string().email();
+const passwordSchema = z.string().min(8).max(32);
+const phoneSchema = z.string().regex(/^\+?[1-9]\d{1,14}$/);
+const uuidSchema = z.string().uuid();
 
-export const validateEmail = (email) => emailSchema.safeParse(email);
-export const validatePassword = (password) =>
-  passwordSchema.safeParse(password);
+const validateEmail = (email) => emailSchema.safeParse(email);
+const validatePassword = (password) => passwordSchema.safeParse(password);
+
+module.exports = { validateEmail, validatePassword, phoneSchema, uuidSchema };

@@ -1,4 +1,4 @@
-const { EmergencyContact } = require("../models");
+const { EmergencyContact } = require("../models/EmergencyContact");
 const { sendSMS } = require("../utils/smsService");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");

@@ -1,4 +1,4 @@
-const { User, Profile } = require("../models");
+const { User, Profile } = require("../models/user");
 const { hashPassword } = require("../utils/hash");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");

@@ -8,27 +8,27 @@ const {
 const AuthService = require("../services/AuthService");
 
 class AuthController {
-  register = asyncHandler(async (req, res) => {
+  static register = asyncHandler(async (req, res) => {
     const userData = await AuthService.registerUser(req.body);
     successResponse(res, userData, 201);
   });
 
-  login = asyncHandler(async (req, res) => {
+  static login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
     const { user, tokens } = await AuthService.login(email, password);
     successResponse(res, { user, tokens });
   });
 
-  refreshToken = asyncHandler(async (req, res) => {
+  static refreshToken = asyncHandler(async (req, res) => {
     const { refreshToken } = req.body;
     const tokens = await AuthService.refreshToken(refreshToken);
     successResponse(res, { tokens });
   });
 
-  logout = asyncHandler(async (req, res) => {
+  static logout = asyncHandler(async (req, res) => {
     await AuthService.logout(req.user.id);
     successResponse(res, { message: "Successfully logged out" });
   });
 }
 
-module.exports = new AuthController();
+module.exports = { AuthController };
