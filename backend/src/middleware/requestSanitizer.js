@@ -4,7 +4,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 /**
  * Security middleware stack
  */
-export const securityMiddleware = [
+const securityMiddleware = [
   helmet(),
   xss(),
   mongoSanitize(),
@@ -14,3 +14,4 @@ export const securityMiddleware = [
     next();
   },
 ];
+module.exports = { securityMiddleware };

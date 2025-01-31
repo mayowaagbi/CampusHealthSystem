@@ -1,4 +1,4 @@
-export const paginateResults = (model) => async (req, res, next) => {
+const paginateResults = (model) => async (req, res, next) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const startIndex = (page - 1) * limit;
@@ -25,3 +25,4 @@ export const paginateResults = (model) => async (req, res, next) => {
     next(error);
   }
 };
+module.exports = { paginateResults };

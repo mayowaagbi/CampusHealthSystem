@@ -1,19 +1,21 @@
-export * from "./apiError";
-export * from "./logger";
-export * from "./tokenService";
-export * from "./mailer";
-export * from "./storage";
-export * from "./sanitize";
-export * from "./dateUtils";
-export * from "./responseHandler";
-export * from "./asyncHandler";
-export * from "./validation";
-export * from "./hash";
-export * from "./configValidator";
-export * from "./cache";
-export * from "./healthCheck";
-export * from "./pagination";
-export * from "./smsService";
-export * from "./geolocation";
-export * from "./backup";
-export * from "./rateLimit";
+module.exports = {
+  ...require("./apiError"),
+  ...require("./logger"),
+  ...require("./tokenService"),
+  ...require("./mailer"),
+  ...require("./storage"),
+  ...require("./sanitize"),
+  ...require("./dateUtils"),
+  ...require("./responseHandler"),
+  ...require("./asyncHandler"),
+  ...require("./validation"),
+  ...require("./hash"),
+  ...require("./configValidator"),
+  ...require("./cache"),
+  ...require("./healthCheck"),
+  ...require("./pagination"),
+  ...require("./smsService"),
+  ...require("./geolocation"),
+  ...require("./backup"),
+  ...require("./rateLimit"),
+};

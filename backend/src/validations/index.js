@@ -1,6 +1,8 @@
-export * from "./authValidation";
-export * from "./userValidation";
-export * from "./appointmentValidation";
-export * from "./healthRecordValidation";
-export * from "./notificationValidation";
-export * from "./emergencyValidation";
+module.exports = {
+  ...require("./authValidation"),
+  ...require("./userValidation"),
+  ...require("./appointmentValidation"),
+  ...require("./healthRecordValidation"),
+  ...require("./notificationValidation"),
+  ...require("./emergencyValidation"),
+};

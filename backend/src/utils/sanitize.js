@@ -1,6 +1,6 @@
 const sanitizeHtml = require("sanitize-html");
 const xss = require("xss");
-export const sanitizeInput = (input) => {
+const sanitizeInput = (input) => {
   if (typeof input === "object") {
     return Object.keys(input).reduce((acc, key) => {
       acc[key] = sanitizeInput(input[key]);
@@ -11,7 +11,7 @@ export const sanitizeInput = (input) => {
   return xss(sanitizeHtml(input.toString()));
 };
 
-export const sanitizeMedicalRecord = (record) => {
+const sanitizeMedicalRecord = (record) => {
   const allowedTags = ["b", "i", "em", "strong", "p", "br"];
   const allowedAttributes = {};
 
@@ -21,3 +21,4 @@ export const sanitizeMedicalRecord = (record) => {
     disallowedTagsMode: "escape",
   });
 };
+module.exports = { sanitizeInput, sanitizeMedicalRecord };

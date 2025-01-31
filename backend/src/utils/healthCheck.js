@@ -1,7 +1,7 @@
 const { prisma } = require("../db");
 const { redis } = require("../cache");
 
-export const checkDatabaseHealth = async () => {
+const checkDatabaseHealth = async () => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     await redis.ping();
@@ -14,3 +14,5 @@ export const checkDatabaseHealth = async () => {
 export const checkStorageHealth = async () => {
   // Implement storage health check
 };
+
+module.exports = { checkDatabaseHealth, checkStorageHealth };

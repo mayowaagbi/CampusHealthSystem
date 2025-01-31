@@ -1,7 +1,8 @@
+const cors = require("cors");
 /**
  * CORS configuration
  */
-export const corsOptions = {
+const corsOptions = {
   origin: process.env.CLIENT_URLS.split(","),
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: [
@@ -13,3 +14,4 @@ export const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
+module.exports = cors(corsOptions);

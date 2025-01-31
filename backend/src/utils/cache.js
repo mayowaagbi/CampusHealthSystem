@@ -1,7 +1,7 @@
 const { promisify } = require("util");
 const exec = require("child_process").exec;
 const redis = require("../config/redis");
-export const cacheMiddleware =
+const cacheMiddleware =
   (keyPrefix, ttl = 300) =>
   async (req, res, next) => {
     const key = `${keyPrefix}:${req.originalUrl}`;
@@ -23,3 +23,4 @@ export const cacheMiddleware =
       next();
     }
   };
+module.exports = { cacheMiddleware };

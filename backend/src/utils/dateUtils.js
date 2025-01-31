@@ -1,4 +1,4 @@
-export const formatAppointmentDate = (date) => {
+const formatAppointmentDate = (date) => {
   return new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     year: "numeric",
@@ -10,8 +10,10 @@ export const formatAppointmentDate = (date) => {
   }).format(new Date(date));
 };
 
-export const calculateAge = (birthDate) => {
+const calculateAge = (birthDate) => {
   const diff = Date.now() - new Date(birthDate).getTime();
   const ageDate = new Date(diff);
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 };
+
+module.exports = { formatAppointmentDate, calculateAge };

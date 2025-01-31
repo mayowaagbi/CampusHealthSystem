@@ -1,5 +1,5 @@
 // utils/geolocation.js
-export const calculateDistance = (prev, current) => {
+const calculateDistance = (prev, current) => {
   const R = 6371e3; // Earth radius in meters
   const φ1 = (prev.latitude * Math.PI) / 180;
   const φ2 = (current.latitude * Math.PI) / 180;
@@ -14,7 +14,9 @@ export const calculateDistance = (prev, current) => {
   return R * c; // Distance in meters
 };
 
-export const metersToSteps = (meters) => {
+const metersToSteps = (meters) => {
   const STEP_LENGTH = 0.762; // Average step length in meters
   return Math.round(meters / STEP_LENGTH);
 };
+
+module.exports = { calculateDistance, metersToSteps };

@@ -3,7 +3,7 @@ const { promisify } = require("util");
 const logger = require("./logger.js");
 const execAsync = promisify(exec);
 
-export const createDatabaseBackup = async () => {
+const createDatabaseBackup = async () => {
   const backupCommand = `pg_dump ${process.env.DATABASE_URL} > backup.sql`;
 
   try {
@@ -15,3 +15,4 @@ export const createDatabaseBackup = async () => {
     return false;
   }
 };
+module.exports = { createDatabaseBackup };

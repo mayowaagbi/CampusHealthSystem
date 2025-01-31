@@ -1,4 +1,4 @@
-export const validateFileUpload = (req, res, next) => {
+const validateFileUpload = (req, res, next) => {
   if (!req.files) return next();
 
   const file = req.files.file;
@@ -14,3 +14,4 @@ export const validateFileUpload = (req, res, next) => {
 
   next();
 };
+module.exports = { validateFileUpload };

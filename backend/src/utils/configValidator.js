@@ -7,10 +7,12 @@ const configSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
 });
 
-export const validateConfig = (config) => {
+const validateConfig = (config) => {
   try {
     return configSchema.parse(config);
   } catch (error) {
     throw new Error(`Config validation failed: ${error.message}`);
   }
 };
+
+module.exports = { validateConfig };
