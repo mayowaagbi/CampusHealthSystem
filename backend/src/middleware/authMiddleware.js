@@ -1,8 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models/user");
-/**
- * Authentication middleware
- */
+
 const authenticate = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
@@ -24,9 +22,6 @@ const authenticate = async (req, res, next) => {
   }
 };
 
-/**
- * Role-based access control
- */
 const authorize =
   (...roles) =>
   (req, res, next) => {

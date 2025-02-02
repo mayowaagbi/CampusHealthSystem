@@ -22,4 +22,4 @@ class WaterController {
   });
 }
 
-module.export = new WaterController();
+module.exports = new WaterController();

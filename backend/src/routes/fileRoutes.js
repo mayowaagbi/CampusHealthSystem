@@ -1,10 +1,10 @@
 const express = require("express");
 const FileController = require("../controllers/fileController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+const { authenticate } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-router.use(authMiddleware);
+router.use(authenticate);
 
 router.post("/upload", FileController.uploadFile);
 router.delete("/:id", FileController.deleteFile);

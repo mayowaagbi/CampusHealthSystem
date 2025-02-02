@@ -14,14 +14,10 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const fileRoutes = require("./routes/fileRoutes");
 const ambulanceRoutes = require("./routes/ambulanceRoutes");
 const waterRoutes = require("./routes/waterRoutes");
+const { authenticate } = require("./middleware/authMiddleware");
 
-const {
-  errorHandler,
-  notFound,
-  rateLimiter,
-  authMiddleware,
-} = require("./middleware");
-
+const apiLimiter = require("./middleware/rateLimiter");
+const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { connectDB } = require("./config/database");
 const logger = require("./utils/logger");
 
@@ -44,17 +40,17 @@ app.use(morgan("combined"));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use(rateLimiter);
+app.use(apiLimiter);
 
 // Public routes
 app.use("/api/auth", authRoutes);
 
 // Authenticated routes
-app.use("/api/users", authMiddleware, userRoutes);
-app.use("/api/appointments", authMiddleware, appointmentRoutes);
-app.use("/api/health-records", authMiddleware, healthRoutes);
-app.use("/api/emergency", authMiddleware, emergencyRoutes);
-app.use("/api/notifications", authMiddleware, notificationRoutes);
+app.use("/api/users", authenticate, userRoutes);
+app.use("/api/appointments", authenticate, appointmentRoutes);
+app.use("/api/health-records", authenticate, healthRoutes);
+app.use("/api/emergency", authenticate, emergencyRoutes);
+app.use("/api/notifications", authenticate, notificationRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/ambulance", ambulanceRoutes);
 app.use("/api/water", waterRoutes);

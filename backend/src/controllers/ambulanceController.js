@@ -1,5 +1,5 @@
 const { AmbulanceService } = require("../services");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const { validateRequest } = require("../middleware");
 const { ambulanceRequestSchema } = require("../validations");
 class AmbulanceController {
@@ -35,4 +35,4 @@ class AmbulanceController {
   });
 }
 
-module.export = new AmbulanceController();
+module.exports = new AmbulanceController();
