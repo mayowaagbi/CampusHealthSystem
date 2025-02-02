@@ -1,6 +1,6 @@
 const { AnalyticsService } = require("../services");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 
 class AnalyticsController {
   getAppointmentAnalytics = asyncHandler(async (req, res) => {
@@ -19,4 +19,4 @@ class AnalyticsController {
   });
 }
 
-module.export = new AnalyticsController();
+module.exports = new AnalyticsController();

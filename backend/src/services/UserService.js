@@ -22,6 +22,16 @@ class UserService {
     return user;
   }
 
+  async getUserProfile(userId) {
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, "User not found");
+
+    const profile = await Profile.findByUserId(userId);
+    if (!profile) throw new ApiError(404, "Profile not found");
+
+    return { user, profile };
+  }
+
   async updateUserProfile(userId, updateData) {
     const user = await User.findById(userId);
     if (!user) throw new ApiError(404, "User not found");
@@ -35,4 +45,5 @@ class UserService {
   }
 }
 
-module.export = new UserService();
+// ✅ Corrected Export
+module.exports = new UserService();

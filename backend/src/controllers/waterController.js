@@ -1,5 +1,5 @@
 const { WaterService } = require("../services");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const { validateRequest } = require("../middleware");
 const { waterGoalSchema } = require("../validations");
 

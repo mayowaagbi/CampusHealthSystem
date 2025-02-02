@@ -1,5 +1,5 @@
 const { FileService } = require("../services");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const path = require("path");
 const fs = require("fs");
 
@@ -35,4 +35,4 @@ class FileController {
   });
 }
 
-module.export = new FileController();
+module.exports = new FileController();

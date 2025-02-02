@@ -1,24 +1,55 @@
-const { UserService } = require("../services");
+const UserService = require("../services/UserService");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const asyncHandler = require("../utils/asyncHandler");
-const { validateRequest } = require("../middleware/validationMiddleware");
-const { updateProfileSchema } = require("../validations/userValidation");
-
+const { validateRequest } = require("../middleware");
 class UserController {
-  getProfile = asyncHandler(async (req, res) => {
-    const user = await UserService.getUserProfile(req.user.id);
-    successResponse(res, user);
-  });
+  static getProfile = async (req, res) => {
+    try {
+      const user = await UserService.getUserById(req.user.id);
+      successResponse(res, user);
+    } catch (error) {
+      errorResponse(res, error);
+    }
+  };
 
-  updateProfile = asyncHandler(async (req, res) => {
-    const updatedUser = await UserService.updateProfile(req.user.id, req.body);
-    successResponse(res, updatedUser);
-  });
+  static updateProfile = async (req, res) => {
+    try {
+      const updatedUser = await UserService.updateUser(req.user.id, req.body);
+      successResponse(res, updatedUser);
+    } catch (error) {
+      errorResponse(res, error);
+    }
+  };
 
-  deleteAccount = asyncHandler(async (req, res) => {
-    await UserService.deactivateUser(req.user.id);
-    successResponse(res, { message: "Account deactivated successfully" });
-  });
+  static deleteAccount = async (req, res) => {
+    try {
+      await UserService.deleteUser(req.user.id);
+      successResponse(res, { message: "Account deleted successfully" });
+    } catch (error) {
+      errorResponse(res, error);
+    }
+  };
+
+  static getAllUsers = async (req, res) => {
+    try {
+      const users = await UserService.getAllUsers();
+      successResponse(res, users);
+    } catch (error) {
+      errorResponse(res, error);
+    }
+  };
+
+  static updateUserStatus = async (req, res) => {
+    try {
+      const updatedUser = await UserService.updateUserStatus(
+        req.params.id,
+        req.body.status
+      );
+      successResponse(res, updatedUser);
+    } catch (error) {
+      errorResponse(res, error);
+    }
+  };
 }
 
-module.export = new UserController();
+module.exports = UserController;

@@ -1,11 +1,7 @@
 const express = require("express");
-const {
-  AppointmentController,
-} = require("../controllers/appointmentController");
-const {
-  authenticate,
-  validateRequest,
-} = require("../middleware/authMiddleware");
+const AppointmentController = require("../controllers/appointmentController");
+const { authenticate } = require("../middleware/authMiddleware");
+const { validateRequest } = require("../middleware/validationMiddleware");
 const {
   createAppointmentSchema,
 } = require("../validations/appointmentValidation");
@@ -22,4 +18,5 @@ router.post(
 router.get("/", AppointmentController.getAppointments);
 router.get("/:id", AppointmentController.getAppointmentDetails);
 router.patch("/:id/cancel", AppointmentController.cancelAppointment);
+
 module.exports = router;

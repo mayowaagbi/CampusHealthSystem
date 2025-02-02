@@ -1,11 +1,7 @@
 const express = require("express");
-const {
-  HealthRecordController,
-} = require("../controllers/healthRecordController");
-const {
-  authenticate,
-  validateRequest,
-} = require("../middleware/authMiddleware");
+const HealthRecordController = require("../controllers/healthRecordController");
+const { authenticate } = require("../middleware/authMiddleware");
+const { validateRequest } = require("../middleware/validationMiddleware");
 const {
   createHealthRecordSchema,
 } = require("../validations/healthRecordValidation");

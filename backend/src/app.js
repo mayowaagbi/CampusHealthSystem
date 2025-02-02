@@ -4,15 +4,16 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const { config } = require("dotenv");
 const fileUpload = require("express-fileupload");
-
-const {
-  authRoutes,
-  userRoutes,
-  appointmentRoutes,
-  healthRoutes,
-  emergencyRoutes,
-  notificationRoutes,
-} = require("./routes");
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const appointmentRoutes = require("./routes/appointmentRoutes");
+const healthRoutes = require("./routes/healthRecordRoutes");
+const emergencyRoutes = require("./routes/emergencyRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const fileRoutes = require("./routes/fileRoutes");
+const ambulanceRoutes = require("./routes/ambulanceRoutes");
+const waterRoutes = require("./routes/waterRoutes");
 
 const {
   errorHandler,
@@ -22,16 +23,13 @@ const {
 } = require("./middleware");
 
 const { connectDB } = require("./config/database");
-const { logger } = require("./utils/logger");
+const logger = require("./utils/logger");
 
 // Load environment variables
 config();
 
 // Initialize Express
 const app = express();
-
-// Database connection
-connectDB();
 
 // Middleware pipeline
 app.use(helmet());
@@ -45,6 +43,7 @@ app.use(
 app.use(morgan("combined"));
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
+
 app.use(rateLimiter);
 
 // Public routes

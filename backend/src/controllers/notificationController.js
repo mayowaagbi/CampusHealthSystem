@@ -1,6 +1,6 @@
 const { NotificationService } = require("../services");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 
 class NotificationController {
   getNotifications = asyncHandler(async (req, res) => {
@@ -19,12 +19,10 @@ class NotificationController {
   });
 
   sendNotification = asyncHandler(async (req, res) => {
-    await NotificationService.sendSystemNotification(
-      req.body.message,
-      req.body.userIds
-    );
-    successResponse(res, { message: "Notifications sent successfully" });
+    const { title, message, recipients } = req.body;
+    await NotificationService.sendNotification(title, message, recipients);
+    successResponse(res, { message: "Notification sent successfully" });
   });
 }
 
-module.export = new NotificationController();
+module.exports = new NotificationController();

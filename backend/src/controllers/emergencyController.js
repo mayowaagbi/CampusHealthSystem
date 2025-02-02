@@ -1,6 +1,6 @@
 const { EmergencyService } = require("../services");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 
 class EmergencyController {
   triggerEmergency = asyncHandler(async (req, res) => {
@@ -23,6 +23,14 @@ class EmergencyController {
     );
     successResponse(res, contact, 201);
   });
+
+  deleteEmergencyContact = asyncHandler(async (req, res) => {
+    await EmergencyService.deleteEmergencyContact(
+      req.user.id,
+      req.params.contactId
+    );
+    successResponse(res, { message: "Emergency contact deleted successfully" });
+  });
 }
 
-module.export = new EmergencyController();
+module.exports = new EmergencyController();

@@ -1,17 +1,13 @@
 const authMiddleware = require("./authMiddleware");
 const errorHandler = require("./errorHandler");
-const validationMiddleware = require("./validationMiddleware");
-const auditLogger = require("./auditLogger");
+const notFound = require("./notFound");
 const rateLimiter = require("./rateLimiter");
-const corsMiddleware = require("./corsMiddleware");
-const requestSanitizer = require("./requestSanitizer");
+const validationMiddleware = require("./validationMiddleware");
 
 module.exports = {
-  ...authMiddleware,
-  ...errorHandler,
-  ...validationMiddleware,
-  ...auditLogger,
-  ...rateLimiter,
-  ...corsMiddleware,
-  ...requestSanitizer,
+  authMiddleware,
+  errorHandler,
+  notFound,
+  rateLimiter,
+  validationMiddleware,
 };

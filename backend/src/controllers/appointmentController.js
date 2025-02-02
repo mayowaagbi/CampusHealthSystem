@@ -1,6 +1,6 @@
 const { AppointmentService } = require("../services");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
-const { asyncHandler } = require("../utils/asyncHandler");
+const asyncHandler = require("../utils/asyncHandler");
 const { validateRequest } = require("../middleware/validationMiddleware");
 const {
   createAppointmentSchema,
@@ -8,25 +8,51 @@ const {
 
 class AppointmentController {
   createAppointment = asyncHandler(async (req, res) => {
+    const appointmentData = req.body;
     const appointment = await AppointmentService.createAppointment(
-      req.user.id,
-      req.body.providerId,
-      req.body
+      appointmentData
     );
     successResponse(res, appointment, 201);
   });
 
-  getAppointments = asyncHandler(async (req, res) => {
-    const appointments = await AppointmentService.getUserAppointments(
-      req.user.id
+  getAppointment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const appointment = await AppointmentService.getAppointmentById(id);
+    successResponse(res, appointment);
+  });
+
+  updateAppointment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const appointmentData = req.body;
+    const updatedAppointment = await AppointmentService.updateAppointment(
+      id,
+      appointmentData
     );
+    successResponse(res, updatedAppointment);
+  });
+
+  deleteAppointment = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    await AppointmentService.deleteAppointment(id);
+    successResponse(res, { message: "Appointment deleted successfully" });
+  });
+
+  getAppointments = asyncHandler(async (req, res) => {
+    const appointments = await AppointmentService.getAppointments();
     successResponse(res, appointments);
   });
 
   cancelAppointment = asyncHandler(async (req, res) => {
-    await AppointmentService.cancelAppointment(req.params.id, req.user.id);
-    successResponse(res, { message: "Appointment cancelled successfully" });
+    const { id } = req.params;
+    await AppointmentService.cancelAppointment(id);
+    successResponse(res, { message: "Appointment canceled successfully" });
+  });
+
+  getAppointmentDetails = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const appointment = await AppointmentService.getAppointmentById(id);
+    successResponse(res, appointment);
   });
 }
 
-module.export = new AppointmentController();
+module.exports = new AppointmentController();
