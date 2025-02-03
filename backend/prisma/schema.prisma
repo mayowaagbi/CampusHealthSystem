@@ -59,13 +59,13 @@ model User {
 }
 
 model Profile {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
-  firstName   String
-  lastName    String
-  dateOfBirth DateTime
-  phone       String   @unique
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  user        User      @relation(fields: [userId], references: [id])
+  firstName   String?
+  lastName    String?
+  dateOfBirth DateTime?
+  phone       String?   @unique
   avatar      String?
   bio         String?
 

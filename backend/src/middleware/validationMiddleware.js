@@ -1,15 +1,16 @@
-const { validationResult } = require("express-validator");
-
 const validateRequest = (schema) => {
-  return async (req, res, next) => {
-    await Promise.all(schema.map((validation) => validation.run(req)));
-
-    const errors = validationResult(req);
-    if (errors.isEmpty()) {
-      return next();
+  return (req, res, next) => {
+    try {
+      // Parse and validate request body using Zod
+      req.body = schema.parse(req.body);
+      next(); // Proceed to the next middleware/controller if validation passes
+    } catch (error) {
+      // Handle validation errors
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: error.errors, // Zod provides detailed error information
+      });
     }
-
-    res.status(400).json({ errors: errors.array() });
   };
 };
 

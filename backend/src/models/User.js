@@ -6,31 +6,46 @@ class User extends BaseModel {
   }
 
   async findByEmail(email) {
-    return this.prisma.user.findUnique({
-      where: { email },
-      include: { profile: true },
-    });
+    try {
+      return await this.model.findUnique({
+        where: { email },
+        include: { profile: true },
+      });
+    } catch (error) {
+      console.error("Error finding user by email:", error);
+      throw error;
+    }
   }
 
   async createWithProfile(userData) {
-    return this.prisma.user.create({
-      data: {
+    try {
+      const userDataToCreate = {
         email: userData.email,
         passwordHash: userData.passwordHash,
         role: userData.role,
-        profile: {
+      };
+
+      if (userData.profile) {
+        userDataToCreate.profile = {
           create: {
-            firstName: userData.profile.firstName,
-            lastName: userData.profile.lastName,
-            dateOfBirth: userData.profile.dateOfBirth,
-            phone: userData.profile.phone,
-            avatar: userData.profile.avatar,
-            bio: userData.profile.bio,
+            firstName: userData.profile.firstName || null,
+            lastName: userData.profile.lastName || null,
+            dateOfBirth: new Date(userData.profile.dateOfBirth),
+            phone: userData.profile.phone || null,
+            avatar: userData.profile.avatar || null,
+            bio: userData.profile.bio || null,
           },
-        },
-      },
-      include: { profile: true },
-    });
+        };
+      }
+
+      return await this.prisma.user.create({
+        data: userDataToCreate,
+        include: { profile: true },
+      });
+    } catch (error) {
+      console.error("Error creating user with profile:", error);
+      throw error; // Rethrow to handle it further up if necessary
+    }
   }
 
   async getFullUser(id) {
