@@ -47,14 +47,15 @@ class AuthService {
    * @returns {Promise<{ user: User, tokens: Object }>} - User and generated tokens.
    * @throws {ApiError} - If credentials are invalid.
    */
-  async login(email, password) {
+  async login(email, password, res) {
     try {
+      // Step 1: Find the user by email
       const user = await User.findByEmail(email);
-
       if (!user) {
         throw new ApiError(401, "Invalid credentials");
       }
 
+      // Step 2: Validate the password
       const isPasswordValid = await comparePassword(
         password,
         user.passwordHash
@@ -63,9 +64,30 @@ class AuthService {
         throw new ApiError(401, "Invalid credentials");
       }
 
-      const tokens = generateTokens({ id: user.id, role: user.role });
+      // Step 3: Generate tokens
+      const { accessToken, refreshToken } = generateTokens({
+        id: user.id,
+        role: user.role,
+      });
+
+      // Step 4: Set the refresh token as an HTTP-only cookie
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true, // Prevents client-side JavaScript access
+        secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+        sameSite: "Strict", // Prevents CSRF attacks
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Step 5: Return the user and access token in the response body
       logger.info(`User logged in: ${user.id}`);
-      return { user, tokens };
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        },
+        accessToken, // Sent in the response body
+      };
     } catch (error) {
       logger.error("Login error:", error);
       throw new ApiError(500, "Internal Server Error");
@@ -99,9 +121,21 @@ class AuthService {
    * @param {string} userId - User ID to log out.
    * @returns {Promise<void>}
    */
-  async logout(userId) {
-    // Implement token invalidation logic here if needed (e.g., blacklist tokens).
-    logger.info(`User logged out: ${userId}`);
+  async logout(refreshToken) {
+    try {
+      const { id, exp } = verifyToken(refreshToken, "refresh");
+      const currentTime = Math.floor(Date.now() / 1000);
+      const ttl = exp - currentTime;
+
+      if (ttl > 0) {
+        await redisClient.set(`blacklist:${refreshToken}`, "true", "EX", ttl);
+        logger.info(`User ${id} logged out. Token invalidated.`);
+      }
+
+      return { success: true, message: "Logout successful" };
+    } catch (error) {
+      // Error handling
+    }
   }
 }
 

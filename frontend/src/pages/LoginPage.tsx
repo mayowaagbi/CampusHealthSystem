@@ -2,7 +2,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 import { Button } from "../components/ui/button";
 import {
@@ -19,8 +21,8 @@ import { Heart } from "lucide-react";
 
 // Zod schema for login validation
 const loginSchema = z.object({
-  id: z.string().min(6, {
-    message: "ID must be at least 6 characters.",
+  email: z.string().email({
+    message: "Please enter a valid email address.",
   }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
@@ -31,10 +33,11 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      id: "",
+      email: "",
       password: "",
     },
   });
@@ -46,8 +49,21 @@ export default function LoginPage() {
   };
 
   const onSubmit = async (data: LoginFormValues) => {
-    console.log("Form Submitted:", data);
-    // Add login logic here
+    try {
+      const response = await axios.post("/api/auth/login", data);
+
+      // Store access token
+      localStorage.setItem("accessToken", response.data.accessToken);
+
+      // Handle successful login
+      toast.success("Login successful!");
+      navigate("/dashboard");
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Login failed. Please try again."
+      );
+      console.error("Login error:", error);
+    }
   };
 
   return (
@@ -88,20 +104,25 @@ export default function LoginPage() {
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              {/* ID Field */}
+              {/* Email Field */}
               <FormField
                 control={form.control}
-                name="id"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>ID</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g 123456" {...field} />
+                      <Input
+                        placeholder="example@healthbridge.com"
+                        type="email"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               {/* Password Field */}
               <FormField
                 control={form.control}
@@ -120,6 +141,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+
               {/* Submit Button */}
               <Button type="submit" className="w-full">
                 Log In
