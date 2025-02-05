@@ -5,8 +5,10 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-
+import { jwtDecode } from "jwt-decode";
+import { useState } from "react";
 import { Button } from "../components/ui/button";
+import Cookies from "js-cookie";
 import {
   Form,
   FormControl,
@@ -18,7 +20,7 @@ import {
 import { Input } from "../components/ui/input";
 import Footer from "../components/footer";
 import { Heart } from "lucide-react";
-
+import { Eye, EyeOff } from "lucide-react";
 // Zod schema for login validation
 const loginSchema = z.object({
   email: z.string().email({
@@ -28,7 +30,11 @@ const loginSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
-
+interface DecodedToken {
+  id: string;
+  role: string;
+  exp: number;
+}
 // Type inference from schema
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -48,23 +54,91 @@ export default function LoginPage() {
     transition: { duration: 0.6 },
   };
 
+  // const onSubmit = async (data: LoginFormValues) => {
+  //   try {
+  //     const response = await axios.post(
+  //       "http://localhost:3000/api/auth/login",
+  //       data,
+  //       {
+  //         withCredentials: true,
+  //       }
+  //     );
+
+  //     console.log("Token received:", response.data.accessToken); // Check if token is received
+
+  //     // Store access token
+  //     localStorage.setItem("accessToken", response.data.accessToken);
+
+  //     // Handle successful login
+  //     toast.success("Login successful!");
+  //     navigate("/student/dashboard");
+  //   } catch (error) {
+  //     toast.error(
+  //       (error as any).response?.data?.message ||
+  //         "Login failed. Please try again."
+  //     );
+  //     console.error("Login error:", error);
+  //   }
+  // };
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const response = await axios.post("/api/auth/login", data);
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        data,
+        {
+          withCredentials: true, // Ensure cookies are included in requests
+        }
+      );
 
-      // Store access token
-      localStorage.setItem("accessToken", response.data.accessToken);
+      // Get accessToken from the response body
+      console.log("Response from login:", response.data);
+      const user = response.data.data.user;
 
-      // Handle successful login
+      if (!user || !user.token || !user.token.accessToken) {
+        console.error("User or token data missing:", response.data);
+        throw new Error("Access token not found in response.");
+      }
+      const accessToken = response.data.data.user.token.accessToken;
+      console.log("Access token from response:", accessToken);
+
+      if (!accessToken) {
+        throw new Error("Access token not found in response.");
+      }
+
+      // Store accessToken in localStorage or memory
+      localStorage.setItem("accessToken", accessToken);
+
+      // Decode token to get user role
+      const decodedToken = jwtDecode<DecodedToken>(accessToken);
+      console.log("Decoded Token:", decodedToken);
+      console.log("User role:", decodedToken.role);
+
+      // Redirect based on role
+      switch (decodedToken.role) {
+        case "STUDENT":
+          navigate("/student/dashboard");
+          break;
+        case "ADMIN":
+          navigate("/admin/dashboard");
+          break;
+        case "doctor":
+          navigate("/doctor/dashboard");
+          break;
+        default:
+          navigate("/dashboard");
+          break;
+      }
+
       toast.success("Login successful!");
-      navigate("/dashboard");
     } catch (error) {
       toast.error(
-        error.response?.data?.message || "Login failed. Please try again."
+        (error as any).response?.data?.message ||
+          "Login failed. Please try again."
       );
       console.error("Login error:", error);
     }
   };
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -130,13 +204,26 @@ export default function LoginPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter your password"
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
+                    <div className="relative">
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your password"
+                          type={showPassword ? "text" : "password"} // Toggle type
+                          {...field}
+                        />
+                      </FormControl>
+                      <button
+                        type="button"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-5 w-5 text-gray-500" />
+                        ) : (
+                          <Eye className="h-5 w-5 text-gray-500" />
+                        )}
+                      </button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -31,7 +31,7 @@ class AuthController {
   static login = asyncHandler(async (req, res) => {
     try {
       const { email, password } = req.body;
-      const { user, tokens } = await AuthService.login(email, password);
+      const { user, tokens } = await AuthService.login(email, password, res);
       successResponse(res, { user, tokens });
     } catch (error) {
       errorResponse(res, error.message, error.statusCode || 401);

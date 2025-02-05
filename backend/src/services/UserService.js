@@ -45,5 +45,4 @@ class UserService {
   }
 }
 
-// ✅ Corrected Export
 module.exports = new UserService();

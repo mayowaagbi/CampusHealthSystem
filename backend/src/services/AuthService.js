@@ -71,13 +71,22 @@ class AuthService {
       });
 
       // Step 4: Set the refresh token as an HTTP-only cookie
+      console.log("Setting cookies...");
       res.cookie("refreshToken", refreshToken, {
-        httpOnly: true, // Prevents client-side JavaScript access
-        secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
-        sameSite: "Strict", // Prevents CSRF attacks
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: "localhost",
       });
-
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 15 * 60 * 1000,
+        domain: "localhost",
+      });
+      console.log("Cookies set successfully.");
       // Step 5: Return the user and access token in the response body
       logger.info(`User logged in: ${user.id}`);
       return {
@@ -85,8 +94,9 @@ class AuthService {
           id: user.id,
           email: user.email,
           role: user.role,
+          token: { accessToken, refreshToken },
         },
-        accessToken, // Sent in the response body
+        // Sent in the response body
       };
     } catch (error) {
       logger.error("Login error:", error);
