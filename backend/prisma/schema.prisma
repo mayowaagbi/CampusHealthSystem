@@ -108,27 +108,28 @@ model ProviderDetails {
 
   @@index([licenseNumber, specialization])
 }
-
+ 
 model Appointment {
   id         String            @id @default(uuid())
   studentId  String
-  providerId String
+  providerId String?
   startTime  DateTime
   endTime    DateTime
   duration   Int
+  service    String            // Added this field
   status     AppointmentStatus @default(PENDING)
   priority   Int               @default(3)
   location   String?
-  videoLink  String?
   notes      String?
 
   student   StudentDetails        @relation(fields: [studentId], references: [id])
-  provider  ProviderDetails       @relation(fields: [providerId], references: [id])
+  provider  ProviderDetails?       @relation(fields: [providerId], references: [id])
   histories AppointmentHistory[]
   documents AppointmentDocument[]
 
   @@index([studentId, providerId, startTime])
 }
+
 
 model HealthRecord {
   id            String            @id @default(uuid())
