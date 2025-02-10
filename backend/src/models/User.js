@@ -19,32 +19,56 @@ class User extends BaseModel {
 
   async createWithProfile(userData) {
     try {
-      const userDataToCreate = {
-        email: userData.email,
-        passwordHash: userData.passwordHash,
-        role: userData.role,
-      };
-
-      if (userData.profile) {
-        userDataToCreate.profile = {
-          create: {
-            firstName: userData.profile.firstName || null,
-            lastName: userData.profile.lastName || null,
-            dateOfBirth: new Date(userData.profile.dateOfBirth),
-            phone: userData.profile.phone || null,
-            avatar: userData.profile.avatar || null,
-            bio: userData.profile.bio || null,
+      return await this.prisma.$transaction(async (tx) => {
+        const userDataToCreate = {
+          email: userData.email,
+          passwordHash: userData.passwordHash,
+          role: userData.role,
+          profile: {
+            create: {
+              firstName: userData.profile?.firstName || null,
+              lastName: userData.profile?.lastName || null,
+              dateOfBirth: userData.profile?.dateOfBirth
+                ? new Date(userData.profile.dateOfBirth)
+                : null,
+              phone: userData.profile?.phone || null,
+              avatar: userData.profile?.avatar || null,
+              bio: userData.profile?.bio || null,
+            },
           },
         };
-      }
 
-      return await this.prisma.user.create({
-        data: userDataToCreate,
-        include: { profile: true },
+        // Step 1: Create the user with profile
+        const user = await tx.user.create({
+          data: userDataToCreate,
+          include: { profile: true },
+        });
+
+        // Step 2: Based on Role, Create Related Records
+        if (userData.role === "STUDENT") {
+          await tx.studentDetails.create({
+            data: {
+              profileId: user.profile.id,
+              studentId: `STU-${Date.now()}`, // Generate student ID
+              insuranceNumber: userData.insuranceNumber || null,
+            },
+          });
+        } else if (userData.role === "PROVIDER") {
+          await tx.providerDetails.create({
+            data: {
+              profileId: user.profile.id,
+              licenseNumber: userData.licenseNumber || `LIC-${Date.now()}`, // Generate license number
+              specialization: userData.specialization || "General",
+              department: userData.department || "Health Center",
+            },
+          });
+        }
+
+        return user;
       });
     } catch (error) {
       console.error("Error creating user with profile:", error);
-      throw error; // Rethrow to handle it further up if necessary
+      throw error;
     }
   }
 

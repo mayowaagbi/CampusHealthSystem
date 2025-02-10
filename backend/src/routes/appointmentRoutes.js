@@ -1,6 +1,6 @@
 const express = require("express");
 const AppointmentController = require("../controllers/appointmentController");
-const { authenticate } = require("../middleware/authMiddleware");
+const { authenticate, authorize } = require("../middleware/authMiddleware");
 const { validateRequest } = require("../middleware/validationMiddleware");
 const {
   createAppointmentSchema,
@@ -8,15 +8,26 @@ const {
 
 const router = express.Router();
 
+// Apply authentication middleware to all routes
 router.use(authenticate);
 
-router.post(
-  "/",
-  validateRequest(createAppointmentSchema),
-  AppointmentController.createAppointment
+// Create a new appointment (only for students)
+router.post("/", authorize("STUDENT"), AppointmentController.createAppointment);
+
+router.get("/", authorize("STUDENT"), AppointmentController.getAppointments);
+
+// Fetch appointment details (only for students)
+router.get(
+  "/:id",
+  authorize("STUDENT"), // Ensure only students can fetch their appointment details
+  AppointmentController.getAppointmentDetails
 );
-router.get("/", AppointmentController.getAppointments);
-router.get("/:id", AppointmentController.getAppointmentDetails);
-router.patch("/:id/cancel", AppointmentController.cancelAppointment);
+
+// Cancel an appointment (only for students)
+router.patch(
+  "/:id/cancel",
+  authorize("STUDENT"), // Ensure only students can cancel their appointments
+  AppointmentController.cancelAppointment
+);
 
 module.exports = router;

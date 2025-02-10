@@ -71,7 +71,6 @@ class AuthService {
       });
 
       // Step 4: Set the refresh token as an HTTP-only cookie
-      console.log("Setting cookies...");
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: false,
@@ -86,7 +85,6 @@ class AuthService {
         maxAge: 15 * 60 * 1000,
         domain: "localhost",
       });
-      console.log("Cookies set successfully.");
       // Step 5: Return the user and access token in the response body
       logger.info(`User logged in: ${user.id}`);
       return {

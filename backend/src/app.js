@@ -1,8 +1,8 @@
 const express = require("express");
+const { config } = require("dotenv");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const { config } = require("dotenv");
 const fileUpload = require("express-fileupload");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");

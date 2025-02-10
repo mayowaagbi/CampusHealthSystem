@@ -2,12 +2,13 @@ const { z } = require("zod");
 const { AppointmentStatus } = require("../models/Appointment");
 // import { AppointmentStatus } from "@prisma/client";
 const createAppointmentSchema = z.object({
-  providerId: z.string().uuid(),
-  startTime: z.coerce.date().refine((date) => date > new Date(), {
-    message: "Start time must be in the future",
-  }),
-  duration: z.number().min(15).max(120),
-  notes: z.string().max(500).optional(),
+  service: z.string().min(1, "Service is required"),
+  startTime: z.string().datetime({ offset: true }),
+  endTime: z.string().datetime({ offset: true }),
+  duration: z.number().min(1, "Duration must be at least 1 minute"),
+  userId: z.string().uuid("Invalid user ID"),
+  providerId: z.string().uuid("Invalid provider ID").nullable(),
+  notes: z.string().optional(),
 });
 
 const updateAppointmentSchema = z.object({

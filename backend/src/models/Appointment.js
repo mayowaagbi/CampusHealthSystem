@@ -7,39 +7,29 @@ class Appointment extends BaseModel {
 
   // Create an appointment request with "PENDING" status by default
   async createAppointment(appointmentData) {
+    console.log("Creating appointment:", appointmentData);
     return this.prisma.appointment.create({
       data: {
-        student: { connect: { id: appointmentData.studentId } },
-        provider: appointmentData.providerId
-          ? { connect: { id: appointmentData.providerId } }
-          : undefined, // No provider needed for creation
-        startTime: appointmentData.startTime,
-        endTime: appointmentData.endTime,
+        studentId: appointmentData.studentId,
+        providerId: appointmentData.providerId,
+        startTime: new Date(appointmentData.startTime),
         duration: appointmentData.duration,
         service: appointmentData.service,
-        status: appointmentData.status || "PENDING", // Default status is "PENDING"
-        priority: appointmentData.priority || 3, // Default priority
-        location: appointmentData.location,
+        status: "PENDING",
+        priority: 3,
         notes: appointmentData.notes,
       },
       include: {
-        student: true,
-        provider: true,
+        student: { include: { profile: true } },
+        provider: { include: { profile: true } },
       },
     });
   }
 
-  // Find appointments by student ID
   async findByStudent(studentId) {
     return this.prisma.appointment.findMany({
       where: { studentId },
-      include: {
-        provider: {
-          include: {
-            profile: true, // Include provider profile info
-          },
-        },
-      },
+      orderBy: { startTime: "asc" },
     });
   }
 
@@ -99,6 +89,35 @@ class Appointment extends BaseModel {
       where: { id: appointmentId },
       data: { status: "CANCELED" },
     });
+  }
+  static async findStudentByUserId(userId) {
+    try {
+      console.log("Searching for student with userId:", userId);
+
+      // Find the profile associated with the user
+      const profile = await prisma.profile.findUnique({
+        where: { userId: userId },
+        select: { id: true },
+      });
+
+      if (!profile) {
+        throw new Error(`No profile found for userId: ${userId}`);
+      }
+
+      // Find the student associated with the profile
+      const student = await prisma.studentDetails.findUnique({
+        where: { profileId: profile.id },
+      });
+
+      if (!student) {
+        throw new Error(`No student found for profileId: ${profile.id}`);
+      }
+
+      return student;
+    } catch (error) {
+      console.error("Error in findStudentByUserId:", error);
+      throw new Error("Failed to find student by userId");
+    }
   }
 }
 

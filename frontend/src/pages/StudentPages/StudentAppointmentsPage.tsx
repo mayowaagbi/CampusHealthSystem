@@ -3,7 +3,7 @@ import { ConfirmAppointmentDialog } from "../../components/ConfirmAppointmentDia
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useState, useEffect } from "react";
@@ -52,19 +52,24 @@ const SERVICE_OPTIONS = [
   { value: "Nutrition Consultation", duration: 45 },
 ];
 
-// Zod schema for validation
+// Zod schema for appointment creation
 const appointmentSchema = z.object({
   service: z.string().nonempty({ message: "Please select a service." }),
   startTime: z.date().refine((date) => date >= new Date(), {
     message: "Date must be in the future.",
   }),
-  location: z.string().optional(),
-  videoLink: z.string().url().optional(),
   notes: z.string().optional(),
 });
 
 // Type for form values
 type AppointmentFormValues = z.infer<typeof appointmentSchema>;
+
+// Define the shape of the decoded token (from login)
+interface DecodedToken {
+  id: string;
+  role: string;
+  exp: number;
+}
 
 export default function StudentAppointmentPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
@@ -73,24 +78,36 @@ export default function StudentAppointmentPage() {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [pendingAppointment, setPendingAppointment] =
     useState<AppointmentFormValues | null>(null);
+
+  const navigate = useNavigate();
+
   const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
       service: "",
       startTime: new Date(),
-      location: "",
       notes: "",
     },
   });
 
+  // Fetch appointments – backend will filter by student using the token
   const fetchAppointments = async () => {
     try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+
+      // Decode token to check user role
+      const decodedToken = jwtDecode<DecodedToken>(accessToken);
+      if (decodedToken.role !== "STUDENT") {
+        throw new Error("Only students can access appointments.");
+      }
+
+      // Backend is expected to use the token to filter appointments for the student.
       const response = await axios.get(
         "http://localhost:3000/api/appointments",
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
+          withCredentials: true,
         }
       );
       setAppointments(response.data);
@@ -100,95 +117,55 @@ export default function StudentAppointmentPage() {
     }
   };
 
-  // const onSubmit = async (data: AppointmentFormValues) => {
-  //   setIsLoading(true);
-  //   try {
-  //     const selectedService = SERVICE_OPTIONS.find(
-  //       (service) => service.value === data.service
-  //     );
-  //     if (!selectedService) {
-  //       throw new Error("Invalid service selected.");
-  //     }
-
-  //     const endTime = new Date(data.startTime);
-  //     endTime.setMinutes(endTime.getMinutes() + selectedService.duration);
-
-  //     const accessToken = localStorage.getItem("accessToken");
-  //     if (!accessToken) {
-  //       throw new Error("Access token not found.");
-  //     }
-
-  //     // Decoding token
-  //     const decodedToken = jwtDecode<DecodedToken>(accessToken);
-
-  //     await axios.post(
-  //       "http://localhost:3000/api/appointments",
-  //       {
-  //         ...data,
-  //         endTime,
-  //         duration: selectedService.duration,
-  //         studentId: decodedToken.id, // Replace with actual student ID
-  //         providerId: null, // Will be added later by the healthcare provider
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${accessToken}`,
-  //         },
-  //       }
-  //     );
-
-  //     toast.success("Appointment booked successfully!");
-  //     fetchAppointments();
-  //     form.reset();
-  //     setSelectedAppointment(null);
-  //   } catch (error) {
-  //     console.error("Error booking appointment:", error);
-  //     toast.error("Failed to book appointment.");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
+  // onSubmit: Open a confirmation dialog before booking
   const onSubmit = async (data: AppointmentFormValues) => {
     setPendingAppointment(data);
     setIsConfirmDialogOpen(true);
   };
 
+  // When the appointment is confirmed, create it.
   const handleConfirmAppointment = async () => {
     if (!pendingAppointment) return;
 
     setIsLoading(true);
     try {
       const selectedService = SERVICE_OPTIONS.find(
-        (service) => service.value === pendingAppointment.service
+        (s) => s.value === pendingAppointment.service
       );
       if (!selectedService) {
         throw new Error("Invalid service selected.");
       }
 
-      const endTime = new Date(pendingAppointment.startTime);
-      endTime.setMinutes(endTime.getMinutes() + selectedService.duration);
+      // Calculate endTime based on startTime and service duration
+      const startTimeISO = new Date(pendingAppointment.startTime).toISOString();
 
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
         throw new Error("Access token not found.");
       }
 
+      // Decode the token to extract user information.
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
+      console.log(pendingAppointment);
+      // Ensure only a student can book an appointment.
+      if (decodedToken.role !== "STUDENT") {
+        throw new Error("Only students can book appointments.");
+      }
+      console.log(pendingAppointment);
 
+      // Create appointment payload. The userId is derived from the token.
       await axios.post(
-        "http://localhost:3000/api/appointments",
+        `http://localhost:3000/api/appointments/`,
         {
           ...pendingAppointment,
-          endTime,
+          userid: decodedToken.id, // Send user ID here
+          startTime: startTimeISO,
           duration: selectedService.duration,
-          studentId: decodedToken.id,
-          providerId: null,
+          service: pendingAppointment.service,
+          providerId: null, // To be assigned later by healthcare staff.
         },
         {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${accessToken}` },
         }
       );
 
@@ -198,19 +175,17 @@ export default function StudentAppointmentPage() {
       setSelectedAppointment(null);
       setIsConfirmDialogOpen(false);
       setPendingAppointment(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error booking appointment:", error);
-      toast.error("Failed to book appointment.");
+      toast.error(
+        error.response?.data?.message || "Failed to book appointment."
+      );
     } finally {
       setIsLoading(false);
     }
   };
-  interface DecodedToken {
-    id: string;
-    role: string;
-    exp: number;
-  }
 
+  // Reschedule: Pre-fill the form with the selected appointment details.
   const handleReschedule = (appointment: any) => {
     setSelectedAppointment(appointment);
     form.setValue("service", appointment.service);
@@ -218,25 +193,40 @@ export default function StudentAppointmentPage() {
     form.setValue("notes", appointment.notes || "");
   };
 
-  const handleCancel = async (id: string) => {
+  // Cancel an appointment – the backend should verify that the student making
+  // the request is the owner using the token.
+  const handleCancel = async (appointmentId: string) => {
     try {
-      await axios.delete(`http://localhost:3000/api/appointments/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+
+      // Decode token to check user role
+      const decodedToken = jwtDecode<DecodedToken>(accessToken);
+      if (decodedToken.role !== "STUDENT") {
+        throw new Error("Only students can cancel appointments.");
+      }
+
+      await axios.delete(
+        `http://localhost:3000/api/appointments/${appointmentId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
       fetchAppointments();
       toast.success("Appointment canceled");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error canceling appointment:", error);
       toast.error("Failed to cancel appointment");
     }
   };
+
   useEffect(() => {
     fetchAppointments();
   }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header */}
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link className="flex items-center justify-center" to="/">
           <img
@@ -280,6 +270,7 @@ export default function StudentAppointmentPage() {
         </nav>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 py-6 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -344,24 +335,9 @@ export default function StudentAppointmentPage() {
                       }}
                       disabled={(date) => date < new Date()}
                     />
-                    {/* <Input
-                      type="time"
-                      value={form.watch("startTime").toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                      onChange={(e) => {
-                        const [hours, minutes] = e.target.value
-                          .split(":")
-                          .map(Number);
-                        const newDateTime = new Date(form.watch("startTime"));
-                        newDateTime.setHours(hours, minutes);
-                        form.setValue("startTime", newDateTime);
-                      }}
-                    /> */}
                     <Input
                       type="time"
-                      value={format(form.watch("startTime"), "HH:mm")} // Formats as 24-hour time
+                      value={format(form.watch("startTime"), "HH:mm")}
                       onChange={(e) => {
                         const newDateTime = parse(
                           e.target.value,
@@ -432,43 +408,7 @@ export default function StudentAppointmentPage() {
                           <TableCell>{appointment.service}</TableCell>
                           <TableCell>{appointment.duration} minutes</TableCell>
                           <TableCell>{appointment.location || "N/A"}</TableCell>
-                          <TableCell>
-                            <Select
-                              value={appointment.status}
-                              onValueChange={async (newStatus) => {
-                                try {
-                                  await axios.patch(
-                                    `http://localhost:3000/api/appointments/${appointment.id}`,
-                                    { status: newStatus },
-                                    {
-                                      headers: {
-                                        Authorization: `Bearer ${localStorage.getItem(
-                                          "accessToken"
-                                        )}`,
-                                      },
-                                    }
-                                  );
-                                  fetchAppointments();
-                                  toast.success("Status updated!");
-                                } catch (error) {
-                                  toast.error("Failed to update status");
-                                }
-                              }}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {Object.values(AppointmentStatus).map(
-                                  (status) => (
-                                    <SelectItem key={status} value={status}>
-                                      {status}
-                                    </SelectItem>
-                                  )
-                                )}
-                              </SelectContent>
-                            </Select>
-                          </TableCell>
+                          <TableCell>{appointment.status}</TableCell>
                           <TableCell>
                             <Button
                               variant="outline"
@@ -501,6 +441,7 @@ export default function StudentAppointmentPage() {
           </div>
         </motion.div>
       </main>
+
       <ConfirmAppointmentDialog
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}

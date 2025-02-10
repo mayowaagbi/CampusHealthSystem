@@ -114,7 +114,6 @@ model Appointment {
   studentId  String
   providerId String?
   startTime  DateTime
-  endTime    DateTime
   duration   Int
   service    String            // Added this field
   status     AppointmentStatus @default(PENDING)
