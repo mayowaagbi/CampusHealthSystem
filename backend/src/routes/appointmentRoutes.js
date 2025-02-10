@@ -14,11 +14,15 @@ router.use(authenticate);
 // Create a new appointment (only for students)
 router.post("/", authorize("STUDENT"), AppointmentController.createAppointment);
 
-router.get("/", authorize("STUDENT"), AppointmentController.getAppointments);
-
+router.get(
+  "/",
+  authenticate,
+  authorize("STUDENT"),
+  AppointmentController.getAppointments
+);
 // Fetch appointment details (only for students)
 router.get(
-  "/:id",
+  "/",
   authorize("STUDENT"), // Ensure only students can fetch their appointment details
   AppointmentController.getAppointmentDetails
 );

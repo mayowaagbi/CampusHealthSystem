@@ -1,15 +1,13 @@
-// services/AppointmentService.js
 const { Appointment } = require("../models");
-const StudentService = require("./StudentService");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");
 
 class AppointmentService {
+  // Create a new appointment
   async createAppointment(studentId, appointmentData) {
     try {
       logger.info(`Creating appointment for student ${studentId}`);
 
-      // Create the appointment using the model
       return await Appointment.createAppointment({
         studentId,
         service: appointmentData.service,
@@ -24,32 +22,31 @@ class AppointmentService {
     }
   }
 
+  // Fetch all appointments for a student
   async getAppointmentsByStudentId(studentId) {
     try {
-      return await Appointment.findByStudent(studentId);
+      logger.info(`Fetching appointments for studentId: ${studentId}`);
+
+      const appointments = await Appointment.getAppointmentsByStudentId(
+        studentId
+      );
+
+      logger.info(
+        `Fetched ${appointments.length} appointments for studentId: ${studentId}`
+      );
+      return appointments;
     } catch (error) {
-      logger.error(`Get appointments failed: ${error.message}`);
+      logger.error("Failed to fetch appointments:", error);
       throw new ApiError(500, "Failed to fetch appointments");
     }
   }
 
-  async getPendingAppointments(providerId) {
-    try {
-      return await Appointment.find({
-        where: {
-          providerId,
-          status: "PENDING",
-        },
-      });
-    } catch (error) {
-      logger.error("Failed to fetch pending appointments:", error);
-      throw new ApiError(500, "Failed to fetch pending appointments");
-    }
-  }
-
+  // Fetch a single appointment by ID
   async getAppointmentById(appointmentId) {
     try {
-      const appointment = await Appointment.findById(appointmentId);
+      const appointment = await Appointment.getAppointmentsByStudentId(
+        appointmentId
+      );
       if (!appointment) {
         throw new ApiError(404, "Appointment not found");
       }
@@ -60,9 +57,13 @@ class AppointmentService {
     }
   }
 
+  // Update an appointment
   async updateAppointment(appointmentId, updateData) {
     try {
-      const appointment = await Appointment.update(appointmentId, updateData);
+      const appointment = await Appointment.updateAppointment(
+        appointmentId,
+        updateData
+      );
       if (!appointment) {
         throw new ApiError(404, "Appointment not found");
       }
@@ -73,9 +74,10 @@ class AppointmentService {
     }
   }
 
+  // Delete an appointment
   async deleteAppointment(appointmentId) {
     try {
-      const appointment = await Appointment.delete(appointmentId);
+      const appointment = await Appointment.deleteAppointment(appointmentId);
       if (!appointment) {
         throw new ApiError(404, "Appointment not found");
       }
@@ -86,6 +88,7 @@ class AppointmentService {
     }
   }
 
+  // Cancel an appointment
   async cancelAppointment(appointmentId) {
     try {
       const appointment = await Appointment.updateStatus(
@@ -103,5 +106,4 @@ class AppointmentService {
   }
 }
 
-// Export as singleton instance
 module.exports = new AppointmentService();

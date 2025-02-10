@@ -33,6 +33,22 @@ class Appointment extends BaseModel {
     });
   }
 
+  async getAppointmentsByStudentId(studentId) {
+    try {
+      return this.prisma.appointment.findMany({
+        where: { studentId }, // Filter by studentId
+        include: {
+          student: {
+            include: { profile: true }, // Include student profile
+          },
+        },
+        orderBy: { startTime: "asc" }, // Sort by appointment time
+      });
+    } catch (error) {
+      logger.error("Failed to fetch appointments by student:", error);
+      throw new ApiError(500, "Failed to fetch appointments");
+    }
+  }
   // Find appointments by provider ID (for provider's dashboard, pending appointments)
   async findByProvider(providerId) {
     return this.prisma.appointment.findMany({

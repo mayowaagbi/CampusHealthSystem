@@ -96,21 +96,16 @@ export default function StudentAppointmentPage() {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found.");
 
-      // Decode token to check user role
-      const decodedToken = jwtDecode<DecodedToken>(accessToken);
-      if (decodedToken.role !== "STUDENT") {
-        throw new Error("Only students can access appointments.");
-      }
-
-      // Backend is expected to use the token to filter appointments for the student.
       const response = await axios.get(
         "http://localhost:3000/api/appointments",
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-          withCredentials: true,
+          params: { t: Date.now() }, // Add cache-busting parameter
         }
       );
-      setAppointments(response.data);
+
+      console.log("Appointments fetched:", response.data);
+      setAppointments(response.data.data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       toast.error("Failed to load appointments.");
