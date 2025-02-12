@@ -28,10 +28,17 @@ router.get(
 );
 
 // Cancel an appointment (only for students)
-router.patch(
+router.delete(
   "/:id/cancel",
   authorize("STUDENT"), // Ensure only students can cancel their appointments
-  AppointmentController.cancelAppointment
+  AppointmentController.deleteAppointment
+);
+
+router.patch(
+  "/:id/reschedule",
+  authorize("STUDENT"),
+  // validateRequest(rescheduleAppointmentSchema),
+  AppointmentController.rescheduleAppointment
 );
 
 module.exports = router;

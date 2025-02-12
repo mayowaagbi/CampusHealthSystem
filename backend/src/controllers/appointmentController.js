@@ -124,38 +124,49 @@ class AppointmentController {
     }
   });
 
-  // Update an appointment (only if the student owns it)
-  updateAppointment = asyncHandler(async (req, res) => {
+  rescheduleAppointment = asyncHandler(async (req, res) => {
     try {
       const userId = req.user.id;
       const { id } = req.params;
-      const appointmentData = req.body;
-
+      const { startTime, service, duration } = req.body;
+      console.log("[Backend] Rescheduling appointment ID:", id);
+      console.log("[Backend] Request body:", req.body);
       // Find the student
       const student = await StudentService.findStudentByUserId(userId);
       if (!student) {
         return errorResponse(res, "Student not found.", 404);
       }
-
+      console.log("[Backend] Student found:", student);
       // Fetch the appointment
       const appointment = await AppointmentService.getAppointmentById(id);
 
+      console.log("[Backend] Appointment found:", appointment);
+      console.log("[Backend] Appointment studentId:", appointment.studentId);
       // Verify the appointment belongs to the student
       if (!appointment || appointment.studentId !== student.id) {
+        console.error("[Backend] Appointment not found:", id);
         return errorResponse(res, "Appointment not found.", 404);
       }
 
-      // Update the appointment
-      const updatedAppointment = await AppointmentService.updateAppointment(
+      // Reschedule the appointment
+      const updatedAppointment = await AppointmentService.rescheduleAppointment(
         id,
-        appointmentData
+        {
+          startTime: new Date(startTime),
+          service,
+          duration: parseInt(duration, 10),
+          status: "RESCHEDULED",
+        }
+      );
+      console.log(
+        "[Backend] Appointment rescheduled successfully:",
+        updatedAppointment
       );
       successResponse(res, updatedAppointment);
     } catch (error) {
       errorResponse(res, error.message, error.statusCode || 500);
     }
   });
-
   // Delete an appointment (only if the student owns it)
   deleteAppointment = asyncHandler(async (req, res) => {
     try {
@@ -167,12 +178,15 @@ class AppointmentController {
       if (!student) {
         return errorResponse(res, "Student not found.", 404);
       }
-
+      console.log("[Backend] Student found:", student);
       // Fetch the appointment
       const appointment = await AppointmentService.getAppointmentById(id);
 
+      console.log("[Backend] Appointment found:", appointment);
+      console.log("[Backend] Appointment studentId:", appointment.studentId);
       // Verify the appointment belongs to the student
       if (!appointment || appointment.studentId !== student.id) {
+        console.error("[Backend] Appointment not found:", id);
         return errorResponse(res, "Appointment not found.", 404);
       }
 

@@ -70,7 +70,22 @@ class Appointment extends BaseModel {
       data: { status: newStatus },
     });
   }
-
+  async deleteAppointment(appointmentId) {
+    try {
+      // Use Prisma to delete the appointment.
+      const deletedAppointment = await this.prisma.appointment.delete({
+        where: { id: appointmentId },
+      });
+      return deletedAppointment;
+    } catch (error) {
+      // Prisma throws an error with code "P2025" if the record doesn't exist.
+      if (error.code === "P2025") {
+        throw new ApiError(404, "Appointment not found");
+      }
+      logger.error("Error deleting appointment in model:", error);
+      throw error;
+    }
+  }
   // Fetch a single appointment by ID
   async findById(appointmentId) {
     return this.prisma.appointment.findUnique({
@@ -98,7 +113,53 @@ class Appointment extends BaseModel {
       },
     });
   }
+  async reschedule(appointmentId, updateData) {
+    return this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: {
+        startTime: new Date(updateData.startTime),
+        service: updateData.service,
+        duration: updateData.duration,
+        notes: updateData.notes,
+        status: updateData.status || "PENDING", // Default to PENDING if not provided
+      },
+    });
+  }
+  async getAppointmentById(appointmentId) {
+    try {
+      logger.info(`[Appointment Model] Fetching appointment ${appointmentId}`);
 
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        include: {
+          student: {
+            include: { profile: true },
+          },
+          provider: {
+            include: { profile: true },
+          },
+        },
+      });
+
+      if (!appointment) {
+        logger.warn(
+          `[Appointment Model] Appointment ${appointmentId} not found`
+        );
+        return null;
+      }
+
+      logger.info(
+        `[Appointment Model] Successfully fetched appointment ${appointmentId}`
+      );
+      return appointment;
+    } catch (error) {
+      logger.error(
+        `[Appointment Model] Error fetching appointment ${appointmentId}:`,
+        error
+      );
+      throw new ApiError(500, "Failed to fetch appointment");
+    }
+  }
   // Cancel an appointment
   async cancelAppointment(appointmentId) {
     return this.prisma.appointment.update({
@@ -133,6 +194,30 @@ class Appointment extends BaseModel {
     } catch (error) {
       console.error("Error in findStudentByUserId:", error);
       throw new Error("Failed to find student by userId");
+    }
+  }
+  async getAppointmentById(appointmentId) {
+    try {
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id: appointmentId },
+        include: {
+          student: {
+            include: { profile: true }, // Include student profile if needed
+          },
+          provider: {
+            include: { profile: true }, // Include provider profile if needed
+          },
+        },
+      });
+
+      if (!appointment) {
+        throw new ApiError(404, "Appointment not found");
+      }
+
+      // logger.info(`Appointment fetched successfully: ${appointmentId}`);
+      return appointment;
+    } catch (error) {
+      throw new ApiError(500, "Failed to fetch appointment");
     }
   }
 }

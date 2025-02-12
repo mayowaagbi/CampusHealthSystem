@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Adjust if needed (some projects use default export)
 import { Button } from "../../components/ui/button";
 import { Calendar } from "../../components/ui/calendar";
 import {
@@ -100,11 +100,12 @@ export default function StudentAppointmentPage() {
         "http://localhost:3000/api/appointments",
         {
           headers: { Authorization: `Bearer ${accessToken}` },
-          params: { t: Date.now() }, // Add cache-busting parameter
+          params: { t: Date.now() }, // Cache busting parameter
         }
       );
 
       console.log("Appointments fetched:", response.data);
+      // Assuming the response is structured as { success: true, data: [...] }
       setAppointments(response.data.data);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -112,76 +113,121 @@ export default function StudentAppointmentPage() {
     }
   };
 
-  // onSubmit: Open a confirmation dialog before booking
+  // onSubmit: Open a confirmation dialog before booking or rescheduling
   const onSubmit = async (data: AppointmentFormValues) => {
     setPendingAppointment(data);
     setIsConfirmDialogOpen(true);
   };
 
-  // When the appointment is confirmed, create it.
   const handleConfirmAppointment = async () => {
     if (!pendingAppointment) return;
 
+    console.log("[Confirm] Starting appointment confirmation");
     setIsLoading(true);
+
     try {
+      console.log("[Confirm] Finding selected service");
       const selectedService = SERVICE_OPTIONS.find(
         (s) => s.value === pendingAppointment.service
       );
+
       if (!selectedService) {
         throw new Error("Invalid service selected.");
       }
 
-      // Calculate endTime based on startTime and service duration
       const startTimeISO = new Date(pendingAppointment.startTime).toISOString();
+      console.log("[Confirm] Converted startTime to ISO:", startTimeISO);
 
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) {
         throw new Error("Access token not found.");
       }
 
-      // Decode the token to extract user information.
+      console.log("[Confirm] Decoding JWT token");
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
-      console.log(pendingAppointment);
-      // Ensure only a student can book an appointment.
-      if (decodedToken.role !== "STUDENT") {
-        throw new Error("Only students can book appointments.");
-      }
-      console.log(pendingAppointment);
+      console.log("[Confirm] Decoded token:", decodedToken);
 
-      // Create appointment payload. The userId is derived from the token.
-      await axios.post(
-        `http://localhost:3000/api/appointments/`,
-        {
+      if (decodedToken.role !== "STUDENT") {
+        throw new Error("Unauthorized action.");
+      }
+
+      if (selectedAppointment) {
+        console.log(
+          "[Confirm] Rescheduling appointment ID:",
+          selectedAppointment.id
+        );
+        console.log("[Confirm] Sending PATCH request with data:", {
+          startTime: startTimeISO,
+          service: pendingAppointment.service,
+          duration: selectedService.duration,
+        });
+
+        const response = await axios.patch(
+          `http://localhost:3000/api/appointments/${selectedAppointment.id}/reschedule`,
+          {
+            startTime: startTimeISO,
+            service: pendingAppointment.service,
+            duration: selectedService.duration,
+          },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+
+        if (response.status === 404) {
+          toast.error("Appointment not found.");
+          return;
+        }
+
+        toast.success("Appointment rescheduled successfully!");
+      } else {
+        console.log("[Confirm] Creating new appointment");
+        console.log("[Confirm] Sending POST request with data:", {
           ...pendingAppointment,
-          userid: decodedToken.id, // Send user ID here
+          userid: decodedToken.id,
           startTime: startTimeISO,
           duration: selectedService.duration,
           service: pendingAppointment.service,
-          providerId: null, // To be assigned later by healthcare staff.
-        },
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
+          providerId: null,
+        });
 
-      toast.success("Appointment booked successfully!");
+        await axios.post(
+          `http://localhost:3000/api/appointments/`,
+          {
+            ...pendingAppointment,
+            userid: decodedToken.id,
+            startTime: startTimeISO,
+            duration: selectedService.duration,
+            service: pendingAppointment.service,
+            providerId: null,
+          },
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+
+        toast.success("Appointment booked successfully!");
+      }
+
+      console.log("[Confirm] Operation successful, refreshing appointments");
       fetchAppointments();
       form.reset();
       setSelectedAppointment(null);
       setIsConfirmDialogOpen(false);
       setPendingAppointment(null);
     } catch (error: any) {
-      console.error("Error booking appointment:", error);
+      console.error("[Confirm] Error processing appointment:", {
+        message: error.message,
+        response: error.response?.data,
+        stack: error.stack,
+      });
       toast.error(
-        error.response?.data?.message || "Failed to book appointment."
+        error.response?.data?.message || "Failed to process appointment."
       );
     } finally {
+      console.log("[Confirm] Finalizing operation");
       setIsLoading(false);
     }
   };
 
-  // Reschedule: Pre-fill the form with the selected appointment details.
   const handleReschedule = (appointment: any) => {
+    console.log("[Frontend] Rescheduling appointment:", appointment);
     setSelectedAppointment(appointment);
     form.setValue("service", appointment.service);
     form.setValue("startTime", new Date(appointment.startTime));
@@ -195,14 +241,13 @@ export default function StudentAppointmentPage() {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found.");
 
-      // Decode token to check user role
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
       if (decodedToken.role !== "STUDENT") {
         throw new Error("Only students can cancel appointments.");
       }
 
       await axios.delete(
-        `http://localhost:3000/api/appointments/${appointmentId}`,
+        `http://localhost:3000/api/appointments/${appointmentId}/cancel`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
         }
