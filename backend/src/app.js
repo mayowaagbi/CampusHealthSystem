@@ -20,7 +20,7 @@ const apiLimiter = require("./middleware/rateLimiter");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { connectDB } = require("./config/database");
 const logger = require("./utils/logger");
-
+const georoutes = require("./routes/geoRoutes");
 // Load environment variables
 config();
 
@@ -56,7 +56,7 @@ app.use("/api/notifications", authenticate, notificationRoutes);
 app.use("/api/files", fileRoutes);
 app.use("/api/ambulance", ambulanceRoutes);
 app.use("/api/water", waterRoutes);
-
+app.use("/api/geo", georoutes);
 // Add after other middleware
 app.use(
   fileUpload({

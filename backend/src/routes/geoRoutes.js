@@ -1,15 +1,9 @@
 const express = require("express");
-const { authMiddleware } = require("../middleware/authMiddleware");
-const GeoController = require("../controllers/geoController");
-const { validateRequest } = require("../validations/geoValidation");
+const geoController = require("../controllers/geoController");
+const rateLimiter = require("../middleware/rateLimiter");
 
 const router = express.Router();
 
-router.post(
-  "/track",
-  authMiddleware,
-  validateRequest,
-  GeoController.trackLocation
-);
+router.post("/track", rateLimiter, geoController.processLocation);
 
 module.exports = router;

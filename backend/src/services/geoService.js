@@ -1,47 +1,40 @@
-// services/geoService.js
-const { prisma } = require("../prisma/client");
+const geoModel = require("../models/geoModel");
 const { calculateDistance, metersToSteps } = require("../utils/geolocation");
+
 class GeoService {
   async processLocation(userId, location) {
-    // Get previous location
-    const prevLocation = await prisma.userLocation.findFirst({
-      where: { userId },
-      orderBy: { timestamp: "desc" },
-    });
+    console.log("Processing location for user:", userId, location);
 
-    // Save new location
-    const newLocation = await prisma.userLocation.create({
-      data: {
-        userId,
-        latitude: location.lat,
-        longitude: location.lng,
-      },
-    });
+    if (!userId || !location.lat || !location.lng) {
+      throw new Error("Invalid input parameters");
+    }
 
-    // Calculate steps if previous location exists
+    const prevLocation = await geoModel.getPreviousLocation(userId);
+    console.log("Previous location:", prevLocation);
+
+    const newLocation = await geoModel.saveNewLocation(userId, location);
+    console.log("New location saved:", newLocation);
+
+    let stepsAdded = 0;
+    let totalSteps = 0;
+
     if (prevLocation) {
       const distance = calculateDistance(
         { latitude: prevLocation.latitude, longitude: prevLocation.longitude },
         { latitude: location.lat, longitude: location.lng }
       );
+      console.log("Distance calculated:", distance);
 
-      const steps = metersToSteps(distance);
-      await this.updateStepEntry(userId, steps);
+      if (distance >= 5) {
+        stepsAdded = metersToSteps(distance);
+        totalSteps = (await geoModel.upsertStepEntry(userId, stepsAdded)).steps;
+        console.log("Steps added:", stepsAdded);
+        console.log("Total steps:", totalSteps);
+      }
     }
 
-    return newLocation;
-  }
-
-  async updateStepEntry(userId, steps) {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    return prisma.stepEntry.upsert({
-      where: { userId_date: { userId, date: today } },
-      update: { steps: { increment: steps } },
-      create: { userId, steps, source: "GEO" },
-    });
+    return { stepsAdded, totalSteps, location: newLocation };
   }
 }
 
-module.export = new GeoService();
+module.exports = new GeoService();
