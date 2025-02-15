@@ -21,6 +21,7 @@ const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { connectDB } = require("./config/database");
 const logger = require("./utils/logger");
 const georoutes = require("./routes/geoRoutes");
+const entryRoutes = require("./routes/entryRoutes");
 // Load environment variables
 config();
 
@@ -57,6 +58,7 @@ app.use("/api/files", fileRoutes);
 app.use("/api/ambulance", ambulanceRoutes);
 app.use("/api/water", waterRoutes);
 app.use("/api/geo", georoutes);
+app.use("/api", entryRoutes);
 // Add after other middleware
 app.use(
   fileUpload({

@@ -21,7 +21,10 @@ enum UserRole {
   PROVIDER
   SUPPORT
 }
-
+enum EntryType {
+  MOOD
+  JOURNAL
+}
 enum FileCategory {
   MEDICAL_REPORT
   LAB_RESULT
@@ -53,10 +56,12 @@ model User {
   files                       File[]
   ambulanceRequests           AmbulanceRequest[]
   waterGoals                  WaterGoal[]
+  entries                     UserEntry[]
   appointmentHistoriesCreated AppointmentHistory[] @relation("UserAppointmentChanges")
 
   @@index([email, createdAt])
 }
+
 
 model Profile {
   id          String    @id @default(uuid())
@@ -86,9 +91,8 @@ model StudentDetails {
 
   healthRecords  HealthRecord[]
   appointments   Appointment[]
-  journalEntries JournalEntry[]
-  moodEntries    MoodEntry[]
 
+  // Removed invalid references to JournalEntry and MoodEntry
   @@index([studentId])
 }
 
@@ -146,25 +150,19 @@ model HealthRecord {
   @@index([studentId, recordedAt])
 }
 
-model JournalEntry {
+model UserEntry {
   id        String   @id @default(uuid())
-  studentId String
-  title     String
-  content   String
+  userId    String
+  type      EntryType // Ensure this is defined
+  mood      String?
+  journal   String?
   createdAt DateTime @default(now())
 
-  student StudentDetails @relation(fields: [studentId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, type, createdAt])
 }
 
-model MoodEntry {
-  id        String   @id @default(uuid())
-  studentId String
-  mood      String
-  notes     String?
-  createdAt DateTime @default(now())
-
-  student StudentDetails @relation(fields: [studentId], references: [id])
-}
 
 model ProviderQualification {
   id            String @id @default(uuid())

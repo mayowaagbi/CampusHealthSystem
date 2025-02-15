@@ -1,11 +1,11 @@
-const User = require("./user");
+const User = require("./User");
 const Profile = require("./Profile");
 const Appointment = require("./Appointment");
 const StudentDetails = require("./StudentDetails");
 const ProviderDetails = require("./ProviderDetails");
 const HealthRecord = require("./HealthRecord");
-const JournalEntry = require("./JournalEntry");
-const MoodEntry = require("./MoodEntry");
+// const JournalEntry = require("./JournalEntry");
+// const MoodEntry = require("./MoodEntry");
 const ProviderQualification = require("./ProviderQualification");
 const AvailabilitySchedule = require("./AvailabilitySchedule");
 const AppointmentHistory = require("./AppointmentHistory");
@@ -24,8 +24,8 @@ module.exports = {
   StudentDetails,
   ProviderDetails,
   HealthRecord,
-  JournalEntry,
-  MoodEntry,
+  // JournalEntry,
+  // MoodEntry,
   ProviderQualification,
   AvailabilitySchedule,
   AppointmentHistory,

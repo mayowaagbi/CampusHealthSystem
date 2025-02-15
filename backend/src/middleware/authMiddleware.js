@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 // Import User correctly (without destructuring)
-const User = require("../models/user");
+const User = require("../models/User");
 
 const authenticate = async (req, res, next) => {
   console.log("JWT_ACCESS_SECRET:", process.env.JWT_ACCESS_SECRET);

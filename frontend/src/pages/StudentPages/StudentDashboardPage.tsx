@@ -427,6 +427,7 @@ import MentalHealthResources from "../../components/Dashboard/MentalHealthResour
 import { EmergencyContacts } from "../../components/Dashboard/EmergencyContacts";
 import WeeklyHealthOverview from "../../components/Dashboard/WeeklyHealthOverview";
 import QuickLinks from "../../components/Dashboard/QuickLinks";
+import { MoodAndJournal } from "../../components/Dashboard/MoodAndJournal";
 
 // Dummy data for Weekly Health Overview
 const healthData = [
@@ -492,7 +493,7 @@ export default function StudentDashboardPage() {
 
           {/* Physical Health Section */}
           <h2 className="text-2xl font-semibold mb-4">Physical Health</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
             <HealthAlerts />
             <UpcomingAppointments />
             <WaterIntake
@@ -501,24 +502,24 @@ export default function StudentDashboardPage() {
               onChange={handleWaterChange}
             />
             <StepCount stepCount={stepCount} stepGoal={stepGoal} />
-            <SleepTracker sleepHours={sleepHours} sleepGoal={sleepGoal} />
+            {/* <SleepTracker sleepHours={sleepHours} sleepGoal={sleepGoal} /> */}
           </div>
 
           {/* Mental Health Resources Section */}
           <h2 className="text-2xl font-semibold mb-4">
             Mental Health Resources
           </h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
+          <div className="flex flex-wrap justify-center gap-6 mb-8">
             <Card>
               <CardHeader>
                 <CardTitle>Mood Tracker</CardTitle>
                 <CardDescription>Track your daily mood</CardDescription>
               </CardHeader>
               <CardContent>
-                <MoodTracker />
+                <MoodAndJournal />
               </CardContent>
             </Card>
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Journal</CardTitle>
                 <CardDescription>Express your thoughts</CardDescription>
@@ -526,7 +527,7 @@ export default function StudentDashboardPage() {
               <CardContent>
                 <JournalEntry />
               </CardContent>
-            </Card>
+            </Card> */}
             <MentalHealthResources />
           </div>
 

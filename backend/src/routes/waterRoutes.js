@@ -5,8 +5,13 @@ const { authenticate, authorize } = require("../middleware/authMiddleware");
 
 router.use(authenticate); // Protect all routes below
 
-router.post("/goal", WaterController.setGoal); // Set water intake goal
-router.post("/intake", WaterController.addIntake); // Add water intake
-router.get("/progress", WaterController.getProgress); // Get progress
+// Set water intake goal
+router.post("/goal", WaterController.setGoal);
+
+// Add water intake
+router.post("/intake", WaterController.addIntake);
+
+// Get water intake progress
+router.get("/progress", WaterController.getProgress);
 
 module.exports = router;
