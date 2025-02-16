@@ -424,7 +424,7 @@ import SleepTracker from "../../components/Dashboard/SleepTracker";
 import { MoodTracker } from "../../components/Dashboard/MoodTracker";
 import { JournalEntry } from "../../components/JournalEntry";
 import MentalHealthResources from "../../components/Dashboard/MentalHealthResources";
-import { EmergencyContacts } from "../../components/Dashboard/EmergencyContacts";
+import AmbulanceRequest from "../../components/Dashboard/AmbulanceRequest";
 import WeeklyHealthOverview from "../../components/Dashboard/WeeklyHealthOverview";
 import QuickLinks from "../../components/Dashboard/QuickLinks";
 import { MoodAndJournal } from "../../components/Dashboard/MoodAndJournal";
@@ -532,9 +532,9 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Emergency Contacts Section */}
-          <h2 className="text-2xl font-semibold mb-4">Emergency Contacts</h2>
+          <h2 className="text-2xl font-semibold mb-4">Ambulance Request</h2>
           <div className="grid gap-6 md:grid-cols-2 mb-8">
-            <EmergencyContacts />
+            <AmbulanceRequest />
           </div>
 
           {/* Weekly Health Overview */}

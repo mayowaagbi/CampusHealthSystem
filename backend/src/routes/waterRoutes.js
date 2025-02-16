@@ -1,17 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const WaterController = require("../controllers/WaterController");
-const { authenticate, authorize } = require("../middleware/authMiddleware");
+const { authenticate } = require("../middleware/authMiddleware");
 
-router.use(authenticate); // Protect all routes below
+router.use(authenticate);
 
-// Set water intake goal
+// Add this endpoint
+router.get("/", WaterController.getProgress); // GET /api/water
+
 router.post("/goal", WaterController.setGoal);
-
-// Add water intake
 router.post("/intake", WaterController.addIntake);
-
-// Get water intake progress
-router.get("/progress", WaterController.getProgress);
+router.get("/progress", WaterController.getProgress); // GET /api/water/progress
 
 module.exports = router;

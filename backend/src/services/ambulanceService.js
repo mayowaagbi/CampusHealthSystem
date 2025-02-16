@@ -1,40 +1,31 @@
-const { prisma } = require("../config/prisma");
-const { sendSMS } = require("../utils/twilio");
+const AmbulanceModel = require("../models/AmbulanceModel");
+const { reverseGeocode } = require("../utils/geocoding"); // Optional geocoding service
 
 class AmbulanceService {
-  async createRequest(requestData) {
-    return prisma.ambulanceRequest.create({
-      data: requestData,
-    });
+  static async createRequest({ userId, latitude, longitude, address }) {
+    try {
+      // Optional: Get human-readable address from coordinates
+      const locationAddress =
+        address || (await reverseGeocode(latitude, longitude));
+
+      return AmbulanceModel.createRequest({
+        userId,
+        latitude,
+        longitude,
+        address: locationAddress,
+      });
+    } catch (error) {
+      throw new Error(`Failed to create ambulance request: ${error.message}`);
+    }
   }
 
-  async updateRequest(id, status) {
-    return prisma.ambulanceRequest.update({
-      where: { id },
-      data: { status },
-    });
-  }
-
-  async getUserRequests(userId) {
-    return prisma.ambulanceRequest.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-    });
-  }
-
-  async notifyEmergencyServices(request) {
-    // Send SMS to emergency contacts
-    await sendSMS(
-      process.env.EMERGENCY_PHONE_NUMBER,
-      `NEW AMBULANCE REQUEST: ${request.address} (${request.latitude}, ${request.longitude})`
-    );
-
-    // Send SMS to user
-    await sendSMS(
-      request.user.phone,
-      `Ambulance requested! Status: ${request.status}`
-    );
+  static async getUserRequests(userId) {
+    try {
+      return AmbulanceModel.getRequestsByUser(userId);
+    } catch (error) {
+      throw new Error(`Failed to fetch requests: ${error.message}`);
+    }
   }
 }
 
-module.exports = new AmbulanceService();
+module.exports = AmbulanceService;

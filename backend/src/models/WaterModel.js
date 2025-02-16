@@ -45,6 +45,22 @@ class WaterModel extends BaseModel {
       },
     });
   }
+  async getWaterByDate(userId, date) {
+    console.log(`Fetching water intake for ${userId} on ${date}`);
+    try {
+      return await this.prisma.waterGoal.findUnique({
+        where: {
+          userId_date: {
+            userId,
+            date: new Date(date.setUTCHours(0, 0, 0, 0)),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error in getWaterByDate:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new WaterModel();

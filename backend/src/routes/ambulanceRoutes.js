@@ -1,15 +1,11 @@
 const express = require("express");
+const router = express.Router();
 const AmbulanceController = require("../controllers/AmbulanceController");
 const { authenticate } = require("../middleware/authMiddleware");
 
-const router = express.Router();
-
-// Apply authentication middleware
 router.use(authenticate);
 
-// Routes
-router.post("/request", AmbulanceController.createRequest);
-router.put("/request/:id", AmbulanceController.updateRequest);
-router.get("/requests", AmbulanceController.getRequests);
+router.post("/", AmbulanceController.createRequest);
+router.get("/", AmbulanceController.getRequests);
 
 module.exports = router;

@@ -1,38 +1,35 @@
-const { AmbulanceService } = require("../services");
-const asyncHandler = require("../utils/asyncHandler");
-const { validateRequest } = require("../middleware");
-const { ambulanceRequestSchema } = require("../validations");
+const AmbulanceService = require("../services/AmbulanceService");
+
 class AmbulanceController {
-  createRequest = asyncHandler(async (req, res) => {
-    const { latitude, longitude, address } = ambulanceRequestSchema.parse(
-      req.body
-    );
+  static async createRequest(req, res) {
+    try {
+      const userId = req.user.id;
+      const { latitude, longitude, address } = req.body;
 
-    const request = await AmbulanceService.createRequest({
-      userId: req.user.id,
-      latitude,
-      longitude,
-      address,
-    });
+      const request = await AmbulanceService.createRequest({
+        userId,
+        latitude,
+        longitude,
+        address,
+      });
 
-    // Trigger emergency notifications
-    await AmbulanceService.notifyEmergencyServices(request);
+      res.status(201).json(request);
+    } catch (error) {
+      console.error("Error creating ambulance request:", error);
+      res.status(400).json({ error: error.message });
+    }
+  }
 
-    res.status(201).json(request);
-  });
-
-  updateRequest = asyncHandler(async (req, res) => {
-    const updated = await AmbulanceService.updateRequest(
-      req.params.id,
-      req.body.status
-    );
-    res.json(updated);
-  });
-
-  getRequests = asyncHandler(async (req, res) => {
-    const requests = await AmbulanceService.getUserRequests(req.user.id);
-    res.json(requests);
-  });
+  static async getRequests(req, res) {
+    try {
+      const userId = req.user.id;
+      const requests = await AmbulanceService.getUserRequests(userId);
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching ambulance requests:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
-module.exports = new AmbulanceController();
+module.exports = AmbulanceController;

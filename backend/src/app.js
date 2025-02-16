@@ -7,12 +7,10 @@ const fileUpload = require("express-fileupload");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const appointmentRoutes = require("./routes/appointmentRoutes");
-const healthRoutes = require("./routes/healthRecordRoutes");
 const emergencyRoutes = require("./routes/emergencyRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const fileRoutes = require("./routes/fileRoutes");
-const ambulanceRoutes = require("./routes/ambulanceRoutes");
 const waterRoutes = require("./routes/waterRoutes");
 const { authenticate } = require("./middleware/authMiddleware");
 const cookieParser = require("cookie-parser");
@@ -22,6 +20,8 @@ const { connectDB } = require("./config/database");
 const logger = require("./utils/logger");
 const georoutes = require("./routes/geoRoutes");
 const entryRoutes = require("./routes/entryRoutes");
+const ambulanceRoutes = require("./routes/ambulanceRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 // Load environment variables
 config();
 
@@ -55,10 +55,11 @@ app.use("/api/health-records", authenticate, healthRoutes);
 app.use("/api/emergency", authenticate, emergencyRoutes);
 app.use("/api/notifications", authenticate, notificationRoutes);
 app.use("/api/files", fileRoutes);
-app.use("/api/ambulance", ambulanceRoutes);
 app.use("/api/water", waterRoutes);
 app.use("/api/geo", georoutes);
 app.use("/api", entryRoutes);
+app.use("/api/ambulance-requests", ambulanceRoutes);
+app.use("/api/healthdata", healthRoutes);
 // Add after other middleware
 app.use(
   fileUpload({

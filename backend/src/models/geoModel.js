@@ -28,6 +28,22 @@ class GeoModel extends BaseModel {
       create: { userId, steps, date: today, source: "GEO" },
     });
   }
+  async getStepsByDate(userId, date) {
+    console.log(`Fetching steps for ${userId} on ${date}`);
+    try {
+      return await this.prisma.stepEntry.findUnique({
+        where: {
+          userId_date: {
+            userId,
+            date: new Date(date.setUTCHours(0, 0, 0, 0)),
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Error in getStepsByDate:", error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new GeoModel();
