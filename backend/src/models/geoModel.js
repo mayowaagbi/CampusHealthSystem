@@ -44,6 +44,39 @@ class GeoModel extends BaseModel {
       throw error;
     }
   }
+  async updateDailyGoal(userId, date, target) {
+    return this.prisma.stepEntry.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date,
+        },
+      },
+      update: {
+        steps: target,
+      },
+      create: {
+        userId,
+        date,
+        steps: target,
+        source: "MANUAL",
+      },
+    });
+  }
+
+  async getProgress(userId) {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    return this.prisma.stepEntry.findUnique({
+      where: {
+        userId_date: {
+          userId,
+          date: today,
+        },
+      },
+    });
+  }
 }
 
 module.exports = new GeoModel();

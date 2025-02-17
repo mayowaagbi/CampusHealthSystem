@@ -1,11 +1,8 @@
 // src/pages/student/StudentHealthGoalsPage.jsx
 import { Outlet, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-// import CurrentGoals from "../components/CurrentGoals";
-
-import SetNewGoal from "../../components/s";
+import SetNewGoal from "../../components/SetNewGoal"; // Adjust the path as necessary
 import CurrentGoals from "../../components/CurrentGoals";
-// import WeeklyProgressGraph from "../../components/WeeklyProgressGraph";
 
 // Sample data for the weekly progress graph
 const goalData = [
@@ -64,16 +61,17 @@ export default function StudentHealthGoalsPage() {
           </Link>
         </nav>
       </header>
-      <main className="flex-1 py-6 px-4 md:px-6">
+      <main className="flex-1 fle py-6 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="space-y-6"
         >
-          <SetNewGoal />
-          <CurrentGoals />
-          <WeeklyProgressGraph data={goalData} />
+          <div className="grid grid-cols-2 g-49">
+            <SetNewGoal />
+            <CurrentGoals />
+          </div>
         </motion.div>
         <Outlet />
       </main>

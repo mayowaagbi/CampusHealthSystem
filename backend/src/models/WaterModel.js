@@ -1,8 +1,7 @@
 const BaseModel = require("./BaseModel");
-
+const MIN_WATER_ML = require("../constants/health").MIN_WATER_ML;
 class WaterModel extends BaseModel {
   constructor() {
-    // Ensure the model name exactly matches the model in your Prisma schema.
     super("waterGoal");
   }
 
@@ -32,18 +31,35 @@ class WaterModel extends BaseModel {
   }
 
   // Instance method to get the current progress (water intake) for today
+  // async getProgress(userId) {
+  //   const today = new Date();
+  //   today.setUTCHours(0, 0, 0, 0);
+
+  //   return this.prisma.waterGoal.findUnique({
+  //     where: {
+  //       userId_date: {
+  //         userId,
+  //         date: today,
+  //       },
+  //     },
+  //   });
+  // }
   async getProgress(userId) {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
-    return this.prisma.waterGoal.findUnique({
-      where: {
-        userId_date: {
-          userId,
-          date: today,
-        },
-      },
+    const result = await this.prisma.waterGoal.findUnique({
+      where: { userId_date: { userId, date: today } },
     });
+
+    return (
+      result || {
+        userId,
+        date: today,
+        current: 0,
+        target: MIN_WATER_ML, // Default target
+      }
+    );
   }
   async getWaterByDate(userId, date) {
     console.log(`Fetching water intake for ${userId} on ${date}`);
@@ -60,6 +76,26 @@ class WaterModel extends BaseModel {
       console.error("Error in getWaterByDate:", error);
       throw error;
     }
+  }
+
+  static async upsertTarget(userId, date, target) {
+    return this.prisma.waterGoal.upsert({
+      where: {
+        userId_date: {
+          userId,
+          date,
+        },
+      },
+      update: {
+        target,
+      },
+      create: {
+        userId,
+        date,
+        target,
+        current: 0, // Initialize current to 0
+      },
+    });
   }
 }
 

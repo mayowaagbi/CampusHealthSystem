@@ -88,6 +88,12 @@ class User extends BaseModel {
       },
     });
   }
+  async updateStepGoal(userId, target) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { stepGoal: target },
+    });
+  }
 }
 
 module.exports = new User();

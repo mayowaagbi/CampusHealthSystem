@@ -22,6 +22,7 @@ const georoutes = require("./routes/geoRoutes");
 const entryRoutes = require("./routes/entryRoutes");
 const ambulanceRoutes = require("./routes/ambulanceRoutes");
 const healthRoutes = require("./routes/healthRoutes");
+const goalRoutes = require("./routes/goalRoutes");
 // Load environment variables
 config();
 
@@ -60,6 +61,7 @@ app.use("/api/geo", georoutes);
 app.use("/api", entryRoutes);
 app.use("/api/ambulance-requests", ambulanceRoutes);
 app.use("/api/healthdata", healthRoutes);
+app.use("/api/goals", goalRoutes);
 // Add after other middleware
 app.use(
   fileUpload({
@@ -88,7 +90,7 @@ app.listen(PORT, () => {
   logger.info(`Docs available at /api/docs`);
 });
 
-// Graceful shutdown
+//  shutdown
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received: Closing server");
   process.exit(0);
