@@ -3,7 +3,7 @@ import { Outlet, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import SetNewGoal from "../../components/SetNewGoal"; // Adjust the path as necessary
 import CurrentGoals from "../../components/CurrentGoals";
-
+import WeeklyHealthOverview from "../../components/Dashboard/WeeklyHealthOverview";
 // Sample data for the weekly progress graph
 const goalData = [
   { day: "Mon", progress: 60 },
@@ -72,6 +72,7 @@ export default function StudentHealthGoalsPage() {
             <SetNewGoal />
             <CurrentGoals />
           </div>
+          <WeeklyHealthOverview />
         </motion.div>
         <Outlet />
       </main>

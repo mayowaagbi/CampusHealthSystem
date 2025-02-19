@@ -1,65 +1,179 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+// src/pages/StudentPages/StudentProfilePage.tsx
+import { useEffect, useState } from "react";
+import { Link, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
+import axios from "axios";
 import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
-import { Switch } from "../../components/ui/switch";
+import { useToast } from "../../hooks/use-toast";
+import PersonalInformation from "./components/profile/PersonalInformation";
+import EmergencyContact from "./components/profile/EmergencyContact";
+import MedicalInformation from "./components/profile/MedicalInformation";
+import NotificationPreferences from "./components/profile/NotificationPreferences";
+
+interface EmergencyContactType {
+  name: string;
+  phone: string;
+  relation?: string;
+}
+
+interface Profile {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth?: string;
+  bloodType?: string;
+  allergies?: string;
+  notifyEmail: boolean;
+  notifySms: boolean;
+  notifyPush: boolean;
+  emergencyContacts: EmergencyContactType[];
+}
 
 export default function StudentProfilePage() {
-  const [profile, setProfile] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "john.doe@example.com",
-    phone: "(123) 456-7890",
-    emergencyContact: "Jane Doe",
-    emergencyPhone: "(987) 654-3210",
-    bloodType: "A+",
-    allergies: "None",
-    notifications: {
-      email: true,
-      sms: false,
-      push: true,
-    },
-  });
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [originalProfile, setOriginalProfile] = useState<Profile | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = event.target;
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      [name]: value,
-    }));
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+          throw new Error("Access token not found.");
+        }
+        const response = await axios.get<Profile>(
+          "http://localhost:3000/api/profile",
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
+        const data = response.data;
+        console.log(data);
+        setProfile({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dateOfBirth: data.dateOfBirth,
+          bloodType: data.bloodType || "",
+          allergies: data.allergies || "",
+          notifyEmail: data.notifyEmail ?? true,
+          notifySms: data.notifySms ?? false,
+          notifyPush: data.notifyPush ?? true,
+          emergencyContacts:
+            data.emergencyContacts?.length > 0
+              ? data.emergencyContacts
+              : [{ name: "", phone: "" }],
+        });
+        setOriginalProfile({ ...data });
+      } catch (error) {
+        handleError(error, "Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+    if (!isEditing) {
+      setOriginalProfile(profile);
+    }
   };
 
-  const handleNotificationChange = (type: "email" | "sms" | "push") => {
-    setProfile((prevProfile) => ({
-      ...prevProfile,
-      notifications: {
-        ...prevProfile.notifications,
-        [type]: !prevProfile.notifications[type],
-      },
-    }));
+  const handleCancel = () => {
+    setIsEditing(false);
+    setProfile(originalProfile);
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Updated profile:", profile);
-    // Here you would typically handle the profile update submission to your server
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!profile) return;
+
+    try {
+      const payload = {
+        ...profile,
+        emergencyContacts: profile.emergencyContacts.filter(
+          (ec) => ec.name && ec.phone
+        ),
+      };
+
+      console.log("Sending payload:", payload);
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        throw new Error("Access token not found.");
+      }
+      const response = await axios.put<Profile>(
+        "http://localhost:3000/api/profile",
+        payload,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      setProfile(response.data);
+      setOriginalProfile(response.data);
+      setIsEditing(false);
+      toast({ title: "Success", description: "Profile updated successfully" });
+    } catch (error) {
+      handleError(error, "Failed to update profile");
+    }
   };
+
+  const handleError = (error: unknown, defaultMessage: string) => {
+    const message = axios.isAxiosError(error)
+      ? error.response?.data?.error || error.message
+      : error instanceof Error
+      ? error.message
+      : defaultMessage;
+
+    toast({ title: "Error", description: message, variant: "destructive" });
+  };
+
+  const updateProfileField = (field: Partial<Profile>) => {
+    setProfile((prev) => (prev ? { ...prev, ...field } : null));
+  };
+
+  const updateEmergencyContact = (
+    index: number,
+    field: Partial<EmergencyContactType>
+  ) => {
+    setProfile((prev) => {
+      if (!prev) return null;
+      const contacts = [...prev.emergencyContacts];
+      contacts[index] = { ...contacts[index], ...field };
+      return { ...prev, emergencyContacts: contacts };
+    });
+  };
+
+  const addEmergencyContact = () => {
+    setProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            emergencyContacts: [
+              ...prev.emergencyContacts,
+              { name: "", phone: "" },
+            ],
+          }
+        : null
+    );
+  };
+
+  const removeEmergencyContact = (index: number) => {
+    setProfile((prev) =>
+      prev
+        ? {
+            ...prev,
+            emergencyContacts: prev.emergencyContacts.filter(
+              (_, i) => i !== index
+            ),
+          }
+        : null
+    );
+  };
+
+  if (loading) return <div className="p-4 text-center">Loading profile...</div>;
+  if (!profile) return <div className="p-4 text-center">Profile not found</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -106,173 +220,69 @@ export default function StudentProfilePage() {
           </Link>
         </nav>
       </header>
-      <main className="flex-1 py-6 px-4 md:px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold mb-6">Your Profile</h1>
-          <form onSubmit={handleSubmit}>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Personal Information</CardTitle>
-                <CardDescription>Update your personal details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={profile.firstName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input
-                      id="lastName"
-                      name="lastName"
-                      value={profile.lastName}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1 py-6 px-4 md:px-6">
+          <motion.div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-3xl font-bold">Your Profile</h1>
+              {!isEditing ? (
+                <Button onClick={handleEditToggle}>Edit Profile</Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={handleCancel}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" form="profile-form">
+                    Save Changes
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={profile.email}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={profile.phone}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Emergency Contact</CardTitle>
-                <CardDescription>
-                  Who should we contact in case of emergency?
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyContact">
-                    Emergency Contact Name
-                  </Label>
-                  <Input
-                    id="emergencyContact"
-                    name="emergencyContact"
-                    value={profile.emergencyContact}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="emergencyPhone">
-                    Emergency Contact Phone
-                  </Label>
-                  <Input
-                    id="emergencyPhone"
-                    name="emergencyPhone"
-                    value={profile.emergencyPhone}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Medical Information</CardTitle>
-                <CardDescription>Important health details</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bloodType">Blood Type</Label>
-                  <Select
-                    value={profile.bloodType}
-                    onValueChange={(value) =>
-                      setProfile((prev) => ({ ...prev, bloodType: value }))
-                    }
-                  >
-                    <SelectTrigger id="bloodType">
-                      <SelectValue placeholder="Select blood type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A+">A+</SelectItem>
-                      <SelectItem value="A-">A-</SelectItem>
-                      <SelectItem value="B+">B+</SelectItem>
-                      <SelectItem value="B-">B-</SelectItem>
-                      <SelectItem value="AB+">AB+</SelectItem>
-                      <SelectItem value="AB-">AB-</SelectItem>
-                      <SelectItem value="O+">O+</SelectItem>
-                      <SelectItem value="O-">O-</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="allergies">Allergies</Label>
-                  <Input
-                    id="allergies"
-                    name="allergies"
-                    value={profile.allergies}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Choose how you want to receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="emailNotifications">
-                    Email Notifications
-                  </Label>
-                  <Switch
-                    id="emailNotifications"
-                    checked={profile.notifications.email}
-                    onCheckedChange={() => handleNotificationChange("email")}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="smsNotifications">SMS Notifications</Label>
-                  <Switch
-                    id="smsNotifications"
-                    checked={profile.notifications.sms}
-                    onCheckedChange={() => handleNotificationChange("sms")}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="pushNotifications">Push Notifications</Label>
-                  <Switch
-                    id="pushNotifications"
-                    checked={profile.notifications.push}
-                    onCheckedChange={() => handleNotificationChange("push")}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-            <Button type="submit">Save Changes</Button>
-          </form>
-        </motion.div>
-      </main>
+              )}
+            </div>
+
+            <form id="profile-form" onSubmit={handleSubmit}>
+              <PersonalInformation
+                firstName={profile.firstName}
+                lastName={profile.lastName}
+                email={profile.email}
+                phone={profile.phone}
+                dateOfBirth={profile.dateOfBirth}
+                isEditing={isEditing}
+                onChange={(field, value) =>
+                  updateProfileField({ [field]: value })
+                }
+              />
+
+              <EmergencyContact
+                contacts={profile.emergencyContacts}
+                isEditing={isEditing}
+                onChange={updateEmergencyContact}
+                onAdd={addEmergencyContact}
+                onRemove={removeEmergencyContact}
+              />
+
+              <MedicalInformation
+                bloodType={profile.bloodType || ""}
+                allergies={profile.allergies || ""}
+                isEditing={isEditing}
+                onChange={(field, value) =>
+                  updateProfileField({ [field]: value })
+                }
+              />
+
+              <NotificationPreferences
+                email={profile.notifyEmail}
+                sms={profile.notifySms}
+                push={profile.notifyPush}
+                // isEditing={isEditing}
+                onChange={(type) =>
+                  updateProfileField({ [type]: !profile[type] })
+                }
+              />
+            </form>
+          </motion.div>
+        </main>
+      </div>
     </div>
   );
 }

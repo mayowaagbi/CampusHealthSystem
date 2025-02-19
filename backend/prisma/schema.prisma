@@ -21,10 +21,12 @@ enum UserRole {
   PROVIDER
   SUPPORT
 }
+
 enum EntryType {
   MOOD
   JOURNAL
 }
+
 enum FileCategory {
   MEDICAL_REPORT
   LAB_RESULT
@@ -62,21 +64,28 @@ model User {
   @@index([email, createdAt])
 }
 
-
 model Profile {
-  id          String    @id @default(uuid())
-  userId      String    @unique
-  user        User      @relation(fields: [userId], references: [id])
-  firstName   String?
-  lastName    String?
-  dateOfBirth DateTime?
-  phone       String?   @unique
-  avatar      String?
-  bio         String?
+  id                String             @id @default(uuid())
+  userId            String             @unique
+  user              User               @relation(fields: [userId], references: [id])
+  firstName         String?
+  lastName          String?
+  dateOfBirth       DateTime?
+  phone             String?            @unique
+  avatar            String?
+  bio               String?
+  bloodType         String? // e.g., "A+"
+  allergies         String?
+  emergencyContacts EmergencyContact[] // One-to-many relation
 
-  studentDetails    StudentDetails?
-  providerDetails   ProviderDetails?
-  emergencyContacts EmergencyContact[]
+  // Flattened notification settings:
+  notifyEmail Boolean @default(true)
+  notifySms   Boolean @default(false)
+  notifyPush  Boolean @default(true)
+
+  // Relations to student or provider details, if applicable:
+  studentDetails  StudentDetails?
+  providerDetails ProviderDetails?
 
   @@index([firstName, lastName])
 }
@@ -89,8 +98,8 @@ model StudentDetails {
   insuranceNumber       String?
   primaryCareProviderId String?
 
-  healthRecords  HealthRecord[]
-  appointments   Appointment[]
+  healthRecords HealthRecord[]
+  appointments  Appointment[]
 
   // Removed invalid references to JournalEntry and MoodEntry
   @@index([studentId])
@@ -151,18 +160,17 @@ model HealthRecord {
 }
 
 model UserEntry {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   userId    String
   type      EntryType // Ensure this is defined
   mood      String?
   journal   String?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
 
   @@index([userId, type, createdAt])
 }
-
 
 model ProviderQualification {
   id            String @id @default(uuid())
@@ -222,7 +230,7 @@ model EmergencyContact {
   profileId    String
   name         String
   relationship String
-  phone        String
+  phone        String  @unique
   email        String?
   priority     Int     @default(1)
 

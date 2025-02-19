@@ -1,5 +1,5 @@
 const User = require("./User");
-const Profile = require("./Profile");
+const Profile = require("./ProfileModel");
 const Appointment = require("./Appointment");
 const StudentDetails = require("./StudentDetails");
 const ProviderDetails = require("./ProviderDetails");

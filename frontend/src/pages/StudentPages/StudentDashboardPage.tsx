@@ -538,7 +538,7 @@ export default function StudentDashboardPage() {
           </div>
 
           {/* Weekly Health Overview */}
-          <WeeklyHealthOverview data={healthData} />
+          <WeeklyHealthOverview />
 
           {/* Quick Links */}
           <QuickLinks />
