@@ -84,3 +84,6 @@ database.rules.json
 # Miscellaneous
 tmp/
 temp/
+
+#uploads
+uploads/

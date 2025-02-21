@@ -98,10 +98,11 @@ model StudentDetails {
   insuranceNumber       String?
   primaryCareProviderId String?
 
-  healthRecords HealthRecord[]
-  appointments  Appointment[]
+  // Directly link to MedicalDocument
+  medicalDocuments MedicalDocument[]
 
-  // Removed invalid references to JournalEntry and MoodEntry
+  appointments Appointment[]
+
   @@index([studentId])
 }
 
@@ -117,7 +118,6 @@ model ProviderDetails {
   appointments   Appointment[]
   qualifications ProviderQualification[]
   schedules      AvailabilitySchedule[]
-  healthRecords  HealthRecord[]          @relation("ProviderHealthRecords")
 
   @@index([licenseNumber, specialization])
 }
@@ -140,23 +140,6 @@ model Appointment {
   documents AppointmentDocument[]
 
   @@index([studentId, providerId, startTime])
-}
-
-model HealthRecord {
-  id            String            @id @default(uuid())
-  studentId     String
-  providerId    String
-  recordedAt    DateTime          @default(now())
-  title         String
-  description   String
-  diagnosis     String
-  prescriptions Prescription[]
-  documents     MedicalDocument[]
-
-  student  StudentDetails  @relation(fields: [studentId], references: [id])
-  provider ProviderDetails @relation(fields: [providerId], references: [id], name: "ProviderHealthRecords")
-
-  @@index([studentId, recordedAt])
 }
 
 model UserEntry {
@@ -221,8 +204,6 @@ model Prescription {
   dosage       String
   instructions String
   refills      Int    @default(0)
-
-  record HealthRecord @relation(fields: [recordId], references: [id])
 }
 
 model EmergencyContact {
@@ -249,18 +230,6 @@ model Notification {
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id])
-}
-
-model MedicalDocument {
-  id          String       @id @default(uuid())
-  recordId    String
-  name        String
-  type        FileCategory
-  storagePath String
-  uploadedBy  String
-  uploadedAt  DateTime     @default(now())
-
-  record HealthRecord @relation(fields: [recordId], references: [id])
 }
 
 model Session {
@@ -365,4 +334,19 @@ model WaterGoal {
 
   @@unique([userId, date])
   @@index([userId, date])
+}
+
+model MedicalDocument {
+  id         String   @id @default(uuid())
+  studentId  String
+  filename   String
+  path       String   @unique
+  mimetype   String
+  size       Int
+  uploadedAt DateTime @default(now())
+
+  // Link to StudentDetails
+  student StudentDetails @relation(fields: [studentId], references: [id])
+
+  @@index([filename, uploadedAt])
 }

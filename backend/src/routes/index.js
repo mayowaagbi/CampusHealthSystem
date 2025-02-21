@@ -8,7 +8,7 @@ const emergencyRoutes = require("./emergencyRoutes");
 const analyticsRoutes = require("./analyticsRoutes");
 const profileRoutes = require("./profileRoutes");
 const router = express.Router();
-
+const documentRoutes = require("./documentRoutes");
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/appointments", appointmentRoutes);
@@ -17,5 +17,6 @@ router.use("/notifications", notificationRoutes);
 router.use("/emergency", emergencyRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/profile", profileRoutes);
+router.use("/documents", documentRoutes);
 
 module.exports = router;

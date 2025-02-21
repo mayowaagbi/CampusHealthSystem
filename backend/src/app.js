@@ -24,6 +24,7 @@ const ambulanceRoutes = require("./routes/ambulanceRoutes");
 const healthRoutes = require("./routes/healthRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const profileRoutes = require("./routes/profileRoutes");
+const documentRoutes = require("./routes/documentRoutes");
 // Load environment variables
 config();
 
@@ -64,6 +65,8 @@ app.use("/api/ambulance-requests", ambulanceRoutes);
 app.use("/api/healthdata", healthRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/documents", documentRoutes);
+
 // Add after other middleware
 app.use(
   fileUpload({

@@ -1,6 +1,8 @@
-import { useState } from "react";
+// src/pages/StudentPages/StudentHealthRecordsPage.tsx
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import axios from "axios";
 import {
   Card,
   CardContent,
@@ -20,28 +22,162 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import { FileUp, Download, Trash } from "lucide-react";
+import { useToast } from "../../hooks/use-toast";
+
+interface MedicalDocument {
+  id: string;
+  filename: string;
+  mimetype: string;
+  size: number;
+  uploadedAt: string;
+}
 
 export default function StudentHealthRecordsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [records, setRecords] = useState<MedicalDocument[]>([]); // Ensure it's always an array
+  const [refresh, setRefresh] = useState(false);
+  const { toast } = useToast();
 
+  // Fetch records on component mount or refresh
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/documents",
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+
+        // Ensure response.data is an array before setting state
+        if (Array.isArray(response.data)) {
+          setRecords(response.data);
+        } else {
+          console.error("Unexpected response:", response.data);
+          setRecords([]); // Default to empty array if data is invalid
+        }
+      } catch (error) {
+        console.error("Error fetching records:", error);
+        setRecords([]); // Avoid undefined errors
+        toast({
+          title: "Error",
+          description: "Failed to fetch health records",
+          variant: "destructive",
+        });
+      }
+    };
+
+    fetchRecords();
+  }, [refresh]);
+
+  // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
     }
   };
 
-  const handleUpload = () => {
-    // Here you would typically handle the file upload to your server
-    console.log("Uploading file:", selectedFile);
-    // Reset selected file after upload
-    setSelectedFile(null);
+  // Handle file upload
+  const handleUpload = async () => {
+    const formData = new FormData();
+    if (selectedFile) {
+      formData.append("document", selectedFile);
+    }
+
+    try {
+      console.log(`data: ${formData}`);
+      console.log(`${selectedFile}`);
+      await axios.post("http://localhost:3000/api/documents/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      toast({ title: "Success", description: "File uploaded successfully" });
+      setRefresh(!refresh);
+      setSelectedFile(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to upload file",
+        variant: "destructive",
+      });
+    }
   };
 
-  const records = [
-    { id: 1, name: "Annual Physical Report", date: "2025-01-15", type: "PDF" },
-    { id: 2, name: "Vaccination Record", date: "2025-02-22", type: "PDF" },
-    { id: 3, name: "Blood Test Results", date: "2025-03-10", type: "PDF" },
-  ];
+  // Handle file download
+  const handleDownload = async (documentId: string) => {
+    try {
+      const response = await axios.get(
+        ` http://localhost:3000/api/documents/download/${documentId}`,
+        {
+          responseType: "blob",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      // Log the response type to verify the file is correct
+      console.log("Downloaded file type:", response.headers["content-type"]);
+
+      // Create a URL for the blob response
+      const blob = new Blob([response.data], {
+        type: response.headers["content-type"],
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      // Extract the filename (ensure it has an extension)
+      const documentRecord = records.find((d) => d.id === documentId);
+      const filename =
+        documentRecord?.filename ||
+        `document.${response.headers["content-type"]?.split("/")[1] || "txt"}`;
+
+      // Create and trigger the download link
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+
+      // Cleanup
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to download file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle file deletion
+  const handleDelete = async (documentId: string) => {
+    if (window.confirm("Are you sure you want to delete this document?")) {
+      try {
+        await axios.delete(
+          `http://localhost:3000/api/documents/${documentId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          }
+        );
+        toast({ title: "Success", description: "File deleted successfully" });
+        setRefresh(!refresh);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete file",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -88,6 +224,7 @@ export default function StudentHealthRecordsPage() {
           </Link>
         </nav>
       </header>
+
       <main className="flex-1 py-6 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -106,9 +243,9 @@ export default function StudentHealthRecordsPage() {
               <CardContent>
                 <form className="space-y-4">
                   <div className="grid w-full max-w-sm items-center gap-1.5">
-                    <Label htmlFor="picture">Picture</Label>
+                    <Label htmlFor="document">Document</Label>
                     <Input
-                      id="picture"
+                      id="document"
                       type="file"
                       onChange={handleFileChange}
                     />
@@ -140,31 +277,53 @@ export default function StudentHealthRecordsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Date</TableHead>
                       <TableHead>Type</TableHead>
+                      <TableHead>Size</TableHead>
+                      <TableHead>Uploaded At</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {records.map((record) => (
-                      <TableRow key={record.id}>
-                        <TableCell>{record.name}</TableCell>
-                        <TableCell>{record.date}</TableCell>
-                        <TableCell>{record.type}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">
-                              <Download className="h-4 w-4" />
-                              <span className="sr-only">Download</span>
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              <Trash className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </div>
+                    {Array.isArray(records) && records.length > 0 ? (
+                      records.map((record) => (
+                        <TableRow key={record.id}>
+                          <TableCell>{record.filename}</TableCell>
+                          <TableCell>{record.mimetype}</TableCell>
+                          <TableCell>
+                            {(record.size / 1024).toFixed(2)} KB
+                          </TableCell>
+                          <TableCell>
+                            {new Date(record.uploadedAt).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex space-x-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownload(record.id)}
+                              >
+                                <Download className="h-4 w-4" />
+                                <span className="sr-only">Download</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDelete(record.id)}
+                              >
+                                <Trash className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center">
+                          No records found
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>

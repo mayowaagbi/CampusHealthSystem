@@ -1,38 +1,74 @@
+// models/MedicalDocumentModel.js
 const BaseModel = require("./BaseModel");
 
-class MedicalDocument extends BaseModel {
+class MedicalDocumentModel extends BaseModel {
   constructor() {
     super("medicalDocument");
   }
 
-  /**
-   * Create document with access control
-   * @param {string} recordId
-   * @param {Object} documentData
-   * @returns {Promise<Object>}
-   */
-  async createDocument(recordId, { name, storagePath, confidentiality }) {
-    return this.prisma.medicalDocument.create({
-      data: {
-        record: { connect: { id: recordId } },
-        name,
-        storagePath,
-        confidentiality: confidentiality || "MEDIUM",
-      },
-    });
+  // async createDocument(studentId, fileData) {
+  //   // Changed parameters
+  //   try {
+  //     console.log("Creating document entry for student:", studentId);
+  //     return await this.prisma.medicalDocument.create({
+  //       // Fixed prisma reference
+  //       data: {
+  //         studentId, // Match schema field name
+  //         filename: fileData.originalname,
+  //         path: fileData.path,
+  //         mimetype: fileData.mimetype,
+  //         size: fileData.size,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Create document error:", error);
+  //     throw new Error("Failed to create document entry");
+  //   }
+  // }
+  async create(data) {
+    try {
+      console.log("Creating DB entry:", data);
+      const result = await this.prisma.medicalDocument.create({
+        data,
+      });
+      console.log("Created document ID:", result.id);
+      return result;
+    } catch (error) {
+      console.error("Model create error:", error);
+      throw new Error(`Database error: ${error.message}`);
+    }
   }
 
-  /**
-   * Get documents by confidentiality level
-   * @param {string} recordId
-   * @param {string} level
-   * @returns {Promise<Array>}
-   */
-  async getDocumentsByConfidentiality(recordId, level) {
-    return this.prisma.medicalDocument.findMany({
-      where: { recordId, confidentiality: level },
-    });
+  async findMany(query) {
+    try {
+      return await this.prisma.medicalDocument.findMany(query);
+    } catch (error) {
+      console.error("FindMany error:", error);
+      throw error;
+    }
+  }
+
+  async findById(id) {
+    try {
+      return await this.prisma.medicalDocument.findUnique({
+        where: { id },
+      });
+    } catch (error) {
+      console.error("FindById error:", error);
+      throw error;
+    }
+  }
+
+  async delete(id) {
+    try {
+      return await this.prisma.medicalDocument.delete({
+        where: { id },
+      });
+    } catch (error) {
+      console.error("Delete error:", error);
+      throw error;
+    }
   }
 }
 
-module.exports = new MedicalDocument();
+module.exports = new MedicalDocumentModel();
