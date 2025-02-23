@@ -50,6 +50,9 @@ class DocumentService {
       throw new Error("Failed to delete document");
     }
   }
+  async recentUploads(providerId) {
+    return MedicalDocumentModel.recentUploads(providerId);
+  }
 }
 
 module.exports = new DocumentService();

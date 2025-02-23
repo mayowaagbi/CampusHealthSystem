@@ -38,6 +38,24 @@ enum FileCategory {
   OTHER
 }
 
+enum AlertPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
+enum RequestStatus {
+  PENDING
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
@@ -74,16 +92,14 @@ model Profile {
   phone             String?            @unique
   avatar            String?
   bio               String?
-  bloodType         String? // e.g., "A+"
+  bloodType         String?
   allergies         String?
-  emergencyContacts EmergencyContact[] // One-to-many relation
+  emergencyContacts EmergencyContact[]
 
-  // Flattened notification settings:
   notifyEmail Boolean @default(true)
   notifySms   Boolean @default(false)
   notifyPush  Boolean @default(true)
 
-  // Relations to student or provider details, if applicable:
   studentDetails  StudentDetails?
   providerDetails ProviderDetails?
 
@@ -98,10 +114,10 @@ model StudentDetails {
   insuranceNumber       String?
   primaryCareProviderId String?
 
-  // Directly link to MedicalDocument
   medicalDocuments MedicalDocument[]
-
-  appointments Appointment[]
+  appointments     Appointment[]
+  alerts           Alert[]
+  prescriptions    Prescription[]
 
   @@index([studentId])
 }
@@ -128,7 +144,7 @@ model Appointment {
   providerId String?
   startTime  DateTime
   duration   Int
-  service    String // Added this field
+  service    String
   status     AppointmentStatus @default(PENDING)
   priority   Int               @default(3)
   location   String?
@@ -140,6 +156,16 @@ model Appointment {
   documents AppointmentDocument[]
 
   @@index([studentId, providerId, startTime])
+}
+
+model Alert {
+  id        String         @id @default(uuid())
+  student   StudentDetails @relation(fields: [studentId], references: [id])
+  studentId String
+  message   String
+  priority  AlertPriority  @default(MEDIUM)
+  status    AlertStatus    @default(ACTIVE)
+  createdAt DateTime       @default(now())
 }
 
 model UserEntry {
@@ -198,12 +224,14 @@ model AppointmentDocument {
 }
 
 model Prescription {
-  id           String @id @default(uuid())
-  recordId     String
+  id           String         @id @default(uuid())
+  student      StudentDetails @relation(fields: [studentId], references: [id])
+  studentId    String
   medication   String
   dosage       String
   instructions String
-  refills      Int    @default(0)
+  refills      Int            @default(0)
+  createdAt    DateTime       @default(now())
 }
 
 model EmergencyContact {
@@ -315,13 +343,6 @@ model AmbulanceRequest {
   user      User          @relation(fields: [userId], references: [id])
 
   @@index([userId, status])
-}
-
-enum RequestStatus {
-  PENDING
-  DISPATCHED
-  COMPLETED
-  CANCELLED
 }
 
 model WaterGoal {

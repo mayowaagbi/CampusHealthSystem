@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const logger = require("../utils/logger");
 // Import User correctly (without destructuring)
-const User = require("../models/User");
+const User = require("../models/User.js");
 
 const authenticate = async (req, res, next) => {
   console.log("JWT_ACCESS_SECRET:", process.env.JWT_ACCESS_SECRET);
@@ -41,5 +41,10 @@ const authorize =
     }
     next();
   };
-
-module.exports = { authenticate, authorize };
+const authorizeProvider = (req, res, next) => {
+  if (req.user.role !== "PROVIDER") {
+    return res.status(403).json({ error: "Provider access required" });
+  }
+  next();
+};
+module.exports = { authenticate, authorize, authorizeProvider };

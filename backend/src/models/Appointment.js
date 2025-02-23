@@ -220,6 +220,35 @@ class Appointment extends BaseModel {
       throw new ApiError(500, "Failed to fetch appointment");
     }
   }
+  async countToday(providerId) {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    return this.prisma.appointment.count({
+      where: {
+        providerId,
+        startTime: { gte: todayStart, lte: todayEnd },
+      },
+    });
+  }
+
+  async weeklyOverview(providerId) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - 7);
+
+    return this.prisma.appointment.groupBy({
+      by: ["startTime"],
+      where: {
+        providerId,
+        startTime: { gte: startDate },
+      },
+      _count: { _all: true },
+      orderBy: { startTime: "asc" },
+    });
+  }
 }
 
 module.exports = new Appointment();

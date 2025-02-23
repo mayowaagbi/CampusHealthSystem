@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
+import axios from "axios";
 import {
   Users,
   Calendar,
@@ -30,16 +31,42 @@ import {
   Legend,
 } from "recharts";
 
-const appointmentData = [
-  { name: "Mon", scheduled: 8, completed: 7 },
-  { name: "Tue", scheduled: 10, completed: 9 },
-  { name: "Wed", scheduled: 12, completed: 11 },
-  { name: "Thu", scheduled: 9, completed: 8 },
-  { name: "Fri", scheduled: 11, completed: 10 },
-];
-
 export default function HealthcareProviderDashboard() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [dashboardStats, setDashboardStats] = useState({
+    totalStudents: 0,
+    todaysAppointments: 0,
+    recentUploads: 0,
+    activeAlerts: 0,
+  });
+  const [appointmentData, setAppointmentData] = useState([]);
+  // const [messages, setMessages] = useState([]);
+  // const [resources, setResources] = useState([]);
+
+  useEffect(() => {
+    // Fetch dashboard stats
+    axios
+      .get("http://localhost:3000/api/provider-dashboard/stats")
+      .then((response) => setDashboardStats(response.data))
+      .catch((error) => console.error("Dashboard stats error:", error));
+    console.log("dashboardStats", dashboardStats);
+    // Fetch appointment overview
+    axios
+      .get("http://localhost:3000/api/provider-dashboard/overview")
+      .then((response) => setAppointmentData(response.data))
+      .catch((error) => console.error("Appointments error:", error));
+
+    // // Fetch recent messages
+    // axios
+    //   .get("/api/messages/recent")
+    //   .then((response) => setMessages(response.data))
+    //   .catch((error) => console.error("Messages error:", error));
+
+    // // Fetch educational resources
+    // axios
+    //   .get("/api/resources/recent")
+    //   .then((response) => setResources(response.data))
+    //   .catch((error) => console.error("Resources error:", error));
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -109,7 +136,9 @@ export default function HealthcareProviderDashboard() {
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">1,234</div>
+                <div className="text-2xl font-bold">
+                  {dashboardStats.totalStudents}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   +5% from last month
                 </p>
@@ -123,7 +152,9 @@ export default function HealthcareProviderDashboard() {
                 <Calendar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">15</div>
+                <div className="text-2xl font-bold">
+                  {dashboardStats.todaysAppointments}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   3 pending approval
                 </p>
@@ -137,7 +168,9 @@ export default function HealthcareProviderDashboard() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">7</div>
+                <div className="text-2xl font-bold">
+                  {dashboardStats.recentUploads}
+                </div>
                 <p className="text-xs text-muted-foreground">
                   Uploaded in the last 24 hours
                 </p>
@@ -151,7 +184,9 @@ export default function HealthcareProviderDashboard() {
                 <Bell className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">2</div>
+                <div className="text-2xl font-bold">
+                  {dashboardStats.activeAlerts}
+                </div>
                 <p className="text-xs text-muted-foreground">1 high priority</p>
               </CardContent>
             </Card>
@@ -224,7 +259,7 @@ export default function HealthcareProviderDashboard() {
             </Card>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Recent Patient Messages</CardTitle>
                 <CardDescription>
@@ -233,28 +268,18 @@ export default function HealthcareProviderDashboard() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
-                    <span className="text-sm">
-                      John Doe: Question about medication side effects
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
-                    <span className="text-sm">
-                      Jane Smith: Request for appointment rescheduling
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
-                    <span className="text-sm">
-                      Mike Johnson: Follow-up on recent lab results
-                    </span>
-                  </li>
+                  {messages.map((msg) => (
+                    <li key={msg.id} className="flex items-center">
+                      <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
+                      <span className="text-sm">
+                        {msg.patientName}: {msg.preview}
+                      </span>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
-            </Card>
-            <Card>
+            </Card> */}
+            {/* <Card>
               <CardHeader>
                 <CardTitle>Educational Resources</CardTitle>
                 <CardDescription>
@@ -263,27 +288,15 @@ export default function HealthcareProviderDashboard() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      10 Tips for Managing Stress During Exams
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      The Importance of Sleep for Academic Performance
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      Nutrition Guide for College Students
-                    </span>
-                  </li>
+                  {resources.map((res) => (
+                    <li key={res.id} className="flex items-center">
+                      <BookOpen className="mr-2 h-4 w-4 text-green-500" />
+                      <span className="text-sm">{res.title}</span>
+                    </li>
+                  ))}
                 </ul>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </motion.div>
       </main>

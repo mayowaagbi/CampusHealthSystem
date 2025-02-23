@@ -1,7 +1,7 @@
 // services/StudentService.js
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
-
+const StudentDetailsModel = require("../models/StudentDetails");
 class StudentService {
   async findStudentByUserId(userId) {
     console.log("[StudentService] Initialized");
@@ -30,6 +30,9 @@ class StudentService {
       console.error("StudentService Error:", error);
       throw new Error("Failed to find student");
     }
+  }
+  async countByProvider(providerId) {
+    return StudentDetailsModel.countByProvider(providerId);
   }
 }
 

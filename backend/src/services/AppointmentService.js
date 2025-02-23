@@ -159,6 +159,13 @@ class AppointmentService {
       throw new ApiError(500, "Failed to reschedule appointment");
     }
   }
+  async countToday(providerId) {
+    return Appointment.countToday(providerId);
+  }
+
+  async weeklyOverview(providerId) {
+    return Appointment.weeklyOverview(providerId);
+  }
 }
 
 module.exports = new AppointmentService();

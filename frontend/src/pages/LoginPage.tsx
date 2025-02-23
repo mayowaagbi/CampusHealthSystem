@@ -121,8 +121,8 @@ export default function LoginPage() {
         case "ADMIN":
           navigate("/admin/dashboard");
           break;
-        case "doctor":
-          navigate("/doctor/dashboard");
+        case "PROVIDER":
+          navigate("/healthcare-provider/dashboard");
           break;
         default:
           navigate("/dashboard");

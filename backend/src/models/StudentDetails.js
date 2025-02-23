@@ -46,6 +46,11 @@ class StudentDetails extends BaseModel {
       data: { insuranceNumber },
     });
   }
+  async countByProvider(providerId) {
+    return this.prisma.studentDetails.count({
+      where: { primaryCareProviderId: providerId },
+    });
+  }
 }
 
 module.exports = new StudentDetails();

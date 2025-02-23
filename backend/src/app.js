@@ -25,6 +25,7 @@ const healthRoutes = require("./routes/healthRoutes");
 const goalRoutes = require("./routes/goalRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const documentRoutes = require("./routes/documentRoutes");
+const healthproviderdashboardRoutes = require("./routes/healthproviderdashboardRoutes");
 // Load environment variables
 config();
 
@@ -66,7 +67,8 @@ app.use("/api/healthdata", healthRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/documents", documentRoutes);
-
+app.use("/api/provider-dashboard", healthproviderdashboardRoutes);
+// app.use("/api/provider-dashboard", healthproviderdashboardController);
 // Add after other middleware
 app.use(
   fileUpload({

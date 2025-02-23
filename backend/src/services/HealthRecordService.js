@@ -1,4 +1,5 @@
-const { HealthRecord, MedicalDocument } = require("../models/HealthRecord");
+const { HealthRecord } = require("../models/HealthRecord");
+const MedicalDocument = require("../models/MedicalDocument");
 const { uploadFile } = require("../utils/storage");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");
@@ -19,6 +20,9 @@ class HealthRecordService {
       name: originalname,
       storagePath: fileUrl,
     });
+  }
+  async recentUploads(providerId) {
+    return HealthRecordModel.recentUploads(providerId);
   }
 }
 

@@ -69,6 +69,17 @@ class MedicalDocumentModel extends BaseModel {
       throw error;
     }
   }
+  async recentUploads(providerId) {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    return this.prisma.medicalDocument.count({
+      where: {
+        student: { primaryCareProviderId: providerId },
+        uploadedAt: { gte: sevenDaysAgo },
+      },
+    });
+  }
 }
 
 module.exports = new MedicalDocumentModel();
