@@ -10,6 +10,7 @@ generator client {
 enum AppointmentStatus {
   PENDING
   CONFIRMED
+  DENIED
   CANCELLED
   RESCHEDULED
   MISSED
@@ -102,6 +103,7 @@ model Profile {
 
   studentDetails  StudentDetails?
   providerDetails ProviderDetails?
+  supportDetails  SupportDetails?
 
   @@index([firstName, lastName])
 }
@@ -138,10 +140,26 @@ model ProviderDetails {
   @@index([licenseNumber, specialization])
 }
 
+model SupportDetails {
+  id             String  @id @default(uuid())
+  profileId      String  @unique
+  profile        Profile @relation(fields: [profileId], references: [id])
+  licenseNumber  String  @unique
+  specialization String
+  department     String
+  available      Boolean @default(true)
+
+  appointments Appointment[] // Appointments assigned to this support staff
+  schedules    AvailabilitySchedule[] // Availability schedules for this support staff
+
+  @@index([licenseNumber, specialization])
+}
+
 model Appointment {
   id         String            @id @default(uuid())
   studentId  String
   providerId String?
+  supportId  String?
   startTime  DateTime
   duration   Int
   service    String
@@ -152,6 +170,7 @@ model Appointment {
 
   student   StudentDetails        @relation(fields: [studentId], references: [id])
   provider  ProviderDetails?      @relation(fields: [providerId], references: [id])
+  support   SupportDetails?       @relation(fields: [supportId], references: [id])
   histories AppointmentHistory[]
   documents AppointmentDocument[]
 
@@ -192,14 +211,16 @@ model ProviderQualification {
 }
 
 model AvailabilitySchedule {
-  id         String   @id @default(uuid())
-  providerId String
-  startTime  DateTime
-  endTime    DateTime
-  recurrence String?
-  createdAt  DateTime @default(now())
+  id               String   @id @default(uuid())
+  supportDetailsId String?  @unique // For support staff
+  providerId       String?  @unique // For providers
+  startTime        DateTime
+  endTime          DateTime
+  recurrence       String?
+  createdAt        DateTime @default(now())
 
-  provider ProviderDetails @relation(fields: [providerId], references: [id])
+  provider ProviderDetails? @relation(fields: [providerId], references: [id])
+  support  SupportDetails?  @relation(fields: [supportDetailsId], references: [id])
 }
 
 model AppointmentHistory {

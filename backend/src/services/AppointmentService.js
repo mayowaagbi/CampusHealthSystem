@@ -166,6 +166,16 @@ class AppointmentService {
   async weeklyOverview(providerId) {
     return Appointment.weeklyOverview(providerId);
   }
+
+  async assignSupport(id, supportId, providerId) {
+    return await Appointment.assignSupport(id, supportId, providerId);
+  }
+  async getAllAppointments() {
+    return await Appointment.getAllAppointments();
+  }
+  async updateStatus(id, status, providerId) {
+    return await Appointment.updateStatus(id, status, providerId);
+  }
 }
 
 module.exports = new AppointmentService();

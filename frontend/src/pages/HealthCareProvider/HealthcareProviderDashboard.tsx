@@ -259,27 +259,7 @@ export default function HealthcareProviderDashboard() {
             </Card>
           </div>
           <div className="grid gap-6 md:grid-cols-2">
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Recent Patient Messages</CardTitle>
-                <CardDescription>
-                  Latest communications from patients
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-4">
-                  {messages.map((msg) => (
-                    <li key={msg.id} className="flex items-center">
-                      <MessageSquare className="mr-2 h-4 w-4 text-blue-500" />
-                      <span className="text-sm">
-                        {msg.patientName}: {msg.preview}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card> */}
-            {/* <Card>
+            <Card>
               <CardHeader>
                 <CardTitle>Educational Resources</CardTitle>
                 <CardDescription>
@@ -288,15 +268,27 @@ export default function HealthcareProviderDashboard() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-4">
-                  {resources.map((res) => (
-                    <li key={res.id} className="flex items-center">
-                      <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                      <span className="text-sm">{res.title}</span>
-                    </li>
-                  ))}
+                  <li className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm">
+                      10 Tips for Managing Stress During Exams
+                    </span>
+                  </li>
+                  <li className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm">
+                      The Importance of Sleep for Academic Performance
+                    </span>
+                  </li>
+                  <li className="flex items-center">
+                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
+                    <span className="text-sm">
+                      Nutrition Guide for College Students
+                    </span>
+                  </li>
                 </ul>
               </CardContent>
-            </Card> */}
+            </Card>
           </div>
         </motion.div>
       </main>

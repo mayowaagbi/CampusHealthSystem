@@ -26,6 +26,8 @@ const goalRoutes = require("./routes/goalRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const documentRoutes = require("./routes/documentRoutes");
 const healthproviderdashboardRoutes = require("./routes/healthproviderdashboardRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const supportRoutes = require("./routes/supportRoutes");
 // Load environment variables
 config();
 
@@ -68,6 +70,8 @@ app.use("/api/goals", goalRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/provider-dashboard", healthproviderdashboardRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/supports", supportRoutes);
 // app.use("/api/provider-dashboard", healthproviderdashboardController);
 // Add after other middleware
 app.use(

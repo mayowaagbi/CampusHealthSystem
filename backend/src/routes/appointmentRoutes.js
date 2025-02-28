@@ -36,9 +36,48 @@ router.delete(
 
 router.patch(
   "/:id/reschedule",
+  (req, res, next) => {
+    console.log("PATCH /api/appointments/:id/status", {
+      id: req.params.id,
+      body: req.body,
+    });
+    next();
+  },
   authorize("STUDENT"),
   // validateRequest(rescheduleAppointmentSchema),
   AppointmentController.rescheduleAppointment
 );
+router.get(
+  "/provider",
+  authorize("PROVIDER"),
+  AppointmentController.getProviderAppointments
+);
+router.patch(
+  "/:id/status",
+  authorize("PROVIDER"),
+  AppointmentController.updateAppointmentStatus
+);
 
+// router.patch(
+//   "/:id/assign-support",
+//   authorize("PROVIDER"),
+//   AppointmentController.assignSupport
+// );
+router.patch(
+  "/:id/assign-support",
+  (req, res, next) => {
+    console.log("Received PATCH request:", req.params, req.body);
+    next();
+  },
+  authorize("ADMIN", "PROVIDER"),
+  AppointmentController.assignSupport
+);
+
+// Fetch ALL appointments (no provider-specific filtering)
+router.get(
+  "/all",
+  authenticate, // Ensure the user is authenticated
+  authorize("ADMIN", "PROVIDER"), // Only admins or providers can access
+  AppointmentController.getAllAppointments
+);
 module.exports = router;

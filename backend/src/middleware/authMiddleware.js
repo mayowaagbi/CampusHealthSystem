@@ -25,6 +25,9 @@ const authenticate = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ message: "Token expired" });
+    }
     logger.error("Token verification failed", {
       error: err.message,
       stack: err.stack,
@@ -41,6 +44,7 @@ const authorize =
     }
     next();
   };
+
 const authorizeProvider = (req, res, next) => {
   if (req.user.role !== "PROVIDER") {
     return res.status(403).json({ error: "Provider access required" });

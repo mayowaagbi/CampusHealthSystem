@@ -1,5 +1,14 @@
+require("dotenv").config(); // Add this at the top
 const nodemailer = require("nodemailer");
 const logger = require("./logger");
+
+// Debugging: Log environment variables
+console.log("[Mailer] Environment Variables:", {
+  SMTP_HOST: process.env.SMTP_HOST,
+  SMTP_PORT: process.env.SMTP_PORT,
+  SMTP_USER: process.env.SMTP_USER,
+  EMAIL_FROM: process.env.EMAIL_FROM,
+});
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,

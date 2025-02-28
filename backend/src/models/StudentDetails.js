@@ -7,8 +7,6 @@ class StudentDetails extends BaseModel {
 
   /**
    * Get complete student profile with health records and appointments
-   * @param {string} studentId - UUID of the student
-   * @returns {Promise<Object>} Complete student profile
    */
   async getFullStudentProfile(studentId) {
     return this.prisma.studentDetails.findUnique({
@@ -36,9 +34,6 @@ class StudentDetails extends BaseModel {
 
   /**
    * Update student insurance information
-   * @param {string} studentId - UUID of the student
-   * @param {string} insuranceNumber - New insurance number
-   * @returns {Promise<Object>} Updated student details
    */
   async updateInsuranceInfo(studentId, insuranceNumber) {
     return this.prisma.studentDetails.update({
@@ -46,9 +41,68 @@ class StudentDetails extends BaseModel {
       data: { insuranceNumber },
     });
   }
+
+  /**
+   * Count students by provider
+   */
   async countByProvider(providerId) {
     return this.prisma.studentDetails.count({
       where: { primaryCareProviderId: providerId },
+    });
+  }
+
+  /**
+   * Get list of students based on search and status
+   */
+  async getStudentsFromDB(search, status) {
+    return this.prisma.studentDetails.findMany({
+      where: {
+        AND: [
+          search
+            ? {
+                OR: [
+                  { studentId: { contains: search, mode: "insensitive" } },
+                  {
+                    insuranceNumber: { contains: search, mode: "insensitive" },
+                  },
+                  {
+                    profile: {
+                      OR: [
+                        {
+                          firstName: { contains: search, mode: "insensitive" },
+                        },
+                        { lastName: { contains: search, mode: "insensitive" } },
+                        { phone: { contains: search, mode: "insensitive" } },
+                      ],
+                    },
+                  },
+                ],
+              }
+            : {},
+          status !== "all"
+            ? {
+                OR: [
+                  {
+                    alerts: {
+                      some: {
+                        status: "ACTIVE",
+                        priority: status === "CRITICAL" ? "HIGH" : undefined,
+                      },
+                    },
+                  },
+                  { appointments: { some: { status } } },
+                ],
+              }
+            : {},
+        ],
+      },
+      include: {
+        profile: true,
+        alerts: { orderBy: { createdAt: "desc" }, take: 5 },
+        appointments: { orderBy: { startTime: "desc" }, take: 1 },
+        medicalDocuments: { orderBy: { uploadedAt: "desc" }, take: 5 },
+      },
+      orderBy: { profile: { lastName: "asc" } },
     });
   }
 }
