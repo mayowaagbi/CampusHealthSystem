@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+// import axios from "axios";
 import {
   Card,
   CardContent,
@@ -24,54 +25,71 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { ChevronDown, Search, FileText, Download, Eye } from "lucide-react";
-import { UploadHealthRecordDialog } from "../../components/UploadHealthRecordDialog";
+import { toast } from "react-toastify";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
+import api from "../../api";
 
-const healthRecords = [
-  {
-    id: 1,
-    patientName: "John Doe",
-    recordType: "Blood Test",
-    date: "2023-05-10",
-    uploadedBy: "Dr. Smith",
-  },
-  {
-    id: 2,
-    patientName: "Jane Smith",
-    recordType: "X-Ray",
-    date: "2023-05-08",
-    uploadedBy: "Dr. Johnson",
-  },
-  {
-    id: 3,
-    patientName: "Mike Johnson",
-    recordType: "Vaccination Record",
-    date: "2023-05-05",
-    uploadedBy: "Nurse Williams",
-  },
-  {
-    id: 4,
-    patientName: "Emily Brown",
-    recordType: "Mental Health Assessment",
-    date: "2023-05-12",
-    uploadedBy: "Dr. Lee",
-  },
-  {
-    id: 5,
-    patientName: "Chris Lee",
-    recordType: "Allergy Test",
-    date: "2023-05-01",
-    uploadedBy: "Dr. Garcia",
-  },
-];
+interface HealthRecord {
+  id: string;
+  student: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  uploadedBy: {
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  filename: string;
+  createdAt: string;
+}
 
 export default function HealthRecordsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [records, setRecords] = useState<HealthRecord[]>([]);
 
-  const filteredRecords = healthRecords.filter(
-    (record) =>
-      record.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.recordType.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) throw new Error("Not authenticated");
+
+        const headers = { Authorization: `Bearer ${accessToken}` };
+        const response = await api.get("/api/documents/all", { headers });
+
+        console.log("API Response:", response.data); // Debugging
+        setRecords(response.data);
+      } catch (error) {
+        console.error("Error fetching health records:", error);
+        toast.error("Failed to load health records");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, []);
+
+  const filteredRecords = records.filter((record) =>
+    `${record.student?.profile?.firstName || ""} ${
+      record.student?.profile?.lastName || ""
+    }`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 py-8">{error}</div>;
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -148,7 +166,9 @@ export default function HealthRecordsPage() {
                     <span className="sr-only">Search</span>
                   </Button>
                 </div>
-                <UploadHealthRecordDialog />
+                {/* <UploadHealthRecordDialog
+                  onUploadSuccess={() => window.location.reload()}
+                /> */}
               </div>
               <Table>
                 <TableHeader>
@@ -163,10 +183,16 @@ export default function HealthRecordsPage() {
                 <TableBody>
                   {filteredRecords.map((record) => (
                     <TableRow key={record.id}>
-                      <TableCell>{record.patientName}</TableCell>
-                      <TableCell>{record.recordType}</TableCell>
-                      <TableCell>{record.date}</TableCell>
-                      <TableCell>{record.uploadedBy}</TableCell>
+                      <TableCell>
+                        {`${record.student.profile.firstName} ${record.student.profile.lastName}`}
+                      </TableCell>
+                      <TableCell>{record.filename}</TableCell>
+                      <TableCell>
+                        {new Date(record.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {`${record.uploadedBy.profile.firstName} ${record.uploadedBy.profile.lastName}`}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -179,7 +205,11 @@ export default function HealthRecordsPage() {
                               <Eye className="mr-2 h-4 w-4" />
                               View Record
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleDownload(record.id, record.filename)
+                              }
+                            >
                               <Download className="mr-2 h-4 w-4" />
                               Download Record
                             </DropdownMenuItem>

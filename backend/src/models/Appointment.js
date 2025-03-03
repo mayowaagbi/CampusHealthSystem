@@ -8,13 +8,13 @@ class AppointmentService {
   }
 
   // Create a new appointment
-  async createAppointment(studentId, appointmentData) {
+  async createAppointment(appointmentData) {
     try {
-      logger.info(`Creating appointment for student ${studentId}`);
-
+      // logger.info(`Creating appointment for student model ${studentId}`);
+      console.log("Appointment Data model:", appointmentData);
       return await this.prisma.appointment.create({
         data: {
-          studentId,
+          studentId: appointmentData.studentId,
           service: appointmentData.service,
           startTime: new Date(appointmentData.startTime),
           duration: Number(appointmentData.duration),
@@ -328,18 +328,73 @@ class AppointmentService {
       throw new Error("Failed to check availability");
     }
   }
-  async updateStatus(id, status, providerId) {
+  // async updateStatus(id, status, providerId) {
+  //   try {
+  //     // Update the appointment status
+  //     console.log("[Service] Updating appointment status:", {
+  //       id,
+  //       status,
+  //       providerId,
+  //     });
+
+  //     const updatedAppointment = await this.prisma.appointment.update({
+  //       where: { id },
+  //       data: { status, providerId },
+  //       include: {
+  //         student: {
+  //           include: { profile: { include: { user: true } } },
+  //         },
+  //         provider: {
+  //           include: { profile: true },
+  //         },
+  //       },
+  //     });
+
+  //     return updatedAppointment;
+  //   } catch (error) {
+  //     logger.error("Failed to update status:", error);
+  //     throw new ApiError(500, "Failed to update appointment status");
+  //   }
+  // }
+  async updateStatus(id, status, userId) {
     try {
-      // Update the appointment status
       console.log("[Service] Updating appointment status:", {
         id,
         status,
-        providerId,
+        userId,
       });
 
+      // Validate the user is a registered provider
+      const provider = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          profile: {
+            include: {
+              providerDetails: true,
+            },
+          },
+        },
+      });
+
+      if (!provider?.profile?.providerDetails) {
+        throw new ApiError(403, "User is not a registered provider");
+      }
+
+      const providerId = provider.profile.providerDetails.id;
+
+      // Get the existing appointment
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id },
+      });
+
+      if (!appointment) {
+        throw new ApiError(404, "Appointment not found");
+      }
+
+      // Perform the update
       const updatedAppointment = await this.prisma.appointment.update({
         where: { id },
-        data: { status },
+        data: { status, providerId }, // Update both status and providerId
         include: {
           student: {
             include: { profile: { include: { user: true } } },
@@ -352,9 +407,36 @@ class AppointmentService {
 
       return updatedAppointment;
     } catch (error) {
-      logger.error("Failed to update status:", error);
-      throw new ApiError(500, "Failed to update appointment status");
+      logger.error("Failed to update appointment status:", error);
+
+      // Handle specific Prisma errors
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === "P2025") {
+          throw new ApiError(404, "Appointment not found");
+        }
+        if (error.code === "P2003") {
+          throw new ApiError(400, "Invalid provider ID");
+        }
+      }
+
+      // Handle custom ApiError
+      if (error instanceof ApiError) {
+        throw error;
+      }
+
+      // Generic error
+      throw new ApiError(500, "Failed to update appointment");
     }
+  }
+  async updateAppointmentLocation(appointmentId, location) {
+    return this.prisma.appointment.update({
+      where: { id: appointmentId },
+      data: { location },
+      include: {
+        student: { include: { profile: true } },
+        support: { include: { profile: true } },
+      },
+    });
   }
 }
 

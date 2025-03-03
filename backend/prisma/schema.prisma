@@ -78,6 +78,7 @@ model User {
   ambulanceRequests           AmbulanceRequest[]
   waterGoals                  WaterGoal[]
   entries                     UserEntry[]
+  medicalDocuments            MedicalDocument[] 
   appointmentHistoriesCreated AppointmentHistory[] @relation("UserAppointmentChanges")
 
   @@index([email, createdAt])
@@ -386,9 +387,11 @@ model MedicalDocument {
   mimetype   String
   size       Int
   uploadedAt DateTime @default(now())
+  uploadedById String
 
   // Link to StudentDetails
   student StudentDetails @relation(fields: [studentId], references: [id])
+  uploadedBy User           @relation(fields: [uploadedById], references: [id]) // Add this relation
 
   @@index([filename, uploadedAt])
 }

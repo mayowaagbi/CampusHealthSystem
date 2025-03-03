@@ -183,6 +183,15 @@ class DocumentController {
       });
     }
   }
+  async getAllRecords(req, res, next) {
+    try {
+      const records = await DocumentService.getAllHealthRecords();
+      console.log("All records fetched:", records);
+      res.json(records);
+    } catch (error) {
+      next(error); // Pass the error to the error-handling middleware
+    }
+  }
 }
 
 const documentController = new DocumentController();
@@ -200,5 +209,8 @@ module.exports = {
   ),
   deleteDocument: asyncHandler(
     documentController.deleteDocument.bind(documentController)
+  ),
+  getAllRecords: asyncHandler(
+    documentController.getAllRecords.bind(documentController)
   ),
 };

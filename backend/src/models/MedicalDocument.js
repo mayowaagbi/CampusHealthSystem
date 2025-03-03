@@ -1,6 +1,6 @@
 // models/MedicalDocumentModel.js
 const BaseModel = require("./BaseModel");
-
+const StudentDetails = require("./StudentDetails");
 class MedicalDocumentModel extends BaseModel {
   constructor() {
     super("medicalDocument");
@@ -28,9 +28,43 @@ class MedicalDocumentModel extends BaseModel {
   async create(data) {
     try {
       console.log("Creating DB entry:", data);
+
+      // Get the userId associated with the studentId
+      const userId = await StudentDetails.getUserIdByStudentId(data.studentId);
+
+      // Create the MedicalDocument
       const result = await this.prisma.medicalDocument.create({
-        data,
+        data: {
+          filename: data.filename,
+          path: data.path,
+          mimetype: data.mimetype,
+          size: data.size,
+          student: {
+            connect: { id: data.studentId }, // Connect to existing StudentDetails
+          },
+          uploadedBy: {
+            connect: { id: userId }, // Connect to existing User using the retrieved userId
+          },
+        },
+        include: {
+          student: {
+            include: {
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
+          uploadedBy: {
+            select: {
+              email: true, // Include uploadedBy user's email for reference
+            },
+          },
+        },
       });
+
       console.log("Created document ID:", result.id);
       return result;
     } catch (error) {
@@ -38,7 +72,6 @@ class MedicalDocumentModel extends BaseModel {
       throw new Error(`Database error: ${error.message}`);
     }
   }
-
   async findMany(query) {
     try {
       return await this.prisma.medicalDocument.findMany(query);
@@ -79,6 +112,36 @@ class MedicalDocumentModel extends BaseModel {
         uploadedAt: { gte: sevenDaysAgo },
       },
     });
+  }
+  async getAllHealthRecords() {
+    try {
+      return await this.prisma.medicalDocument.findMany({
+        include: {
+          student: {
+            include: {
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
+          uploadedBy: {
+            include: {
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    } catch (error) {
+      console.error("Failed to fetch health records:", error);
+    }
   }
 }
 

@@ -42,13 +42,32 @@ class Profile extends BaseModel {
   }
 
   async findByUserId(userId) {
-    return this.prisma.profile.findUnique({
-      where: { userId },
-      include: { emergencyContacts: true },
-    });
+    try {
+      const profile = await this.prisma.profile.findUnique({
+        where: { userId },
+        include: {
+          user: {
+            select: {
+              email: true, // Include the email from the User table
+            },
+          },
+        },
+      });
+
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+
+      console.log("Retrieved profile:", profile);
+      return profile;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      throw new Error(`Failed to fetch profile: ${error.message}`);
+    }
   }
 
   async updateProfile(userId, data) {
+    console.log(`model${data}`);
     return this.prisma.profile.update({
       where: { userId },
       data: {
@@ -82,11 +101,11 @@ class Profile extends BaseModel {
                 relationship: contact.relationship || "Unknown", // Provide a default value if missing
               })) || [],
         },
-        user: {
-          update: {
-            email: data.email,
-          },
-        },
+        // user: {
+        //   update: {
+        //     email: data.email,
+        //   },
+        // },
       },
       include: {
         emergencyContacts: true,

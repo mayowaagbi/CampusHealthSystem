@@ -6,8 +6,8 @@ class AppointmentService {
   // Create a new appointment
   async createAppointment(studentId, appointmentData) {
     try {
-      logger.info(`Creating appointment for student ${studentId}`);
-
+      console.log(`Creating appointment for student ${studentId}`);
+      console.log("[Service] Creating appointment:", appointmentData);
       return await Appointment.createAppointment({
         studentId,
         service: appointmentData.service,
@@ -138,7 +138,7 @@ class AppointmentService {
       logger.info(`Rescheduling appointment ${appointmentId}`);
       console.log("[Service] Rescheduling appointment:", appointmentId);
       console.log("[Service] Update data:", updateData);
-      const updatedAppointment = await Appointment.reschedule(
+      const updatedAppointment = await Appointment.rescheduleAppointment(
         appointmentId,
         updateData
       );
@@ -175,6 +175,26 @@ class AppointmentService {
   }
   async updateStatus(id, status, providerId) {
     return await Appointment.updateStatus(id, status, providerId);
+  }
+  async updateAppointmentLocation(appointmentId, location) {
+    try {
+      logger.info(`Updating location for appointment ${appointmentId}`);
+      console.log("[Service] Location:", location);
+
+      const updatedAppointment = await Appointment.updateAppointmentLocation(
+        appointmentId,
+        location
+      );
+
+      if (!updatedAppointment) {
+        throw new ApiError(404, "Appointment not found");
+      }
+
+      return updatedAppointment;
+    } catch (error) {
+      logger.error("Failed to update appointment location:", error);
+      throw new ApiError(500, "Failed to update location");
+    }
   }
 }
 

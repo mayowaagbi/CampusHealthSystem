@@ -5,8 +5,9 @@ const {
   getDocuments,
   downloadDocument,
   deleteDocument,
+  getAllRecords,
 } = require("../controllers/documentController"); // Import correctly
-const { authenticate } = require("../middleware/authMiddleware");
+const { authenticate, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -23,5 +24,6 @@ router.use(authenticate);
 router.get("/", getDocuments);
 router.get("/download/:documentId", downloadDocument);
 router.delete("/:documentId", deleteDocument);
+router.get("/all", authorize("ADMIN", "PROVIDER"), getAllRecords);
 
 module.exports = router;

@@ -53,6 +53,14 @@ class DocumentService {
   async recentUploads(providerId) {
     return MedicalDocumentModel.recentUploads(providerId);
   }
+  async getAllHealthRecords() {
+    try {
+      return await MedicalDocumentModel.getAllHealthRecords();
+    } catch (error) {
+      console.error("Error in DocumentService:", error);
+      throw error; // Re-throw the error to the controller
+    }
+  }
 }
 
 module.exports = new DocumentService();

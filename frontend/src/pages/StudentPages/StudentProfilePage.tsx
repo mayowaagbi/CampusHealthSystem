@@ -9,11 +9,15 @@ import PersonalInformation from "./components/profile/PersonalInformation";
 import EmergencyContact from "./components/profile/EmergencyContact";
 import MedicalInformation from "./components/profile/MedicalInformation";
 import NotificationPreferences from "./components/profile/NotificationPreferences";
-
+import api from "../../api";
 interface EmergencyContactType {
   name: string;
   phone: string;
   relation?: string;
+}
+
+interface User {
+  email: string;
 }
 
 interface Profile {
@@ -28,6 +32,7 @@ interface Profile {
   notifySms: boolean;
   notifyPush: boolean;
   emergencyContacts: EmergencyContactType[];
+  user: User;
 }
 
 export default function StudentProfilePage() {
@@ -44,7 +49,7 @@ export default function StudentProfilePage() {
         if (!accessToken) {
           throw new Error("Access token not found.");
         }
-        const response = await axios.get<Profile>(
+        const response = await api.get<Profile>(
           "http://localhost:3000/api/profile",
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
@@ -53,7 +58,7 @@ export default function StudentProfilePage() {
         setProfile({
           firstName: data.firstName || "",
           lastName: data.lastName || "",
-          email: data.email || "",
+          email: data.user.email || "",
           phone: data.phone || "",
           dateOfBirth: data.dateOfBirth,
           bloodType: data.bloodType || "",
@@ -65,6 +70,7 @@ export default function StudentProfilePage() {
             data.emergencyContacts?.length > 0
               ? data.emergencyContacts
               : [{ name: "", phone: "" }],
+          user: data.user,
         });
         setOriginalProfile({ ...data });
       } catch (error) {
@@ -106,7 +112,7 @@ export default function StudentProfilePage() {
         throw new Error("Access token not found.");
       }
       const response = await axios.put<Profile>(
-        "http://localhost:3000/api/profile",
+        "http://localhost:3000/api/profile  ",
         payload,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -135,12 +141,13 @@ export default function StudentProfilePage() {
 
   const updateEmergencyContact = (
     index: number,
-    field: Partial<EmergencyContactType>
+    field: "name" | "phone" | "relation",
+    value: string
   ) => {
     setProfile((prev) => {
       if (!prev) return null;
       const contacts = [...prev.emergencyContacts];
-      contacts[index] = { ...contacts[index], ...field };
+      contacts[index] = { ...contacts[index], [field]: value };
       return { ...prev, emergencyContacts: contacts };
     });
   };

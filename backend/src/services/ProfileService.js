@@ -12,7 +12,9 @@ class ProfileService {
     return profile;
   }
 
-  async updateProfile(userId, data) {
+  async updateProfileservice(userId, data) {
+    console.log(`service${data}`);
+    // console.log("Service:", JSON.stringify(service));
     return this.profileModel.updateProfile(userId, data);
   }
 }

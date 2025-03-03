@@ -77,9 +77,9 @@ export default function PersonalInformation({
             type="email"
             value={email}
             onChange={(e) => onChange("email", e.target.value)}
-            readOnly={!isEditing}
+            readOnly={true}
             className={cn(
-              !isEditing && "bg-muted/50 cursor-not-allowed",
+              "bg-muted/50 cursor-not-allowed",
               "transition-colors"
             )}
           />

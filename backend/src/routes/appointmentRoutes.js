@@ -72,7 +72,7 @@ router.patch(
   authorize("ADMIN", "PROVIDER"),
   AppointmentController.assignSupport
 );
-
+router.patch("/:id/location", AppointmentController.updateAppointmentLocation);
 // Fetch ALL appointments (no provider-specific filtering)
 router.get(
   "/all",

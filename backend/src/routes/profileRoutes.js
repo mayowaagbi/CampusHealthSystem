@@ -12,6 +12,10 @@ router.use(authenticate);
 router.get("/", profileController.getProfile.bind(profileController));
 router.put(
   "/",
+  (req, res, next) => {
+    console.log("Received PATCH request:", req.params, req.body);
+    next();
+  },
   validateProfile,
   profileController.updateProfile.bind(profileController)
 );

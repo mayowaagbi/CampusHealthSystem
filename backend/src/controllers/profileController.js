@@ -31,7 +31,7 @@
 // module.exports = ProfileController;
 // src/controllers/ProfileController.js
 const ProfileService = require("../services/ProfileService");
-
+const StudentDetails = require("../models/StudentDetails");
 class ProfileController {
   constructor() {
     this.profileService = new ProfileService();
@@ -48,7 +48,10 @@ class ProfileController {
 
   async updateProfile(req, res) {
     try {
-      const updatedProfile = await this.profileService.updateProfile(
+      // console.log(req.user.id);
+      // const userid = await StudentDetails.getUserIdByStudentId(req.user.id);
+      console.log(req.user.id, req.body);
+      const updatedProfile = await this.profileService.updateProfileservice(
         req.user.id,
         req.body
       );

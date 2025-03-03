@@ -37,7 +37,8 @@ type Appointment = {
   date: string;
   time: string;
   type: string;
-  status: "PENDING" | "CONFIRMED" | "DENIED" | "COMPLETED";
+  status: "PENDING" | "CONFIRMED" | "DENIED" | "COMPLETED" | "RESCHEDULED";
+  location?: "Amphithereter" | "BUTH";
   support?: {
     id: string;
     name: string;
@@ -145,7 +146,7 @@ export default function AppointmentManagementPage() {
   );
 
   const pendingAppointments = filteredAppointments.filter(
-    (appt) => appt.status === "PENDING"
+    (appt) => appt.status === "PENDING" || appt.status === "RESCHEDULED"
   );
 
   const confirmedAppointments = filteredAppointments.filter(
@@ -181,7 +182,33 @@ export default function AppointmentManagementPage() {
       toast.error("Update failed");
     }
   };
+  const handleLocationChange = async (
+    id: string,
+    location: "Amphithereter" | "BUTH"
+  ) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Authentication required");
 
+      // Update the location in the backend (if needed)
+      await api.patch(
+        `/api/appointments/${id}/location`,
+        { location },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      // Update the state
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === id ? { ...appt, location } : appt))
+      );
+      toast.success("Location updated");
+    } catch (error) {
+      console.error("Location update error:", error);
+      toast.error("Failed to update location");
+    }
+  };
   const handleAssignSupport = async (id: string, supportId: string) => {
     try {
       console.log("Assigning support", id, supportId);
@@ -304,6 +331,7 @@ export default function AppointmentManagementPage() {
                     <TableHead>Patient</TableHead>
                     <TableHead>Date/Time</TableHead>
                     <TableHead>Service</TableHead>
+                    <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Support</TableHead>
                     <TableHead>Actions</TableHead>
@@ -320,6 +348,35 @@ export default function AppointmentManagementPage() {
                         </div>
                       </TableCell>
                       <TableCell>{appointment.type}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              {appointment.location || "Select Location"}
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent>
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                handleLocationChange(
+                                  appointment.id,
+                                  "Amphithereter"
+                                )
+                              }
+                            >
+                              Amphitherete
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() =>
+                                handleLocationChange(appointment.id, "BUTH")
+                              }
+                            >
+                              Buth
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{appointment.status}</Badge>
                       </TableCell>
@@ -424,6 +481,7 @@ export default function AppointmentManagementPage() {
                     <TableHead>Patient</TableHead>
                     <TableHead>Date/Time</TableHead>
                     <TableHead>Service</TableHead>
+                    <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Support</TableHead>
                   </TableRow>

@@ -1,8 +1,9 @@
 const AppointmentService = require("../services/AppointmentService");
-const StudentService = require("../services/StudentService");
+const StudentService = require("../services/studentService");
 const ProviderService = require("../services/ProviderService");
 const SupportService = require("../services/SupportService");
 const { sendEmail } = require("../utils/mailer");
+const { sendAppointmentStatusEmail } = require("../utils/mailer");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const asyncHandler = require("../utils/asyncHandler");
 
@@ -20,7 +21,7 @@ class AppointmentController {
         return errorResponse(res, "User ID is required.", 400);
       }
 
-      // Find the student
+      // Find the stude nt
       const student = await StudentService.findStudentByUserId(userId);
       if (!student) {
         console.error(`No student found for userId ${userId}`);
@@ -313,17 +314,20 @@ class AppointmentController {
       const { id } = req.params;
       const { status } = req.body;
       const providerId = req.user.id;
+
       console.log("Updating appointment:", { id, status, providerId });
-      // Fetch the appointment first
+
+      // Fetch the appointment
       console.log("[Controller] Fetching appointment...");
       const appointment = await AppointmentService.getAppointmentById(id);
+
+      if (!appointment) {
+        throw new ApiError(404, "Appointment not found");
+      }
+
       console.log("[Controller] Fetched appointment:", appointment);
 
-      // Check if the logged-in provider is authorized to modify this appointment
-      // if (appointment.providerId !== providerId) {
-      //   console.log("[Controller] Unauthorized provider:", providerId);
-      //   throw new ApiError(403, "Not authorized to modify this appointment");
-      // }
+      // Check authorization
 
       // Update the appointment status
       console.log("[Controller] Updating appointment status...");
@@ -332,33 +336,21 @@ class AppointmentController {
         status,
         providerId
       );
-
       console.log("[Controller] Updated appointment:", updatedAppointment);
-      // Send email notification if status is CONFIRMED or DENIED
-      if (["CONFIRMED", "DENIED"].includes(status)) {
-        const studentEmail = updatedAppointment.student.profile.user.email;
-        const subject = `Appointment ${status}`;
-        const html = `
-          <h1>Appointment ${status}</h1>
-          <p>Your appointment has been ${status.toLowerCase()}.</p>
-          <p><strong>Details:</strong></p>
-          <ul>
-            <li>Date: ${new Date(
-              updatedAppointment.startTime
-            ).toLocaleDateString()}</li>
-            <li>Time: ${new Date(
-              updatedAppointment.startTime
-            ).toLocaleTimeString()}</li>
-            <li>Service: ${updatedAppointment.service}</li>
-          </ul>
-        `;
 
-        await sendEmail(studentEmail, subject, html);
+      // Send email notification for important status updates
+      if (["CONFIRMED", "DENIED"].includes(status)) {
+        await sendAppointmentStatusEmail(
+          updatedAppointment.student.profile.user,
+          updatedAppointment,
+          status
+        );
         console.log("[Controller] Email sent successfully.");
       }
 
       successResponse(res, updatedAppointment);
     } catch (error) {
+      console.error("[Controller] Error:", error.message);
       errorResponse(res, error.message, error.statusCode || 500);
     }
   });
@@ -371,6 +363,23 @@ class AppointmentController {
       errorResponse(res, error.message, error.statusCode || 500);
     }
   });
+
+  async updateAppointmentLocation(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { location } = req.body;
+
+      if (!location) {
+        throw new ApiError(400, "Location is required");
+      }
+
+      const updatedAppointment =
+        await AppointmentService.updateAppointmentLocation(id, location);
+      res.json(updatedAppointment);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AppointmentController();
