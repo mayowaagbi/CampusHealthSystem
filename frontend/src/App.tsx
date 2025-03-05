@@ -6,6 +6,7 @@ import FacilitiesPage from "./pages/FacilitiesPage";
 import ServicesPage from "./pages/ServicesPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
 import TSPage from "./pages/TSpage";
 import NotFound from "./pages/NotFound";
 import { GlobalStateProvider } from "./context/GlobalState";
@@ -26,7 +27,7 @@ import PatientManagementPage from "./pages/HealthCareProvider/HealthcarePatientM
 import AlertsPage from "./pages/HealthCareProvider/HealthcareAlertsPage";
 import HealthRecordsPage from "./pages/HealthCareProvider/HealthcareHealthRecordsPage";
 import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescriptionsPage";
-
+import AlertNotification from "./components/AlertNotification";
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <GlobalStateProvider>
         <BrowserRouter>
+          <AlertNotification />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />
@@ -105,6 +107,10 @@ export default function App() {
             <Route
               path="/healthcare-provider/prescriptions"
               element={<PrescriptionsPage />}
+            />
+            <Route
+              path="/healthcare-provider/Signup"
+              element={<SignupPage />}
             />
           </Routes>
         </BrowserRouter>

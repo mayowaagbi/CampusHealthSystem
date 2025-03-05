@@ -78,8 +78,9 @@ model User {
   ambulanceRequests           AmbulanceRequest[]
   waterGoals                  WaterGoal[]
   entries                     UserEntry[]
-  medicalDocuments            MedicalDocument[] 
+  medicalDocuments            MedicalDocument[]
   appointmentHistoriesCreated AppointmentHistory[] @relation("UserAppointmentChanges")
+  alertsCreated               Alert[]              @relation("UserCreatedAlerts")
 
   @@index([email, createdAt])
 }
@@ -119,7 +120,7 @@ model StudentDetails {
 
   medicalDocuments MedicalDocument[]
   appointments     Appointment[]
-  alerts           Alert[]
+  alerts           AlertStudent[] // Many-to-many relationship via join table
   prescriptions    Prescription[]
 
   @@index([studentId])
@@ -179,13 +180,31 @@ model Appointment {
 }
 
 model Alert {
-  id        String         @id @default(uuid())
-  student   StudentDetails @relation(fields: [studentId], references: [id])
-  studentId String
+  id        String        @id @default(uuid())
+  title     String
   message   String
-  priority  AlertPriority  @default(MEDIUM)
-  status    AlertStatus    @default(ACTIVE)
-  createdAt DateTime       @default(now())
+  startTime DateTime
+  endTime   DateTime
+  priority  AlertPriority @default(MEDIUM)
+  status    AlertStatus   @default(ACTIVE)
+  createdAt DateTime      @default(now())
+
+  // Link to the provider who created the alert
+  createdBy   User   @relation("UserCreatedAlerts", fields: [createdById], references: [id])
+  createdById String
+
+  // Many-to-many relationship with StudentDetails via join table
+  students AlertStudent[]
+}
+
+model AlertStudent {
+  id        String         @id @default(uuid())
+  alertId   String
+  studentId String
+  alert     Alert          @relation(fields: [alertId], references: [id])
+  student   StudentDetails @relation(fields: [studentId], references: [id])
+
+  @@unique([alertId, studentId])
 }
 
 model UserEntry {
@@ -380,17 +399,17 @@ model WaterGoal {
 }
 
 model MedicalDocument {
-  id         String   @id @default(uuid())
-  studentId  String
-  filename   String
-  path       String   @unique
-  mimetype   String
-  size       Int
-  uploadedAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  studentId    String
+  filename     String
+  path         String   @unique
+  mimetype     String
+  size         Int
+  uploadedAt   DateTime @default(now())
   uploadedById String
 
   // Link to StudentDetails
-  student StudentDetails @relation(fields: [studentId], references: [id])
+  student    StudentDetails @relation(fields: [studentId], references: [id])
   uploadedBy User           @relation(fields: [uploadedById], references: [id]) // Add this relation
 
   @@index([filename, uploadedAt])

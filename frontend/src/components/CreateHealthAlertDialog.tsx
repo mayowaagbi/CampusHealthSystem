@@ -19,17 +19,46 @@ import {
 } from "./ui/select";
 import { Textarea } from "./ui/textarea";
 
-export function CreateHealthAlertDialog() {
+interface CreateHealthAlertDialogProps {
+  onCreate: (data: {
+    title: string;
+    message: string;
+    severity: "LOW" | "MEDIUM" | "HIGH";
+    duration: number;
+  }) => void;
+}
+
+export function CreateHealthAlertDialog({
+  onCreate,
+}: CreateHealthAlertDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [severity, setSeverity] = useState("");
-  const [date, setDate] = useState("");
+  const [severity, setSeverity] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
+  const [duration, setDuration] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle the form submission here
-    console.log("Submitting health alert:", { title, message, severity, date });
+
+    // Validate duration
+    const durationNumber = parseInt(duration);
+    if (isNaN(durationNumber)) {
+      alert("Please enter a valid duration in hours");
+      return;
+    }
+
+    onCreate({
+      title,
+      message,
+      severity,
+      duration: durationNumber,
+    });
+
+    // Reset form
+    setTitle("");
+    setMessage("");
+    setSeverity("MEDIUM");
+    setDuration("");
     setOpen(false);
   };
 
@@ -42,7 +71,7 @@ export function CreateHealthAlertDialog() {
         <DialogHeader>
           <DialogTitle>Create Health Alert</DialogTitle>
           <DialogDescription>
-            Create a new health alert for the campus.
+            Create a new health alert for the campus community.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -55,6 +84,7 @@ export function CreateHealthAlertDialog() {
               required
             />
           </div>
+
           <div>
             <Label htmlFor="message">Alert Message</Label>
             <Textarea
@@ -62,32 +92,54 @@ export function CreateHealthAlertDialog() {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               required
+              rows={4}
             />
           </div>
-          <div>
-            <Label htmlFor="severity">Severity</Label>
-            <Select value={severity} onValueChange={setSeverity} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select severity" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="severity">Severity Level</Label>
+              <Select
+                value={severity}
+                onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") =>
+                  setSeverity(value)
+                }
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select severity" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="LOW">Low</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="HIGH">High</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="duration">Duration (hours)</Label>
+              <Input
+                id="duration"
+                type="number"
+                min="1"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                required
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button type="submit">Create Alert</Button>
           </div>
-          <Button type="submit">Create Alert</Button>
         </form>
       </DialogContent>
     </Dialog>

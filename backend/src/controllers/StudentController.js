@@ -1,4 +1,4 @@
-const StudentService = require("../services/StudentService");
+const StudentService = require("../services/studentService");
 
 const StudentController = {
   /**
@@ -29,3 +29,4 @@ const StudentController = {
 };
 
 module.exports = StudentController;
+// module.exports = new StudentController();

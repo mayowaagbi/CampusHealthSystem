@@ -94,6 +94,22 @@ class User extends BaseModel {
       data: { stepGoal: target },
     });
   }
+  async getAllStudents() {
+    return this.prisma.user.findMany({
+      where: { role: "STUDENT" },
+      select: {
+        profile: {
+          select: {
+            studentDetails: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }
 
 module.exports = new User();

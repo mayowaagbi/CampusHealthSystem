@@ -30,7 +30,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
-
+import api from "../../api";
 export default function HealthcareProviderDashboard() {
   const [dashboardStats, setDashboardStats] = useState({
     totalStudents: 0,
@@ -44,19 +44,23 @@ export default function HealthcareProviderDashboard() {
 
   useEffect(() => {
     // Fetch dashboard stats
-    axios
-      .get("http://localhost:3000/api/provider-dashboard/stats")
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) throw new Error("Not authenticated");
+
+    const headers = { Authorization: `Bearer ${accessToken}` };
+    api
+      .get("/api/provider-dashboard/stats", { headers })
       .then((response) => setDashboardStats(response.data))
       .catch((error) => console.error("Dashboard stats error:", error));
     console.log("dashboardStats", dashboardStats);
     // Fetch appointment overview
-    axios
-      .get("http://localhost:3000/api/provider-dashboard/overview")
+    api
+      .get("/api/provider-dashboard/overview", { headers })
       .then((response) => setAppointmentData(response.data))
       .catch((error) => console.error("Appointments error:", error));
 
     // // Fetch recent messages
-    // axios
+    // api
     //   .get("/api/messages/recent")
     //   .then((response) => setMessages(response.data))
     //   .catch((error) => console.error("Messages error:", error));
@@ -232,9 +236,9 @@ export default function HealthcareProviderDashboard() {
               </CardHeader>
               <CardContent className="grid gap-4">
                 <Button asChild>
-                  <Link to="/healthcare-provider/appointments/create">
+                  <Link to="/healthcare-provider/Signup">
                     <Calendar className="mr-2 h-4 w-4" />
-                    Schedule Appointment
+                    Create Student
                   </Link>
                 </Button>
                 <Button asChild variant="outline">

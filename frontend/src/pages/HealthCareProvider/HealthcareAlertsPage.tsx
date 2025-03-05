@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { io, Socket } from "socket.io-client";
 import {
   Card,
   CardContent,
@@ -23,49 +24,233 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import { ChevronDown, Search, Edit, Trash2, Send } from "lucide-react";
+import { ChevronDown, Search, Edit, Trash2, Send, Bell } from "lucide-react";
 import { CreateHealthAlertDialog } from "../../components/CreateHealthAlertDialog";
+import { CreateNotificationDialog } from "../../components/CreateNotificationDialog";
+import { useToast } from "../../hooks/use-toast";
+import api from "../../api";
 
-const alerts = [
-  {
-    id: 1,
-    title: "Flu Outbreak Warning",
-    severity: "High",
-    date: "2023-05-10",
-    status: "Active",
-  },
-  {
-    id: 2,
-    title: "Mental Health Awareness Week",
-    severity: "Medium",
-    date: "2023-05-15",
-    status: "Scheduled",
-  },
-  {
-    id: 3,
-    title: "COVID-19 Vaccination Reminder",
-    severity: "High",
-    date: "2023-05-20",
-    status: "Active",
-  },
-  {
-    id: 4,
-    title: "Seasonal Allergy Advisory",
-    severity: "Low",
-    date: "2023-05-25",
-    status: "Draft",
-  },
-  {
-    id: 5,
-    title: "Campus Health Fair Announcement",
-    severity: "Medium",
-    date: "2023-06-01",
-    status: "Scheduled",
-  },
-];
+interface HealthAlert {
+  id: string;
+  title: string;
+  content: string;
+  severity: "LOW" | "MEDIUM" | "HIGH";
+  startTime: string;
+  endTime: string;
+  status: "DRAFT" | "ACTIVE" | "EXPIRED";
+  createdAt: string;
+}
+
+interface Notification {
+  id: string;
+  title: string;
+  content: string;
+  read: boolean;
+  createdAt: string;
+}
 
 export default function AlertsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [alerts, setAlerts] = useState<HealthAlert[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Initialize Socket.io connection
+    const newSocket = io(import.meta.env.VITE_API_URL);
+    setSocket(newSocket);
+
+    // Fetch initial data
+    fetchAlerts();
+    fetchNotifications();
+
+    // Cleanup on unmount
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (socket) {
+      // Listen for alert updates
+      socket.on("alert-update", (updatedAlert: HealthAlert) => {
+        setAlerts((prev) =>
+          prev.map((alert) =>
+            alert.id === updatedAlert.id ? updatedAlert : alert
+          )
+        );
+      });
+
+      // Listen for new alerts
+      socket.on("new-alert", (newAlert: HealthAlert) => {
+        setAlerts((prev) => [newAlert, ...prev]);
+      });
+
+      // Listen for new notifications
+      socket.on("new-notification", (newNotification: Notification) => {
+        setNotifications((prev) => [newNotification, ...prev]);
+      });
+    }
+  }, [socket]);
+
+  const fetchAlerts = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      const response = await api.get("/api/alerts", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setAlerts(response.data);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching alerts",
+        description: "Failed to load health alerts",
+      });
+    }
+  };
+  // Countdown Timer Component
+  const CountdownTimer = ({ endTime }: { endTime: string }) => {
+    const [timeLeft, setTimeLeft] = useState<string>("");
+
+    useEffect(() => {
+      const calculateTimeLeft = () => {
+        const difference = new Date(endTime).getTime() - new Date().getTime();
+        if (difference <= 0) return "Expired";
+
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        return `${hours}h ${minutes}m left`;
+      };
+
+      setTimeLeft(calculateTimeLeft());
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 60000);
+
+      return () => clearInterval(timer);
+    }, [endTime]);
+
+    return <span>{timeLeft}</span>;
+  };
+  const fetchNotifications = async () => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      const response = await api.get("/api/notifications", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setNotifications(response.data);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error fetching notifications",
+        description: "Failed to load notifications",
+      });
+    }
+  };
+
+  const handleCreateAlert = async (alertData: {
+    title: string;
+    content: string;
+    severity: "LOW" | "MEDIUM" | "HIGH";
+    duration: number;
+  }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      const response = await api.post(
+        "/api/alerts",
+        {
+          ...alertData,
+          duration: alertData.duration * 60,
+          headers: { Authorization: `Bearer ${accessToken}` },
+        } // Convert minutes to seconds
+      );
+
+      setAlerts((prev) => [response.data, ...prev]);
+      toast({
+        title: "Alert Created",
+        description: "New health alert has been published",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error creating alert",
+        description: "Failed to create new health alert",
+      });
+    }
+  };
+
+  const handleCreateNotification = async (notificationData: {
+    title: string;
+    content: string;
+    userId: string;
+  }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      const response = await api.post("/notifications", notificationData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setNotifications((prev) => [response.data, ...prev]);
+      toast({
+        title: "Notification Sent",
+        description: "Notification has been sent to the user",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error creating notification",
+        description: "Failed to send notification",
+      });
+    }
+  };
+
+  const handleDeleteAlert = async (alertId: string) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      await api.delete(`/alerts/${alertId}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
+      toast({
+        title: "Alert Deleted",
+        description: "Health alert has been removed",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error deleting alert",
+        description: "Failed to delete health alert",
+      });
+    }
+  };
+
+  const handleSendAlert = async (alertId: string) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+      const response = await api.patch(`/alerts/${alertId}/publish`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      setAlerts((prev) =>
+        prev.map((alert) => (alert.id === alertId ? response.data : alert))
+      );
+      toast({
+        title: "Alert Published",
+        description: "Health alert has been sent to all students",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error publishing alert",
+        description: "Failed to publish health alert",
+      });
+    }
+  };
 
   const filteredAlerts = alerts.filter(
     (alert) =>
@@ -124,6 +309,7 @@ export default function AlertsPage() {
           </Link>
         </nav>
       </header>
+
       <main className="flex-1 py-6 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -131,9 +317,11 @@ export default function AlertsPage() {
           transition={{ duration: 0.5 }}
         >
           <h1 className="text-3xl font-bold mb-6">Health Alerts Management</h1>
+
+          {/* Alerts Section */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Health Alerts</CardTitle>
+              <CardTitle>Active Health Alerts</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-between mb-4">
@@ -146,18 +334,28 @@ export default function AlertsPage() {
                   />
                   <Button type="submit" size="icon">
                     <Search className="h-4 w-4" />
-                    <span className="sr-only">Search</span>
                   </Button>
                 </div>
-                <CreateHealthAlertDialog />
+                <CreateHealthAlertDialog
+                  onCreate={({ title, message, severity, duration }) => {
+                    // Handle API call here
+                    console.log("Creating alert:", {
+                      title,
+                      message,
+                      severity,
+                      duration,
+                    });
+                  }}
+                />
               </div>
+
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Severity</TableHead>
-                    <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Expires In</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -165,9 +363,39 @@ export default function AlertsPage() {
                   {filteredAlerts.map((alert) => (
                     <TableRow key={alert.id}>
                       <TableCell>{alert.title}</TableCell>
-                      <TableCell>{alert.severity}</TableCell>
-                      <TableCell>{alert.date}</TableCell>
-                      <TableCell>{alert.status}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            alert.severity === "HIGH"
+                              ? "bg-red-100 text-red-800"
+                              : alert.severity === "MEDIUM"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                          }`}
+                        >
+                          {alert.severity}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            alert.status === "ACTIVE"
+                              ? "bg-blue-100 text-blue-800"
+                              : alert.status === "EXPIRED"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-orange-100 text-orange-800"
+                          }`}
+                        >
+                          {alert.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {alert.status === "ACTIVE" ? (
+                          <CountdownTimer endTime={alert.endTime} />
+                        ) : (
+                          "Expired"
+                        )}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -176,20 +404,76 @@ export default function AlertsPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent>
+                            {alert.status === "DRAFT" && (
+                              <DropdownMenuItem
+                                onClick={() => handleSendAlert(alert.id)}
+                              >
+                                <Send className="mr-2 h-4 w-4" />
+                                Publish Alert
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem>
                               <Edit className="mr-2 h-4 w-4" />
                               Edit Alert
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Send className="mr-2 h-4 w-4" />
-                              Send Alert
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => handleDeleteAlert(alert.id)}
+                            >
                               <Trash2 className="mr-2 h-4 w-4" />
                               Delete Alert
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Notifications Section */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Notifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between mb-4">
+                <div className="flex items-center space-x-2">
+                  <Bell className="h-5 w-5" />
+                  <span>Send Notifications to Users</span>
+                </div>
+                <CreateNotificationDialog onCreate={handleCreateNotification} />
+              </div>
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Content</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {notifications.map((notification) => (
+                    <TableRow key={notification.id}>
+                      <TableCell>{notification.title}</TableCell>
+                      <TableCell>{notification.content}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            notification.read
+                              ? "bg-green-100 text-green-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {notification.read ? "Read" : "Unread"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(notification.createdAt).toLocaleString()}
                       </TableCell>
                     </TableRow>
                   ))}

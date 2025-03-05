@@ -54,32 +54,6 @@ export default function LoginPage() {
     transition: { duration: 0.6 },
   };
 
-  // const onSubmit = async (data: LoginFormValues) => {
-  //   try {
-  //     const response = await axios.post(
-  //       "http://localhost:3000/api/auth/login",
-  //       data,
-  //       {
-  //         withCredentials: true,
-  //       }
-  //     );
-
-  //     console.log("Token received:", response.data.accessToken); // Check if token is received
-
-  //     // Store access token
-  //     localStorage.setItem("accessToken", response.data.accessToken);
-
-  //     // Handle successful login
-  //     toast.success("Login successful!");
-  //     navigate("/student/dashboard");
-  //   } catch (error) {
-  //     toast.error(
-  //       (error as any).response?.data?.message ||
-  //         "Login failed. Please try again."
-  //     );
-  //     console.error("Login error:", error);
-  //   }
-  // };
   const onSubmit = async (data: LoginFormValues) => {
     try {
       const response = await axios.post(
@@ -112,7 +86,25 @@ export default function LoginPage() {
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
       console.log("Decoded Token:", decodedToken);
       console.log("User role:", decodedToken.role);
+      if (decodedToken.role === "STUDENT") {
+        try {
+          const studentDetailsResponse = await axios.get(
+            `http://localhost:3000/api/student/users/${user.id}/student-details`,
+            {
+              headers: { Authorization: `Bearer ${accessToken}` },
+            }
+          );
+          const studentDetailsId = studentDetailsResponse.data.id;
 
+          // Store the studentDetailsId in localStorage
+          if (studentDetailsId) {
+            localStorage.setItem("studentDetailsId", studentDetailsId);
+          }
+        } catch (error) {
+          console.error("Error fetching student details:", error);
+          // Handle the error gracefully (e.g., log it or show a message to the user)
+        }
+      }
       // Redirect based on role
       switch (decodedToken.role) {
         case "STUDENT":
