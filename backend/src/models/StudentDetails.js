@@ -85,8 +85,10 @@ class StudentDetails extends BaseModel {
                   {
                     alerts: {
                       some: {
-                        status: "ACTIVE",
-                        priority: status === "CRITICAL" ? "HIGH" : undefined,
+                        alert: {
+                          status: "ACTIVE",
+                          priority: status === "CRITICAL" ? "HIGH" : undefined,
+                        },
                       },
                     },
                   },
@@ -98,11 +100,35 @@ class StudentDetails extends BaseModel {
       },
       include: {
         profile: true,
-        alerts: { orderBy: { createdAt: "desc" }, take: 5 },
-        appointments: { orderBy: { startTime: "desc" }, take: 1 },
-        medicalDocuments: { orderBy: { uploadedAt: "desc" }, take: 5 },
+        alerts: {
+          include: {
+            alert: true, // Include the `Alert` model to access `createdAt`
+          },
+          orderBy: {
+            alert: {
+              createdAt: "desc", // Order by `createdAt` in the `Alert` model
+            },
+          },
+          take: 5,
+        },
+        appointments: {
+          orderBy: {
+            startTime: "desc",
+          },
+          take: 1,
+        },
+        medicalDocuments: {
+          orderBy: {
+            uploadedAt: "desc",
+          },
+          take: 5,
+        },
       },
-      orderBy: { profile: { lastName: "asc" } },
+      orderBy: {
+        profile: {
+          lastName: "asc",
+        },
+      },
     });
   }
   async getUserIdByStudentId(studentId) {

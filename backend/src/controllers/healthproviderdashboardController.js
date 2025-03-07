@@ -1,4 +1,4 @@
-const StudentService = require("../services/StudentService");
+const StudentService = require("../services/studentService");
 const documentService = require("../services/documentService");
 const AlertService = require("../services/AlertService");
 const AppointmentService = require("../services/AppointmentService");
@@ -14,10 +14,10 @@ class DashboardController {
 
       const [totalStudents, todaysAppointments, recentUploads, activeAlerts] =
         await Promise.all([
-          StudentService.countByProvider(providerId),
+          StudentService.countStudents(),
           AppointmentService.countToday(providerId),
           documentService.recentUploads(providerId),
-          AlertService.activeAlerts(providerId),
+          AlertService.countActiveAlerts(),
         ]);
 
       res.json({

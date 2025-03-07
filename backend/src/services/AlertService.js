@@ -34,10 +34,17 @@ class AlertService {
       },
     });
   }
-
-  async deleteAlert(alertId) {
-    return AlertModel.delete({ id: alertId });
+  async getActiveAlerts() {
+    return await AlertModel.getActiveAlerts();
   }
+  async countActiveAlerts() {
+    return await AlertModel.countActiveAlerts();
+  }
+  async deleteAlert(id) {
+    console.log("Service - Deleting alert with ID:", id);
+    return AlertModel.deleteAlert(id); // Problem: Wraps the ID in an object
+  }
+
   async publishAlert(id) {
     // Check if the alert exists
     const alert = await AlertModel.findById(id);
@@ -52,6 +59,9 @@ class AlertService {
     const students = await AlertModel.getAllStudents();
 
     return { updatedAlert, students };
+  }
+  async updateAlertStatus(id, status) {
+    return AlertModel.updateAlertStatus(id, status);
   }
 }
 

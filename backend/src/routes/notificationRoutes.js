@@ -23,15 +23,30 @@ const router = express.Router();
 const NotificationController = require("../controllers/NotificationController");
 const { authorize, authenticate } = require("../middleware/authMiddleware");
 
-const controller = new NotificationController();
 router.use(authenticate);
 
 // Provider routes
-router.post("/", authorize(["PROVIDER"]), controller.createNotification);
+router.post(
+  "/",
+  authorize("PROVIDER"),
+  NotificationController.createNotification
+);
 
 // User routes
-router.get("/", authorize(["STUDENT"]), controller.getNotifications);
-router.patch("/:id/read", authorize(["STUDENT"]), controller.markAsRead);
-router.delete("/:id", authorize(["STUDENT"]), controller.deleteNotification);
+router.get(
+  "/",
+  authorize("STUDENT", "PROVIDER"),
+  NotificationController.getallNotifications
+);
+router.patch(
+  "/:id/read",
+  authorize("STUDENT"),
+  NotificationController.markAsRead
+);
+router.delete(
+  "/:id",
+  authorize("PROVIDER"),
+  NotificationController.deleteNotification
+);
 
 module.exports = router;

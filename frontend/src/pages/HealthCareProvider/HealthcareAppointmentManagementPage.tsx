@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../../api";
+import { AppointmentHistoryTable } from "../../components/AppointmentHistoryTable";
 import {
   Card,
   CardContent,
@@ -68,6 +69,31 @@ export default function AppointmentManagementPage() {
   const [supportSearch, setSupportSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [appointmentHistory, setAppointmentHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Fetch appointment history
+  const fetchAppointmentHistory = async (appointmentId: string) => {
+    try {
+      setLoadingHistory(true);
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Authentication required");
+
+      const response = await api.get(
+        `/api/appointments/${appointmentId}/history`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      setAppointmentHistory(response.data);
+    } catch (error) {
+      console.error("Error fetching appointment history:", error);
+      toast.error("Failed to load appointment history");
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -529,6 +555,18 @@ export default function AppointmentManagementPage() {
                   )}
                 </TableBody>
               </Table>
+            </CardContent>
+          </Card>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Appointment History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {loadingHistory ? (
+                <LoadingSpinner />
+              ) : (
+                <AppointmentHistoryTable history={appointmentHistory} />
+              )}
             </CardContent>
           </Card>
         </motion.div>

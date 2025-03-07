@@ -34,7 +34,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
-
+import api from "../../api";
 type StudentWithDetails = {
   id: string;
   studentId: string;

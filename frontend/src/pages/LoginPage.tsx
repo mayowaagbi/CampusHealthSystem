@@ -8,7 +8,6 @@ import { toast } from "react-hot-toast";
 import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import { Button } from "../components/ui/button";
-import Cookies from "js-cookie";
 import {
   Form,
   FormControl,
@@ -21,6 +20,8 @@ import { Input } from "../components/ui/input";
 import Footer from "../components/footer";
 import { Heart } from "lucide-react";
 import { Eye, EyeOff } from "lucide-react";
+import { registerSocket } from "../hooks/sockets";
+
 // Zod schema for login validation
 const loginSchema = z.object({
   email: z.string().email({
@@ -30,11 +31,14 @@ const loginSchema = z.object({
     message: "Password must be at least 8 characters.",
   }),
 });
+
+// Define the type for the decoded token
 interface DecodedToken {
   id: string;
   role: string;
   exp: number;
 }
+
 // Type inference from schema
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -47,6 +51,8 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -72,6 +78,7 @@ export default function LoginPage() {
         console.error("User or token data missing:", response.data);
         throw new Error("Access token not found in response.");
       }
+
       const accessToken = response.data.data.user.token.accessToken;
       console.log("Access token from response:", accessToken);
 
@@ -86,6 +93,11 @@ export default function LoginPage() {
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
       console.log("Decoded Token:", decodedToken);
       console.log("User role:", decodedToken.role);
+
+      // Initialize the socket connection
+      registerSocket(decodedToken.role, decodedToken.id);
+
+      // Handle student-specific logic
       if (decodedToken.role === "STUDENT") {
         try {
           const studentDetailsResponse = await axios.get(
@@ -105,6 +117,14 @@ export default function LoginPage() {
           // Handle the error gracefully (e.g., log it or show a message to the user)
         }
       }
+      if (decodedToken.role === "PROVIDER") {
+        registerSocket("PROVIDER", decodedToken.id);
+      }
+      // Handle provider-specific logic
+      // if (decodedToken.role === "PROVIDER") {
+      //   socket.emit("register-provider", user.id);
+      // }
+
       // Redirect based on role
       switch (decodedToken.role) {
         case "STUDENT":
@@ -130,7 +150,6 @@ export default function LoginPage() {
       console.error("Login error:", error);
     }
   };
-  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen">

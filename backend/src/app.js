@@ -94,7 +94,7 @@ io.on("connection", (socket) => {
   // setTimeout(() => {
   //   io.emit("new-alert", {
   //     id: "123",
-  //     title: "Test Alert",
+  //     title: "Test Alert hello",
   //     message: "This is a test alert",
   //     priority: "HIGH",
   //     endTime: new Date().toISOString(),
@@ -111,6 +111,22 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("register-provider", (providerId) => {
+    if (providerId) {
+      socket.join("healthcare-providers"); // Join the healthcare-providers room
+      console.log(`Healthcare provider ${providerId} joined the room`);
+    }
+  });
+  setTimeout(() => {
+    io.to("healthcare-providers").emit("new-alert", {
+      id: "123",
+      title: "Test Alert for Providers",
+      message: "This is a test alert for healthcare providers",
+      priority: "HIGH",
+      endTime: new Date().toISOString(),
+    });
+    console.log("Test alert emitted to healthcare providers");
+  }, 1000); // Broadcast after 5 seconds
   // Handle disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected:", socket.id);
@@ -150,7 +166,7 @@ app.use("/api/files", fileRoutes);
 app.use("/api/water", waterRoutes);
 app.use("/api/geo", georoutes);
 app.use("/api", entryRoutes);
-app.use("/api/ambulance-requests", ambulanceRoutes);
+app.use("/api/ambulance-requests", ambulanceRoutes(io));
 app.use("/api/healthdata", healthRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/profile", profileRoutes);

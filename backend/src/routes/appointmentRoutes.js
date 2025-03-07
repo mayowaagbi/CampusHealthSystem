@@ -80,4 +80,16 @@ router.get(
   authorize("ADMIN", "PROVIDER"), // Only admins or providers can access
   AppointmentController.getAllAppointments
 );
+router.get(
+  "/:id/history",
+  authenticate,
+  authorize("PROVIDER", "ADMIN"),
+  AppointmentController.getAppointmentHistory
+);
+router.get(
+  "/student",
+  authenticate,
+  authorize("STUDENT"),
+  AppointmentController.getStudentAppointments
+);
 module.exports = router;

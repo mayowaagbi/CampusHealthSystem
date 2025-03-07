@@ -28,6 +28,8 @@ import AlertsPage from "./pages/HealthCareProvider/HealthcareAlertsPage";
 import HealthRecordsPage from "./pages/HealthCareProvider/HealthcareHealthRecordsPage";
 import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescriptionsPage";
 import AlertNotification from "./components/AlertNotification";
+import { AmbulanceRequestProvider } from "./context/AmbulanceRequestContext";
+
 const queryClient = new QueryClient();
 
 export default function App() {
@@ -85,32 +87,35 @@ export default function App() {
 
             {/* Healthcare Pages */}
             <Route
-              path="/healthcare-provider/dashboard"
-              element={<HealthcareProviderDashboard />}
-            />
-            <Route
-              path="/healthcare-provider/appointments"
-              element={<AppointmentManagementPage />}
-            />
-            <Route
-              path="/healthcare-provider/patients"
-              element={<PatientManagementPage />}
-            />
-            <Route
-              path="/healthcare-provider/alerts"
-              element={<AlertsPage />}
-            />
-            <Route
-              path="/healthcare-provider/health-records"
-              element={<HealthRecordsPage />}
-            />
-            <Route
-              path="/healthcare-provider/prescriptions"
-              element={<PrescriptionsPage />}
-            />
-            <Route
-              path="/healthcare-provider/Signup"
-              element={<SignupPage />}
+              path="/healthcare-provider/*"
+              element={
+                <AmbulanceRequestProvider>
+                  <Routes>
+                    <Route
+                      path="dashboard"
+                      element={<HealthcareProviderDashboard />}
+                    />
+                    <Route
+                      path="appointments"
+                      element={<AppointmentManagementPage />}
+                    />
+                    <Route
+                      path="patients"
+                      element={<PatientManagementPage />}
+                    />
+                    <Route path="alerts" element={<AlertsPage />} />
+                    <Route
+                      path="health-records"
+                      element={<HealthRecordsPage />}
+                    />
+                    <Route
+                      path="prescriptions"
+                      element={<PrescriptionsPage />}
+                    />
+                    <Route path="Signup" element={<SignupPage />} />
+                  </Routes>
+                </AmbulanceRequestProvider>
+              }
             />
           </Routes>
         </BrowserRouter>

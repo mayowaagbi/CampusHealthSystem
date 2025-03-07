@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
+
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import {
@@ -34,7 +35,7 @@ interface HealthAlert {
   id: string;
   title: string;
   content: string;
-  severity: "LOW" | "MEDIUM" | "HIGH";
+  priority: "LOW" | "MEDIUM" | "HIGH";
   startTime: string;
   endTime: string;
   status: "DRAFT" | "ACTIVE" | "EXPIRED";
@@ -63,7 +64,7 @@ export default function AlertsPage() {
 
     // Fetch initial data
     fetchAlerts();
-    fetchNotifications();
+    // fetchNotifications();
 
     // Cleanup on unmount
     return () => {
@@ -110,30 +111,7 @@ export default function AlertsPage() {
       });
     }
   };
-  // Countdown Timer Component
-  const CountdownTimer = ({ endTime }: { endTime: string }) => {
-    const [timeLeft, setTimeLeft] = useState<string>("");
 
-    useEffect(() => {
-      const calculateTimeLeft = () => {
-        const difference = new Date(endTime).getTime() - new Date().getTime();
-        if (difference <= 0) return "Expired";
-
-        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-        const minutes = Math.floor((difference / 1000 / 60) % 60);
-        return `${hours}h ${minutes}m left`;
-      };
-
-      setTimeLeft(calculateTimeLeft());
-      const timer = setInterval(() => {
-        setTimeLeft(calculateTimeLeft());
-      }, 60000);
-
-      return () => clearInterval(timer);
-    }, [endTime]);
-
-    return <span>{timeLeft}</span>;
-  };
   const fetchNotifications = async () => {
     try {
       const accessToken = localStorage.getItem("accessToken");
@@ -154,19 +132,26 @@ export default function AlertsPage() {
   const handleCreateAlert = async (alertData: {
     title: string;
     content: string;
-    severity: "LOW" | "MEDIUM" | "HIGH";
+    priority: "LOW" | "MEDIUM" | "HIGH";
     duration: number;
   }) => {
     try {
       const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("Access token not found.");
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const headers = { Authorization: `Bearer ${accessToken}` };
+
+      const durationInSeconds = alertData.duration * 60 * 60;
+
       const response = await api.post(
-        "/api/alerts",
+        "/api/alerts/",
         {
           ...alertData,
-          duration: alertData.duration * 60,
-          headers: { Authorization: `Bearer ${accessToken}` },
-        } // Convert minutes to seconds
+          duration: durationInSeconds,
+          priority: alertData.priority,
+          message: alertData.content,
+        },
+        { headers }
       );
 
       setAlerts((prev) => [response.data, ...prev]);
@@ -183,36 +168,11 @@ export default function AlertsPage() {
     }
   };
 
-  const handleCreateNotification = async (notificationData: {
-    title: string;
-    content: string;
-    userId: string;
-  }) => {
-    try {
-      const accessToken = localStorage.getItem("accessToken");
-      if (!accessToken) throw new Error("Access token not found.");
-      const response = await api.post("/notifications", notificationData, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      setNotifications((prev) => [response.data, ...prev]);
-      toast({
-        title: "Notification Sent",
-        description: "Notification has been sent to the user",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error creating notification",
-        description: "Failed to send notification",
-      });
-    }
-  };
-
   const handleDeleteAlert = async (alertId: string) => {
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found.");
-      await api.delete(`/alerts/${alertId}`, {
+      await api.delete(`api/alerts/${alertId}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       setAlerts((prev) => prev.filter((alert) => alert.id !== alertId));
@@ -252,15 +212,126 @@ export default function AlertsPage() {
     }
   };
 
+  const updateAlertStatus = async (
+    alertId: string,
+    status: "DRAFT" | "ACTIVE" | "EXPIRED"
+  ) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+
+      const response = await api.patch(
+        `/api/alerts/${alertId}`,
+        { status },
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating alert status:", error);
+      throw new Error("Failed to update alert status");
+    }
+  };
+
+  const checkAndUpdateExpiredAlerts = async () => {
+    const updatedAlerts = await Promise.all(
+      alerts.map(async (alert) => {
+        if (
+          alert.status !== "EXPIRED" &&
+          new Date(alert.endTime) < new Date()
+        ) {
+          try {
+            await updateAlertStatus(alert.id, "EXPIRED");
+            return { ...alert, status: "EXPIRED" as "EXPIRED" };
+          } catch (error) {
+            console.error("Failed to update alert status:", error);
+            return alert;
+          }
+        }
+        return alert;
+      })
+    );
+
+    setAlerts(updatedAlerts);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkAndUpdateExpiredAlerts();
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [alerts]);
+
+  const CountdownTimer = ({
+    endTime,
+    status,
+  }: {
+    endTime: string;
+    status: string;
+  }) => {
+    const [timeLeft, setTimeLeft] = useState<string>("");
+
+    useEffect(() => {
+      const calculateTimeLeft = () => {
+        if (status === "EXPIRED") return "Expired";
+
+        const difference = new Date(endTime).getTime() - new Date().getTime();
+        if (difference <= 0) return "Expired";
+
+        const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        return `${hours}h ${minutes}m left`;
+      };
+
+      setTimeLeft(calculateTimeLeft());
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 60000);
+
+      return () => clearInterval(timer);
+    }, [endTime, status]);
+
+    return <span>{timeLeft}</span>;
+  };
+  const handleCreateNotification = async (notificationData: {
+    title: string;
+    content: string;
+    userId: string;
+  }) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Access token not found.");
+
+      const response = await api.post("/api/notifications", notificationData, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      setNotifications((prev) => [response.data, ...prev]);
+      toast({
+        title: "Notification Sent",
+        description: "Notification has been sent to the user",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error creating notification",
+        description: "Failed to send notification",
+      });
+    }
+  };
   const filteredAlerts = alerts.filter(
     (alert) =>
       alert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alert.severity.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alert.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
       alert.status.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header and Navigation */}
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link
           className="flex items-center justify-center"
@@ -310,6 +381,7 @@ export default function AlertsPage() {
         </nav>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 py-6 px-4 md:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -338,11 +410,10 @@ export default function AlertsPage() {
                 </div>
                 <CreateHealthAlertDialog
                   onCreate={({ title, message, severity, duration }) => {
-                    // Handle API call here
-                    console.log("Creating alert:", {
+                    handleCreateAlert({
                       title,
-                      message,
-                      severity,
+                      content: message,
+                      priority: severity,
                       duration,
                     });
                   }}
@@ -353,7 +424,7 @@ export default function AlertsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Title</TableHead>
-                    <TableHead>Severity</TableHead>
+                    <TableHead>Priority</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Expires In</TableHead>
                     <TableHead>Actions</TableHead>
@@ -366,14 +437,14 @@ export default function AlertsPage() {
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded ${
-                            alert.severity === "HIGH"
+                            alert.priority === "HIGH"
                               ? "bg-red-100 text-red-800"
-                              : alert.severity === "MEDIUM"
+                              : alert.priority === "MEDIUM"
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-green-100 text-green-800"
                           }`}
                         >
-                          {alert.severity}
+                          {alert.priority}
                         </span>
                       </TableCell>
                       <TableCell>
@@ -391,7 +462,10 @@ export default function AlertsPage() {
                       </TableCell>
                       <TableCell>
                         {alert.status === "ACTIVE" ? (
-                          <CountdownTimer endTime={alert.endTime} />
+                          <CountdownTimer
+                            endTime={alert.endTime}
+                            status={alert.status}
+                          />
                         ) : (
                           "Expired"
                         )}
@@ -434,7 +508,7 @@ export default function AlertsPage() {
           </Card>
 
           {/* Notifications Section */}
-          <Card className="mb-6">
+          {/* <Card className="mb-6">
             <CardHeader>
               <CardTitle>Notifications</CardTitle>
             </CardHeader>
@@ -480,7 +554,7 @@ export default function AlertsPage() {
                 </TableBody>
               </Table>
             </CardContent>
-          </Card>
+          </Card> */}
         </motion.div>
       </main>
     </div>

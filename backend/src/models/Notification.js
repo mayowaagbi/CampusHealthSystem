@@ -36,6 +36,19 @@ class Notification extends BaseModel {
       data: { read: true },
     });
   }
+  async findMany() {
+    return prisma.notification.findMany();
+  }
+
+  async create(data) {
+    return prisma.notification.create({
+      data: {
+        title: data.title,
+        content: data.content,
+        userId: data.userId,
+      },
+    });
+  }
 }
 
 module.exports = new Notification();

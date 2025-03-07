@@ -34,7 +34,7 @@ export function CreateHealthAlertDialog({
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
-  const [severity, setSeverity] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
+  const [priority, setPriority] = useState<"LOW" | "MEDIUM" | "HIGH">("MEDIUM");
   const [duration, setDuration] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -50,14 +50,14 @@ export function CreateHealthAlertDialog({
     onCreate({
       title,
       message,
-      severity,
+      severity: priority,
       duration: durationNumber,
     });
 
     // Reset form
     setTitle("");
     setMessage("");
-    setSeverity("MEDIUM");
+    setPriority("MEDIUM");
     setDuration("");
     setOpen(false);
   };
@@ -100,9 +100,9 @@ export function CreateHealthAlertDialog({
             <div>
               <Label htmlFor="severity">Severity Level</Label>
               <Select
-                value={severity}
+                value={priority}
                 onValueChange={(value: "LOW" | "MEDIUM" | "HIGH") =>
-                  setSeverity(value)
+                  setPriority(value)
                 }
                 required
               >

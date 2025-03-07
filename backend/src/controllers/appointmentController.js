@@ -380,6 +380,33 @@ class AppointmentController {
       next(error);
     }
   }
+  async getAppointmentHistory(req, res) {
+    try {
+      const { id } = req.params;
+      const history = await AppointmentService.getAppointmentHistory(id);
+      successResponse(res, history);
+    } catch (error) {
+      errorResponse(res, error.message, error.statusCode || 500);
+    }
+  }
+  async getStudentAppointments(req, res) {
+    try {
+      const userId = req.user.id; // Get the logged-in user's ID
+      const student = await StudentService.findStudentByUserId(userId);
+
+      if (!student) {
+        throw new ApiError(404, "Student not found");
+      }
+
+      const appointments = await AppointmentService.getAppointmentsByStudentId(
+        student.id
+      );
+
+      successResponse(res, appointments);
+    } catch (error) {
+      errorResponse(res, error.message, error.statusCode || 500);
+    }
+  }
 }
 
 module.exports = new AppointmentController();

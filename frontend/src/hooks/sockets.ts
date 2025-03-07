@@ -1,23 +1,32 @@
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
-// Connect to the Socket.IO server
-const socket = io("http://localhost:3000", {
+// Initialize the socket connection
+const socket: Socket = io("http://localhost:3000", {
   withCredentials: true,
   transports: ["websocket", "polling"],
 });
 
-// Register the student with their ID
-socket.on("connect", () => {
-  console.log("Socket connected!");
-  const studentDetailsId = localStorage.getItem("studentDetailsId"); // Ensure this is set during login
-  if (studentDetailsId) {
-    socket.emit("register-user", studentDetailsId);
-  }
-});
+// Register the user with their ID based on their role
+export const registerSocket = (role: string, userId: string) => {
+  socket.on("connect", () => {
+    console.log("Socket connected!");
 
-// Handle disconnection
-socket.on("disconnect", () => {
-  console.log("Socket disconnected!");
-});
+    if (role === "STUDENT") {
+      const studentDetailsId = localStorage.getItem("studentDetailsId");
+      if (studentDetailsId) {
+        socket.emit("register-user", studentDetailsId);
+      }
+    } else if (role === "PROVIDER") {
+      if (userId) {
+        socket.emit("register-provider", userId);
+      }
+    }
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected!");
+  });
+};
 
 export default socket;

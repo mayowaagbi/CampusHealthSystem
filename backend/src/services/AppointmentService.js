@@ -56,6 +56,64 @@ class AppointmentService {
   //     throw new ApiError(500, "Failed to fetch appointment");
   //   }
   // }
+  async updateStatus(id, status, userId) {
+    try {
+      console.log("[Service] Updating appointment status:", {
+        id,
+        status,
+        userId,
+      });
+
+      // Validate the user is a registered provider
+      const provider = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          profile: {
+            include: {
+              providerDetails: true,
+            },
+          },
+        },
+      });
+
+      if (!provider?.profile?.providerDetails) {
+        throw new ApiError(403, "User is not a registered provider");
+      }
+
+      const providerId = provider.profile.providerDetails.id;
+
+      // Get the existing appointment
+      const appointment = await this.prisma.appointment.findUnique({
+        where: { id },
+      });
+
+      if (!appointment) {
+        throw new ApiError(404, "Appointment not found");
+      }
+
+      // Perform the update
+      const updatedAppointment = await this.prisma.appointment.update({
+        where: { id },
+        data: { status, providerId }, // Update both status and providerId
+        include: {
+          student: {
+            include: { profile: { include: { user: true } } },
+          },
+          provider: {
+            include: { profile: true },
+          },
+        },
+      });
+
+      // Log the status change
+      await this.logAppointmentHistory(id, status, userId);
+
+      return updatedAppointment;
+    } catch (error) {
+      console.error("Failed to update appointment status:", error);
+      throw new ApiError(500, "Failed to update appointment status");
+    }
+  }
   async getAppointmentById(appointmentId) {
     try {
       logger.info(
@@ -194,6 +252,32 @@ class AppointmentService {
     } catch (error) {
       logger.error("Failed to update appointment location:", error);
       throw new ApiError(500, "Failed to update location");
+    }
+  }
+  async getAppointmentHistory(appointmentId) {
+    try {
+      return this.prisma.appointmentHistory.findMany({
+        where: { appointmentId },
+        include: {
+          changedBy: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+        orderBy: { timestamp: "desc" }, // Sort by most recent first
+      });
+    } catch (error) {
+      console.error("Failed to fetch appointment history:", error);
+      throw new ApiError(500, "Failed to fetch appointment history");
+    }
+  }
+  async getAppointmentsByStudentId(studentId) {
+    try {
+      return await Appointment.findAppointmentsByStudentId(studentId);
+    } catch (error) {
+      console.error("Failed to fetch appointments:", error);
+      throw new ApiError(500, "Failed to fetch appointments");
     }
   }
 }

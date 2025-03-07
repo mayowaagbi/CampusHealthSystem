@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
+
 import { toast } from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { format, parse } from "date-fns";
@@ -35,7 +35,9 @@ import {
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
-
+import api from "../../api";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { StudentAppointmentsHistoryTable } from "../../components/StudentAppointmentsHistoryTable";
 // Enums and Constants
 enum AppointmentStatus {
   PENDING = "PENDING",
@@ -73,6 +75,7 @@ interface DecodedToken {
 
 export default function StudentAppointmentPage() {
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [historyappointments, setHistoryappointments] = useState<any[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -96,13 +99,10 @@ export default function StudentAppointmentPage() {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found.");
 
-      const response = await axios.get(
-        "http://localhost:3000/api/appointments",
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-          params: { t: Date.now() }, // Cache busting parameter
-        }
-      );
+      const response = await api.get("http://localhost:3000/api/appointments", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        params: { t: Date.now() }, // Cache busting parameter
+      });
 
       console.log("Appointments fetched:", response.data);
       // Assuming the response is structured as { success: true, data: [...] }
@@ -112,6 +112,28 @@ export default function StudentAppointmentPage() {
       toast.error("Failed to load appointments.");
     }
   };
+  useEffect(() => {
+    const fetchstudentAppointments = async () => {
+      try {
+        setIsLoading(true);
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) throw new Error("Authentication required");
+
+        const response = await api.get("/api/appointments/student", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        console.log("API history Response:", response.data);
+        setHistoryappointments(response.data.data);
+      } catch (error) {
+        console.error("Error fetching appointments:", error);
+        toast.error("Failed to load appointments");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchstudentAppointments();
+  }, []);
 
   // onSubmit: Open a confirmation dialog before booking or rescheduling
   const onSubmit = async (data: AppointmentFormValues) => {
@@ -162,7 +184,7 @@ export default function StudentAppointmentPage() {
           duration: selectedService.duration,
         });
 
-        const response = await axios.patch(
+        const response = await api.patch(
           `http://localhost:3000/api/appointments/${selectedAppointment.id}/reschedule`,
           {
             startTime: startTimeISO,
@@ -189,7 +211,7 @@ export default function StudentAppointmentPage() {
           providerId: null,
         });
 
-        await axios.post(
+        await api.post(
           `http://localhost:3000/api/appointments/`,
           {
             ...pendingAppointment,
@@ -246,7 +268,7 @@ export default function StudentAppointmentPage() {
         throw new Error("Only students can cancel appointments.");
       }
 
-      await axios.delete(
+      await api.delete(
         `http://localhost:3000/api/appointments/${appointmentId}/cancel`,
         {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -479,6 +501,20 @@ export default function StudentAppointmentPage() {
               </CardContent>
             </Card>
           </div>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Your Appointment History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : (
+                <StudentAppointmentsHistoryTable
+                  historyappointments={historyappointments}
+                />
+              )}
+            </CardContent>
+          </Card>
         </motion.div>
       </main>
 

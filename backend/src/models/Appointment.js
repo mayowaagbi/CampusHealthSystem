@@ -428,6 +428,17 @@ class AppointmentService {
       throw new ApiError(500, "Failed to update appointment");
     }
   }
+  async findAppointmentsByStudentId(studentId) {
+    return this.prisma.appointment.findMany({
+      where: { studentId },
+      include: {
+        student: { include: { profile: true } },
+        provider: { include: { profile: true } },
+        support: { include: { profile: true } },
+      },
+      orderBy: { startTime: "desc" }, // Sort by most recent first
+    });
+  }
   async updateAppointmentLocation(appointmentId, location) {
     return this.prisma.appointment.update({
       where: { id: appointmentId },

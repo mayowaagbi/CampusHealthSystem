@@ -1,14 +1,6 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
+import { useAmbulanceRequestContext } from "../../context/AmbulanceRequestContext";
 import { motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,71 +10,23 @@ import {
   TableRow,
 } from "../../components/ui/table";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
-import { ChevronDown, Search, Edit, Trash2, Send } from "lucide-react";
-import { CreatePrescriptionDialog } from "../../components/CreatePrescriptionDialog";
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/ui/button";
+import { useToast } from "../../hooks/use-toast";
 
-const prescriptions = [
-  {
-    id: 1,
-    patientName: "John Doe",
-    medication: "Amoxicillin",
-    dosage: "500mg",
-    frequency: "3x daily",
-    startDate: "2023-05-10",
-    endDate: "2023-05-20",
-  },
-  {
-    id: 2,
-    patientName: "Jane Smith",
-    medication: "Lisinopril",
-    dosage: "10mg",
-    frequency: "1x daily",
-    startDate: "2023-05-08",
-    endDate: "2023-06-08",
-  },
-  {
-    id: 3,
-    patientName: "Mike Johnson",
-    medication: "Metformin",
-    dosage: "1000mg",
-    frequency: "2x daily",
-    startDate: "2023-05-05",
-    endDate: "2023-08-05",
-  },
-  {
-    id: 4,
-    patientName: "Emily Brown",
-    medication: "Sertraline",
-    dosage: "50mg",
-    frequency: "1x daily",
-    startDate: "2023-05-12",
-    endDate: "2023-11-12",
-  },
-  {
-    id: 5,
-    patientName: "Chris Lee",
-    medication: "Ibuprofen",
-    dosage: "400mg",
-    frequency: "As needed",
-    startDate: "2023-05-01",
-    endDate: "2023-05-15",
-  },
-];
+export default function AmbulanceRequestsPage() {
+  const { ambulanceRequests, resolveRequest, socket } =
+    useAmbulanceRequestContext();
+  const { toast } = useToast();
 
-export default function PrescriptionsPage() {
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredPrescriptions = prescriptions.filter(
-    (prescription) =>
-      prescription.patientName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      prescription.medication.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter requests with statuses other than "PENDING"
+  const nonPendingRequests = ambulanceRequests.filter(
+    (request) => request.status !== "PENDING"
   );
 
   return (
@@ -125,7 +69,7 @@ export default function PrescriptionsPage() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/healthcare-provider/prescriptions"
           >
-            Prescriptions
+            Ambulance
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -141,70 +85,109 @@ export default function PrescriptionsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-3xl font-bold mb-6">Prescription Management</h1>
+          <h1 className="text-3xl font-bold mb-6">
+            Ambulance Request Management
+          </h1>
+
+          {/* Table for Pending Requests */}
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Prescriptions</CardTitle>
+              <CardTitle>Pending Ambulance Requests</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between mb-4">
-                <div className="flex w-full max-w-sm items-center space-x-2">
-                  <Input
-                    type="search"
-                    placeholder="Search prescriptions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <Button type="submit" size="icon">
-                    <Search className="h-4 w-4" />
-                    <span className="sr-only">Search</span>
-                  </Button>
-                </div>
-                <CreatePrescriptionDialog />
-              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Patient Name</TableHead>
-                    <TableHead>Medication</TableHead>
-                    <TableHead>Dosage</TableHead>
-                    <TableHead>Frequency</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
+                    <TableHead>Student ID</TableHead>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Blood Type</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredPrescriptions.map((prescription) => (
-                    <TableRow key={prescription.id}>
-                      <TableCell>{prescription.patientName}</TableCell>
-                      <TableCell>{prescription.medication}</TableCell>
-                      <TableCell>{prescription.dosage}</TableCell>
-                      <TableCell>{prescription.frequency}</TableCell>
-                      <TableCell>{prescription.startDate}</TableCell>
-                      <TableCell>{prescription.endDate}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              Actions <ChevronDown className="ml-2 h-4 w-4" />
+                  {ambulanceRequests
+                    .filter((request) => request.status === "PENDING")
+                    .map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell>{request.userId}</TableCell>
+                        <TableCell>
+                          {request.user.profile.firstName}{" "}
+                          {request.user.profile.lastName}{" "}
+                        </TableCell>
+                        <TableCell>{request.user.profile.bloodType}</TableCell>
+                        <TableCell>{request.user.profile.phone}</TableCell>
+                        <TableCell>{request.address}</TableCell>
+                        <TableCell>
+                          <span
+                            className={`px-2 py-1 rounded ${
+                              request.status === "PENDING"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : request.status === "RESOLVED"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {request.status}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          {request.status === "PENDING" && (
+                            <Button
+                              variant="destructive"
+                              onClick={() => resolveRequest(request.id)}
+                            >
+                              Resolve
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Prescription
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Send className="mr-2 h-4 w-4" />
-                              Send to Pharmacy
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Prescription
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+
+          {/* Table for Resolved/Other Requests */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Resolved/Other Ambulance Requests</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Student ID</TableHead>
+                    <TableHead>Student Name</TableHead>
+                    <TableHead>Blood Type</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {nonPendingRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell>{request.userId}</TableCell>
+                      <TableCell>
+                        {request.user.profile.firstName}{" "}
+                        {request.user.profile.lastName}{" "}
+                      </TableCell>
+                      <TableCell>{request.user.profile.bloodType}</TableCell>
+                      <TableCell>{request.user.profile.phone}</TableCell>
+                      <TableCell>{request.address}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded ${
+                            request.status === "RESOLVED"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {request.status}
+                        </span>
                       </TableCell>
                     </TableRow>
                   ))}

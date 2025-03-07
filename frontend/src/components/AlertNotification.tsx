@@ -13,6 +13,7 @@ interface Alert {
 
 const AlertNotification = () => {
   useEffect(() => {
+    console.log("Socket object:", socket); // Debugging: Check the socket object
     console.log("Socket connected:", socket.connected);
 
     // Listen for connection events
@@ -25,14 +26,7 @@ const AlertNotification = () => {
     };
 
     // Listen for new alerts
-    interface NewAlert {
-      title: string;
-      message: string;
-      priority: "HIGH" | "MEDIUM" | "LOW";
-      endTime: string;
-    }
-
-    const handleNewAlert = (alert: NewAlert) => {
+    const handleNewAlert = (alert: Alert) => {
       console.log("New alert received:", alert);
       toast.info(
         <div className="p-4 bg-white rounded-lg shadow-lg">
@@ -71,7 +65,6 @@ const AlertNotification = () => {
       socket.off("new-alert", handleNewAlert);
     };
   }, []); // Empty dependency array to run only once
-
   return (
     <div>
       <ToastContainer

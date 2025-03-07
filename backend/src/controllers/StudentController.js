@@ -1,5 +1,5 @@
 const StudentService = require("../services/studentService");
-
+const ProviderService = require("../services/ProviderService");
 const StudentController = {
   /**
    * Get list of students
@@ -22,6 +22,15 @@ const StudentController = {
       const { userId } = req.params;
       const student = await StudentService.findStudentByUserId(userId);
       res.json(student);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  },
+  async getProviderByUserId(req, res) {
+    try {
+      const { userId } = req.params;
+      const provider = await ProviderService.findProviderByUserId(userId);
+      res.json(provider);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

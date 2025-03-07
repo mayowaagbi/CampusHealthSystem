@@ -34,31 +34,52 @@ class NotificationController {
     this.service = new NotificationService();
   }
 
-  async createNotification(req, res) {
-    try {
-      const notification = await this.service.createNotification(req.body);
+  // async createNotification(req, res) {
+  //   try {
+  //     const notification = await this.service.createNotification(req.body);
 
-      // Broadcast to specific user
-      req.app
-        .get("io")
-        .to(req.body.userId)
-        .emit("new-notification", notification);
-      res.status(201).json(notification);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  }
-
-  async getNotifications(req, res) {
+  //     // Broadcast to specific user
+  //     req.app
+  //       .get("io")
+  //       .to(req.body.userId)
+  //       .emit("new-notification", notification);
+  //     res.status(201).json(notification);
+  //   } catch (error) {
+  //     res.status(500).json({ error: error.message });
+  //   }
+  // }
+  async getallNotifications(req, res) {
     try {
-      const notifications = await this.service.getUserNotifications(
-        req.user.id
-      );
+      const notifications = await NotificationService.getallNotifications();
       res.json(notifications);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async createNotification(req, res) {
+    try {
+      const { title, content, userId } = req.body;
+      const notification = await NotificationService.createNotification({
+        title,
+        content,
+        userId,
+      });
+      res.status(201).json(notification);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  // async getNotifications(req, res) {
+  //   try {
+  //     const notifications = await this.service.getUserNotifications(
+  //       req.user.id
+  //     );
+  //     res.json(notifications);
+  //   } catch (error) {
+  //     res.status(500).json({ error: error.message });
+  //   }
+  // }
 
   async markAsRead(req, res) {
     try {
@@ -79,4 +100,5 @@ class NotificationController {
   }
 }
 
-module.exports = NotificationController;
+// module.exports = NotificationController;
+module.exports = new NotificationController();

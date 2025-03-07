@@ -50,12 +50,12 @@
 const NotificationModel = require("../models/Notification");
 
 class NotificationService {
-  async createNotification(data) {
-    return await NotificationModel.create({
-      ...data,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week
-    });
-  }
+  // async createNotification(data) {
+  //   return await NotificationModel.create({
+  //     ...data,
+  //     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week
+  //   });
+  // }
 
   async getUserNotifications(userId) {
     return await NotificationModel.findMany({
@@ -70,6 +70,16 @@ class NotificationService {
 
   async deleteNotification(id) {
     return await NotificationModel.delete({ id });
+  }
+  async getallNotifications() {
+    return NotificationModel.findMany();
+  }
+
+  async createNotification(data) {
+    return NotificationModel.create({
+      ...data,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week
+    });
   }
 }
 

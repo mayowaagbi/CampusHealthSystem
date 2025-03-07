@@ -110,6 +110,28 @@ class User extends BaseModel {
       },
     });
   }
+  async getAllProviders() {
+    return this.prisma.user.findMany({
+      where: { role: "PROVIDER" },
+      select: {
+        id: true, // Provider ID
+        profile: {
+          select: {
+            providerDetails: {
+              select: {
+                id: true, // ProviderDetails ID (if needed)
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+  async countStudents() {
+    return this.prisma.user.count({
+      where: { role: "STUDENT" },
+    });
+  }
 }
 
 module.exports = new User();

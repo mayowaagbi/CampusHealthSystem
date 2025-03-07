@@ -57,7 +57,9 @@ class AlertController {
 
   async deleteAlert(req, res) {
     try {
-      await AlertService.deleteAlert(req.params.id);
+      const id = req.params.id;
+      console.log("Controller - Deleting alert with ID:", id); // Correctly extracts the ID from the request parameters
+      await AlertService.deleteAlert(id);
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -76,6 +78,16 @@ class AlertController {
         io.to(student.id).emit("alert-update", updatedAlert);
       });
 
+      res.status(200).json(updatedAlert);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+  async updateAlertStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const updatedAlert = await AlertService.updateAlertStatus(id, status);
       res.status(200).json(updatedAlert);
     } catch (error) {
       res.status(500).json({ error: error.message });

@@ -94,8 +94,8 @@ export default function AmbulanceRequest() {
         }
       } else {
         setError(
-          error.response?.data?.error ||
-            error.message ||
+          (axios.isAxiosError(error) && error.response?.data?.error) ||
+            (error instanceof Error && error.message) ||
             "Failed to request ambulance."
         );
       }
@@ -103,7 +103,7 @@ export default function AmbulanceRequest() {
       setLoading(false);
     }
   };
-  const formatCooldownTime = (ms) => {
+  const formatCooldownTime = (ms: any) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;

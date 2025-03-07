@@ -1,5 +1,5 @@
 const StudentDetailsModel = require("../models/StudentDetails");
-
+const user = require("../models/User");
 class StudentService {
   /**
    * Find student by user ID
@@ -49,6 +49,9 @@ class StudentService {
    */
   async countByProvider(providerId) {
     return StudentDetailsModel.countByProvider(providerId);
+  }
+  async countStudents() {
+    return user.countStudents();
   }
 }
 
