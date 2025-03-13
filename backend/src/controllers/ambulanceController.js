@@ -1,17 +1,28 @@
 const AmbulanceService = require("../services/AmbulanceService");
 const UserModel = require("../models/User");
 const activeRequests = new Map(); // Track active requests and their intervals
-
+const {
+  sendRoleNotification,
+  sendUserNotification,
+} = require("../utils/sockets");
 class AmbulanceController {
   /**
    * Create a new ambulance request and broadcast it to healthcare providers.
    */
-  async createRequest(req, res, io) {
+  async createRequest(req, res) {
     try {
-      const userId = req.user.id;
-      const { latitude, longitude, address } = req.body;
+      // Check authorization first
+      if (req.user.role !== "student") {
+        return res.status(403).json({
+          success: false,
+          message: "Not authorized to create ambulance requests",
+        });
+      }
 
-      // Create the ambulance request
+      const userId = req.user.id;
+      const { latitude, longitude, address, details } = req.body;
+
+      // Create request in database
       const request = await AmbulanceService.createRequest({
         userId,
         latitude,
@@ -19,26 +30,21 @@ class AmbulanceController {
         address,
       });
 
-      // Fetch all healthcare providers
-      const providers = await UserModel.getAllProviders();
-
-      // Broadcast the request to healthcare providers
-      console.log("Broadcasting ambulance request to healthcare providers");
-      providers.forEach((provider) => {
-        if (provider.id) {
-          console.log(`Broadcasting to provider ${provider.id}`);
-          io.to("healthcare-providers").emit("new-ambulance-request", request);
-        }
+      // Send notification via socket
+      const io = req.app.get("socketio");
+      await sendRoleNotification(io, "provider", {
+        title: "New Ambulance Request",
+        message: `Student ${req.user.name} needs an ambulance at ${address}`,
+        type: "ambulance-request",
+        data: {
+          requestId: request.id || Date.now().toString(),
+          studentId: req.user.id,
+          studentName: req.user.name,
+          location: address,
+          details: details || "",
+          timestamp: new Date(),
+        },
       });
-
-      // Start sending repeated notifications every 60 seconds
-      const intervalId = setInterval(() => {
-        console.log("Emitting new-ambulance-request to healthcare-providers");
-        io.to("healthcare-providers").emit("new-ambulance-request", request);
-      }, 60000); // Send every 60 seconds
-
-      // Track the active request and its interval
-      activeRequests.set(request.id, intervalId);
 
       res.status(201).json(request);
     } catch (error) {

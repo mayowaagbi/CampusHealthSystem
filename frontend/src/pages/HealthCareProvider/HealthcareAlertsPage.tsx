@@ -236,6 +236,8 @@ export default function AlertsPage() {
   };
 
   const checkAndUpdateExpiredAlerts = async () => {
+    console.log("Checking for expired alerts..."); // Debugging
+
     const updatedAlerts = await Promise.all(
       alerts.map(async (alert) => {
         if (
@@ -243,20 +245,21 @@ export default function AlertsPage() {
           new Date(alert.endTime) < new Date()
         ) {
           try {
-            await updateAlertStatus(alert.id, "EXPIRED");
-            return { ...alert, status: "EXPIRED" as "EXPIRED" };
+            console.log("Expired alert found:", alert.id); // Debugging
+            const updatedAlert = await updateAlertStatus(alert.id, "EXPIRED");
+            return updatedAlert; // Use the updated alert from the backend
           } catch (error) {
             console.error("Failed to update alert status:", error);
-            return alert;
+            return alert; // Return the original alert if the update fails
           }
         }
-        return alert;
+        return alert; // Return the original alert if it's not expired
       })
     );
 
+    console.log("Updated alerts:", updatedAlerts); // Debugging
     setAlerts(updatedAlerts);
   };
-
   useEffect(() => {
     const interval = setInterval(() => {
       checkAndUpdateExpiredAlerts();
@@ -322,11 +325,13 @@ export default function AlertsPage() {
       });
     }
   };
+  console.log("Alerts Data:", alerts);
+
   const filteredAlerts = alerts.filter(
     (alert) =>
-      alert.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alert.priority.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alert.status.toLowerCase().includes(searchTerm.toLowerCase())
+      alert.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alert.priority?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      alert.status?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

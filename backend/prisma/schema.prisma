@@ -294,7 +294,7 @@ model Notification {
   title     String
   content   String
   read      Boolean   @default(false)
-  priority  Int       @default(3)
+  priority  AlertPriority @default(MEDIUM)
   expiresAt DateTime?
   createdAt DateTime  @default(now())
 

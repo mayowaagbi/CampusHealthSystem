@@ -1,6 +1,10 @@
 // src/controllers/AlertController.js
 const AlertService = require("../services/AlertService");
 const UserModel = require("../models/User");
+const {
+  sendRoleNotification,
+  sendUserNotification,
+} = require("../utils/sockets");
 class AlertController {
   // constructor() {
   //   this.alertService = new AlertService();
@@ -9,17 +13,53 @@ class AlertController {
   // src/controllers/AlertController.js
   async createAlert(req, res) {
     try {
-      const { title, message, priority, duration } = req.body;
+      const { title, message, priority, duration, type, data } = req.body;
+      console.log("Creating alert with data:", {
+        title,
+      });
+      const io = req.app.get("socketio");
 
-      // Get students with their StudentDetails IDs
+      if (!io) {
+        throw new Error("Socket.IO instance not available");
+      }
+      // Validate required fields
+      if (!title || !message) {
+        return res.status(400).json({
+          success: false,
+          message: "Title and message are required",
+        });
+      }
+
+      // Check authorization
+      if (req.user.role !== "ADMIN" && req.user.role !== "PROVIDER") {
+        return res.status(403).json({
+          success: false,
+          message: "Not authorized to create role notifications",
+        });
+      }
+
+      // Get all students
       const users = await UserModel.getAllStudents();
+      if (!users || users.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No students found",
+        });
+      }
 
-      // Extract StudentDetails IDs, filtering out nulls
+      // Extract student IDs
       const studentDetailsIds = users
         .map((user) => user.profile?.studentDetails?.id)
         .filter((id) => id);
 
-      // Create alert with correct student associations
+      if (studentDetailsIds.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "No valid student IDs found",
+        });
+      }
+
+      // Create alert in database
       const alert = await AlertService.createAlert({
         title,
         message,
@@ -28,21 +68,53 @@ class AlertController {
         createdById: req.user.id,
         studentIds: studentDetailsIds,
       });
+      console.log("Alert created:", alert);
+      if (!alert) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to create alert in database",
+        });
+      }
 
-      // Broadcast logic
-      console.log("Broadcasting alert to students:", studentDetailsIds);
-      const io = req.app.get("io");
-      users.forEach((user) => {
-        if (user.profile?.studentDetails?.id) {
-          const studentDetailsId = user.profile.studentDetails.id;
-          console.log(`Broadcasting alert to student ${studentDetailsId}`);
-          io.to(studentDetailsId).emit("new-alert", alert); // Emit to the correct room
-        }
+      // Send notification via socket
+      // const io = req.app.get("socketio");
+      const notificationType =
+        type === "ambulance" ? "ambulance-request" : type || "info";
+
+      // Send to all students
+      await sendRoleNotification("STUDENT", {
+        type: "alert",
+        title: req.body.title,
+        message: req.body.message,
+        priority: req.body.priority || 3,
+        expiresAt: new Date(Date.now() + req.body.duration * 60 * 60 * 1000),
       });
 
-      res.status(201).json(alert);
+      // Log the broadcast
+      console.log(`Broadcasting notification to role: student`);
+      console.log(`Notification data:`, {
+        title,
+        message,
+        type: notificationType,
+        data: {
+          ...data,
+          timestamp: new Date(),
+        },
+      });
+
+      // Return success response
+      res.status(201).json({
+        success: true,
+        message: "Alert created and notification sent successfully",
+        data: alert,
+      });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error("Error creating alert:", error);
+      res.status(500).json({
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      });
     }
   }
 

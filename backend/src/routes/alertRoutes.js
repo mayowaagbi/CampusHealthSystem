@@ -5,7 +5,8 @@ const { authorize, authenticate } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 router.use(authenticate);
-// Create a new alert
+
+// Create   a new alert
 router.post(
   "/",
   authorize("PROVIDER"),

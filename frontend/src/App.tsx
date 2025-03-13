@@ -27,17 +27,303 @@ import PatientManagementPage from "./pages/HealthCareProvider/HealthcarePatientM
 import AlertsPage from "./pages/HealthCareProvider/HealthcareAlertsPage";
 import HealthRecordsPage from "./pages/HealthCareProvider/HealthcareHealthRecordsPage";
 import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescriptionsPage";
-import AlertNotification from "./components/AlertNotification";
 import { AmbulanceRequestProvider } from "./context/AmbulanceRequestContext";
-
+import { useState, useEffect } from "react"; // Add this import
+// import { io } from "socket.io-client"; // Add this import
+import Toast from "./components/toast/Toast";
+import { getSocket, connectSocket } from "./hooks/sockets";
 const queryClient = new QueryClient();
 
 export default function App() {
+  const userRole = localStorage.getItem("Role");
+  const [notifications, setNotifications] = useState<any[]>([]);
+  // useEffect(() => {
+  //   // Add a test notification after 2 seconds
+  //   const testTimer = setTimeout(() => {
+  //     const testNotification = {
+  //       _id: "test-" + Date.now(),
+  //       type: "success" as const,
+  //       title: "Test Notification",
+  //       message: "This is a test notification to verify toast rendering",
+  //       data: { timestamp: Date.now() },
+  //     };
+
+  //     setNotifications((prev) => [testNotification, ...prev]);
+  //     console.log("Added test notification:", testNotification);
+  //   }, 2000);
+
+  //   return () => clearTimeout(testTimer);
+  // }, []);
+  // console.log(import.meta.env.VITE_API_URL);
+  useEffect(() => {
+    // Connect using your utility
+    connectSocket();
+
+    // Get the socket instance
+    const socket = getSocket();
+
+    // Set up the notification listener for real-time notifications
+    socket.on("notification", (newNotification) => {
+      // Map the notification type to one of the allowed types
+      let mappedType:
+        | "success"
+        | "error"
+        | "warning"
+        | "ambulance-request"
+        | "info";
+
+      // Map the backend type to the Toast component type
+      switch (newNotification.type) {
+        case "alert":
+          mappedType = "warning";
+          break;
+        case "ambulance-request":
+          mappedType = "ambulance-request";
+          break;
+        case "error":
+          mappedType = "error";
+          break;
+        case "success":
+          mappedType = "success";
+          break;
+        default:
+          mappedType = "info"; // Default to info for unknown types
+      }
+
+      // Transform the notification to match the expected format
+      const transformedNotification = {
+        _id: newNotification.id,
+        type: mappedType,
+        title: newNotification.title,
+        message: newNotification.content,
+        data: {
+          timestamp: newNotification.createdAt
+            ? new Date(newNotification.createdAt).getTime()
+            : Date.now(),
+        },
+      };
+
+      // Filter notifications based on user role
+      if (
+        (userRole === "PROVIDER" &&
+          transformedNotification.type === "ambulance-request") ||
+        (userRole === "STUDENT" &&
+          transformedNotification.type !== "ambulance-request")
+      ) {
+        setNotifications((prev) => [transformedNotification, ...prev]);
+      }
+    });
+
+    // Handle initial notifications from database
+    // socket.on("initialNotifications", (storedNotifications) => {
+    //   console.log("Received initial notifications:", storedNotifications);
+
+    //   // Transform stored notifications
+    //   interface StoredNotification {
+    //     id: string;
+    //     userId: string;
+    //     type: string;
+    //     title: string;
+    //     content: string;
+    //     createdAt?: string;
+    //   }
+
+    //   interface TransformedNotification {
+    //     _id: string;
+    //     type: "success" | "error" | "warning" | "ambulance-request" | "info";
+    //     title: string;
+    //     message: string;
+    //     data: {
+    //       timestamp: number;
+    //     };
+    //   }
+
+    //   const transformedNotifications: TransformedNotification[] =
+    //     storedNotifications.map((notification: StoredNotification) => {
+    //       // Map the notification type to one of the allowed types
+    //       let mappedType:
+    //         | "success"
+    //         | "error"
+    //         | "warning"
+    //         | "ambulance-request"
+    //         | "info";
+
+    //       // Map the backend type to the Toast component type
+    //       switch (notification.type) {
+    //         case "alert":
+    //           mappedType =
+    //             userRole === "PROVIDER" ? "ambulance-request" : "warning";
+    //           break;
+    //         case "ambulance-request":
+    //           mappedType = "ambulance-request";
+    //           break;
+    //         case "error":
+    //           mappedType = "error";
+    //           break;
+    //         case "success":
+    //           mappedType = "success";
+    //           break;
+    //         default:
+    //           mappedType = "info"; // Default to info for unknown types
+    //       }
+
+    //       return {
+    //         _id: notification.id,
+    //         type: mappedType,
+    //         title: notification.title,
+    //         message: notification.content,
+    //         data: {
+    //           timestamp: notification.createdAt
+    //             ? new Date(notification.createdAt).getTime()
+    //             : Date.now(),
+    //         },
+    //       };
+    //     });
+    //   console.log("Transformed Notifications:", transformedNotifications);
+    //   // Filter based on user role
+    //   const filteredNotifications = transformedNotifications.filter(
+    //     (notification) =>
+    //       (userRole === "PROVIDER" &&
+    //         notification.type === "ambulance-request") ||
+    //       notification.type === "warning" ||
+    //       (userRole === "STUDENT" && notification.type !== "ambulance-request")
+    //   );
+    //   console.log("User Role:", userRole);
+    //   console.log("Filtered Notifications:", filteredNotifications);
+    //   setNotifications(filteredNotifications);
+    // });
+    socket.on("initialNotifications", (storedNotifications) => {
+      console.log("Received initial notifications:", storedNotifications);
+
+      // Transform stored notifications
+      interface StoredNotification {
+        id: string;
+        userId: string;
+        type: string; // "alert" or "ambulance-request"
+        title: string;
+        content: string;
+        createdAt?: string;
+      }
+
+      interface TransformedNotification {
+        _id: string;
+        type: "alert" | "ambulance-request" | "success" | "error" | "info"; // Add "alert"
+        title: string;
+        message: string;
+        data: {
+          timestamp: number;
+        };
+      }
+
+      const transformedNotifications: TransformedNotification[] =
+        storedNotifications.map((notification: StoredNotification) => {
+          // Map the notification type
+          let mappedType:
+            | "alert"
+            | "ambulance-request"
+            | "success"
+            | "error"
+            | "info";
+
+          switch (notification.type) {
+            case "alert":
+              // For students, map to "alert"; for providers, map to "ambulance-request"
+              mappedType =
+                userRole === "PROVIDER" ? "ambulance-request" : "alert";
+              break;
+            case "ambulance-request":
+              mappedType = "ambulance-request";
+              break;
+            case "error":
+              mappedType = "error";
+              break;
+            case "success":
+              mappedType = "success";
+              break;
+            default:
+              mappedType = "info";
+          }
+
+          return {
+            _id: notification.id,
+            type: mappedType,
+            title: notification.title,
+            message: notification.content,
+            data: {
+              timestamp: notification.createdAt
+                ? new Date(notification.createdAt).getTime()
+                : Date.now(),
+            },
+          };
+        });
+
+      console.log("Transformed Notifications:", transformedNotifications);
+
+      // Add the original filtering logic here
+      transformedNotifications.forEach((notification) => {
+        if (notification.type === "alert") {
+          console.log("Alert:", notification.title, notification.message);
+        } else if (notification.type === "ambulance-request") {
+          console.log(
+            "Ambulance Request:",
+            notification.title,
+            notification.message
+          );
+        }
+      });
+
+      // Filter based on user role
+      const filteredNotifications = transformedNotifications.filter(
+        (notification) =>
+          (userRole === "PROVIDER" &&
+            (notification.type === "ambulance-request" ||
+              notification.type === "alert")) ||
+          (userRole === "STUDENT" && notification.type === "alert")
+      );
+
+      console.log("User Role:", userRole);
+      console.log("Filtered Notifications:", filteredNotifications);
+      setNotifications(filteredNotifications);
+    });
+    // Refresh notifications every 30 seconds
+    const refreshInterval = setInterval(() => {
+      if (socket.connected) {
+        console.log("Refreshing notifications");
+        socket.emit("getInitialNotifications");
+      }
+    }, 30000);
+
+    // Cleanup
+    return () => {
+      socket.off("notification");
+      socket.off("initialNotifications");
+      clearInterval(refreshInterval);
+    };
+  }, [userRole]);
+  interface Notification {
+    _id: string;
+    message: string;
+    // Add other properties as needed
+  }
+
+  const handleCloseToast = (id: string) => {
+    setNotifications((prev: Notification[]) =>
+      prev.filter((n) => n._id !== id)
+    );
+  };
   return (
     <QueryClientProvider client={queryClient}>
       <GlobalStateProvider>
         <BrowserRouter>
-          <AlertNotification />
+          <div className="toast-container">
+            {notifications.map((notification) => (
+              <Toast
+                key={notification._id}
+                notification={notification}
+                onClose={handleCloseToast}
+              />
+            ))}
+          </div>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<LandingPage />} />

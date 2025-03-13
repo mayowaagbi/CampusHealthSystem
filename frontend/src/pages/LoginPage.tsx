@@ -93,9 +93,13 @@ export default function LoginPage() {
       const decodedToken = jwtDecode<DecodedToken>(accessToken);
       console.log("Decoded Token:", decodedToken);
       console.log("User role:", decodedToken.role);
+      localStorage.setItem("Role", decodedToken.role);
 
       // Initialize the socket connection
-      registerSocket(decodedToken.role, decodedToken.id);
+      registerSocket(
+        decodedToken.role as "STUDENT" | "PROVIDER",
+        decodedToken.id
+      );
 
       // Handle student-specific logic
       if (decodedToken.role === "STUDENT") {

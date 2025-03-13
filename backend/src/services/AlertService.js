@@ -60,6 +60,7 @@ class AlertService {
 
     return { updatedAlert, students };
   }
+
   async updateAlertStatus(id, status) {
     return AlertModel.updateAlertStatus(id, status);
   }

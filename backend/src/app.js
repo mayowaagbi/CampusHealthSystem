@@ -35,6 +35,8 @@ const alertRoutes = require("./routes/alertRoutes");
 const { authenticate } = require("./middleware/authMiddleware");
 const apiLimiter = require("./middleware/rateLimiter");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
+const { setupSocketHandlers, initialize } = require("./utils/sockets");
+const { authenticateSocket } = require("./utils/sockets");
 
 // Import utilities
 const logger = require("./utils/logger");
@@ -67,91 +69,28 @@ app.use(
   })
 );
 
-// Create HTTP server and Socket.io instance
+// Store connected users
+const users = new Map();
+
+// Configure Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   },
+  path: "/socket.io/",
   transports: ["websocket", "polling"],
+  pingInterval: 10000,
+  pingTimeout: 5000,
 });
 
-// Store connected users
-const users = new Map();
-
-// Example: Broadcast a test alert
-
-// Register user with their socket ID
-// socket.on("register-user", (userId) => {
-//   users.set(userId, socket.id);
-//   socket.join(userId);
-//   console.log(`User ${userId} registered with socket ID ${socket.id}`);
-// });
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
-  // setTimeout(() => {
-  //   io.emit("new-alert", {
-  //     id: "123",
-  //     title: "Test Alert hello",
-  //     message: "This is a test alert",
-  //     priority: "HIGH",
-  //     endTime: new Date().toISOString(),
-  //   });
-  //   alertSent = true;
-  // }, 5000); // Broadcast after 5 seconds
-  // Register user with their socket ID
-  socket.on("register-user", (studentDetailsId) => {
-    if (studentDetailsId) {
-      socket.join(studentDetailsId); // Join the room with studentDetails.id
-      console.log(
-        `User ${studentDetailsId} registered with socket ID ${socket.id}`
-      );
-    }
-  });
-
-  socket.on("register-provider", (providerId) => {
-    if (providerId) {
-      socket.join("healthcare-providers"); // Join the healthcare-providers room
-      console.log(`Healthcare provider ${providerId} joined the room`);
-    }
-  });
-  setTimeout(() => {
-    io.to("healthcare-providers").emit("new-alert", {
-      id: "123",
-      title: "Test Alert for Providers",
-      message: "This is a test alert for healthcare providers",
-      priority: "HIGH",
-      endTime: new Date().toISOString(),
-    });
-    console.log("Test alert emitted to healthcare providers");
-  }, 1000); // Broadcast after 5 seconds
-  // Handle disconnection
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
-});
-//   socket.on("register-user", (studentDetailsId) => {
-//     if (studentDetailsId) {
-//       socket.join(studentDetailsId); // Join the room with studentDetails.id
-//       console.log(
-//         `User ${studentDetailsId} registered with socket ID ${socket.id}`
-//       );
-//     }
-//   });
-//   socket.on("disconnect", () => {
-//     users.forEach((socketId, userId) => {
-//       if (socketId === socket.id) {
-//         users.delete(userId);
-//         console.log(`User ${userId} disconnected`);
-//       }
-//     });
-//   });
-// });
-
-// Attach Socket.io to app for use in controllers
-app.set("io", io);
+// Socket.io middleware and handlers
+io.use(authenticateSocket);
+app.set("socketio", io);
+initialize(io);
+setupSocketHandlers(io);
 
 // Public routes
 app.use("/api/auth", authRoutes);
@@ -192,9 +131,9 @@ httpServer.listen(PORT, () => {
   logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   logger.info(`Docs available at /api/docs`);
 });
-io.on("connection", (socket) => {
-  console.log("back Client connected:", socket.id);
-});
+// io.on("connection", (socket) => {
+//   console.log("back Client connected:", socket.id);
+// });
 // Graceful shutdown
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received: Closing server");

@@ -4,7 +4,7 @@ const logger = require("../utils/logger");
 const User = require("../models/User.js");
 
 const authenticate = async (req, res, next) => {
-  console.log("JWT_ACCESS_SECRET:", process.env.JWT_ACCESS_SECRET);
+  // console.log("JWT_ACCESS_SECRET:", process.env.JWT_ACCESS_SECRET);
   try {
     const authHeader = req.headers.authorization;
 
