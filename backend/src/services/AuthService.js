@@ -23,6 +23,7 @@ class AuthService {
   //   // Proceed with registration logic...
   //   return User.createWithProfile(userData);
   // }
+
   async registerUser(userData) {
     // Check if user already exists
     const existingUser = await User.findByEmail(userData.email);

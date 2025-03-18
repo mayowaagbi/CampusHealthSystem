@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -9,7 +10,8 @@ import {
   CardTitle,
 } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import axios from "axios";
+import { disconnectSocket } from "../../hooks/sockets";
+import toast from "react-hot-toast";
 import {
   Users,
   Calendar,
@@ -39,6 +41,7 @@ export default function HealthcareProviderDashboard() {
     activeAlerts: 0,
   });
   const [appointmentData, setAppointmentData] = useState([]);
+  const navigate = useNavigate();
   // const [messages, setMessages] = useState([]);
   // const [resources, setResources] = useState([]);
 
@@ -71,6 +74,12 @@ export default function HealthcareProviderDashboard() {
     //   .then((response) => setResources(response.data))
     //   .catch((error) => console.error("Resources error:", error));
   }, []);
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken"); // Clear the access token
+    disconnectSocket(); // Disconnect the socket
+    toast.success("Logged out successfully!"); // Display success toast
+    navigate("/login"); // Redirect to the login page
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -112,7 +121,7 @@ export default function HealthcareProviderDashboard() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/healthcare-provider/prescriptions"
           >
-            Prescriptions
+            Ambulance
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -120,6 +129,9 @@ export default function HealthcareProviderDashboard() {
           >
             Alerts
           </Link>
+          <Button variant="destructive" onClick={handleLogout}>
+            Logout
+          </Button>
         </nav>
       </header>
       <main className="flex-1 py-6 px-4 md:px-6">

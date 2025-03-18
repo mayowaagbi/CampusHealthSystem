@@ -318,7 +318,7 @@ export default function AppointmentManagementPage() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/healthcare-provider/prescriptions"
           >
-            Prescriptions
+            Ambulance
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Button } from "../../components/ui/button";
 import { Progress } from "../../components/ui/progress";
 import { Minus, Plus } from "lucide-react";
@@ -9,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import axios from "axios";
+import api from "../../api";
 
 export default function WaterIntake() {
   // waterIntake is stored in milliliters
@@ -23,7 +24,7 @@ export default function WaterIntake() {
       try {
         const accessToken = localStorage.getItem("accessToken");
         if (!accessToken) throw new Error("Access token not found.");
-        const response = await axios.get("http://localhost:3000/api/water", {
+        const response = await api.get("/api/water", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
         setWaterIntake(response.data.current || 0);
@@ -54,8 +55,8 @@ export default function WaterIntake() {
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Access token not found.");
-      const response = await axios.post(
-        "http://localhost:3000/api/water/intake",
+      const response = await api.post(
+        "/api/water/intake",
         { amount },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -64,7 +65,7 @@ export default function WaterIntake() {
     } catch (error) {
       console.error("Error updating water intake:", error);
       alert("Failed to update water intake.");
-      if ((error as any).response) {
+      if (axios.isAxiosError(error) && error.response) {
         // The request was made and the server responded with a status code
         if (axios.isAxiosError(error) && error.response) {
           console.error("Response data:", error.response.data);

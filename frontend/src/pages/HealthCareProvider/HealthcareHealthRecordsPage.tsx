@@ -91,6 +91,30 @@ export default function HealthRecordsPage() {
     return <div className="text-center text-red-500 py-8">{error}</div>;
   }
 
+  async function handleDownload(id: string, filename: string): Promise<void> {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) throw new Error("Not authenticated");
+
+      const headers = { Authorization: `Bearer ${accessToken}` };
+      const response = await api.get(`/api/documents/download/${id}`, {
+        headers,
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading the record:", error);
+      toast.error("Failed to download the record");
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
@@ -131,7 +155,7 @@ export default function HealthRecordsPage() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/healthcare-provider/prescriptions"
           >
-            Prescriptions
+            Ambulance
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"

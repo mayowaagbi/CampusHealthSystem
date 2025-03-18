@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Textarea } from "../ui/textarea";
 import axios from "axios";
-
+import api from "../../api";
 const MOOD_EMOJIS = [
   { label: "Happy", emoji: "😊" },
   { label: "Neutral", emoji: "😐" },
@@ -38,7 +38,7 @@ export function MoodAndJournal() {
       const payload = { mood: selectedMood, journal: journalContent };
       console.log("Sending payload:", payload);
 
-      const response = await axios.post(
+      const response = await api.post(
         "http://localhost:3000/api/entries",
         payload,
         {

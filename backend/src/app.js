@@ -31,13 +31,14 @@ const healthproviderdashboardRoutes = require("./routes/healthproviderdashboardR
 const studentRoutes = require("./routes/studentRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const alertRoutes = require("./routes/alertRoutes");
+const healthRouter = require("./routes/dailyHealthRoutes");
 // Import middleware
 const { authenticate } = require("./middleware/authMiddleware");
 const apiLimiter = require("./middleware/rateLimiter");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { setupSocketHandlers, initialize } = require("./utils/sockets");
 const { authenticateSocket } = require("./utils/sockets");
-
+// import healthRouter from ;
 // Import utilities
 const logger = require("./utils/logger");
 
@@ -114,6 +115,7 @@ app.use("/api/provider-dashboard", healthproviderdashboardRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/supports", supportRoutes);
 app.use("/api/alerts", alertRoutes);
+app.use("/api/health", healthRouter);
 
 // Health check endpoint
 app.get("/health", (req, res) => {

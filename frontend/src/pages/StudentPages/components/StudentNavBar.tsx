@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Button } from "../../../components/ui/Button";
+import { disconnectSocket } from "../../../hooks/sockets";
 function StudentNavBar() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    disconnectSocket(); // Disconnect the socket
+    toast.success("Logged out successfully!"); // Display success toast
+    navigate("/login"); // Redirect to the login page
+  };
   return (
     <>
       <Link className="flex items-center justify-center" to="/">
@@ -43,6 +53,9 @@ function StudentNavBar() {
         >
           Profile
         </Link>
+        <Button variant="destructive" onClick={handleLogout}>
+          Logout
+        </Button>
       </nav>
     </>
   );

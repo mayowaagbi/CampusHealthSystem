@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+// import axios from "axios";
 import {
   Card,
   CardContent,
@@ -35,6 +35,8 @@ import {
 } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
 import api from "../../api";
+import { StudentDetailsModal } from "../../components/StudentDetailsDailyModal"; // Import the modal component
+
 type StudentWithDetails = {
   id: string;
   studentId: string;
@@ -66,11 +68,13 @@ export default function PatientManagementPage() {
   const [students, setStudents] = useState<StudentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedStudent, setSelectedStudent] =
+    useState<StudentWithDetails | null>(null);
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get<StudentWithDetails[]>(
+        const response = await api.get<StudentWithDetails[]>(
           "http://localhost:3000/api/student",
           {
             params: {
@@ -160,7 +164,7 @@ export default function PatientManagementPage() {
             className="text-sm font-medium hover:underline underline-offset-4"
             to="/healthcare-provider/prescriptions"
           >
-            Prescriptions
+            Ambulance
           </Link>
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
@@ -334,6 +338,14 @@ export default function PatientManagementPage() {
                                     Create Alert
                                   </Link>
                                 </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => setSelectedStudent(student)}
+                                >
+                                  <div className="flex items-center">
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    View Details
+                                  </div>
+                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -347,6 +359,14 @@ export default function PatientManagementPage() {
           </Card>
         </motion.div>
       </main>
+
+      {/* Render the modal when a student is selected */}
+      {selectedStudent && (
+        <StudentDetailsModal
+          userId={selectedStudent.id} // Pass the userId to the modal
+          onClose={() => setSelectedStudent(null)}
+        />
+      )}
     </div>
   );
 }

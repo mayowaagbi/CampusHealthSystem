@@ -9,9 +9,13 @@ const router = express.Router();
 
 router.post(
   "/register",
-  validateRequest(registerSchema),
+  (req, res, next) => {
+    console.log("Received POST request:", req.params, req.body);
+    next();
+  },
   AuthController.register
 );
+
 router.post("/login", validateRequest(loginSchema), AuthController.login);
 router.post("/refresh-token", AuthController.refreshToken);
 router.post("/logout", AuthController.logout);

@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; // Add useNavigate
 import { z } from "zod";
 import { useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod"; // Uncomment this line
 import { motion } from "framer-motion";
-import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-hot-toast"; // Import toast
 import {
   Card,
   CardContent,
@@ -26,6 +25,7 @@ import {
 } from "../components/ui/select";
 import { Loader2 } from "lucide-react";
 
+// Define the schema for form validation
 const signupSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
@@ -44,9 +44,10 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate(); // Add useNavigate
 
   const form = useForm<SignupFormValues>({
-    // resolver: zodResolver(signupSchema),
+    resolver: zodResolver(signupSchema), // Uncomment this line
     defaultValues: {
       email: "",
       password: "",
@@ -65,14 +66,36 @@ export default function SignupPage() {
     try {
       const accessToken = localStorage.getItem("accessToken");
       if (!accessToken) throw new Error("Not authenticated");
-      console.log("signup data", data);
+
+      // Format the data to match the backend schema
+      const formattedData = {
+        ...data,
+        profile: {
+          ...data.profile,
+          dateOfBirth: new Date(data.profile.dateOfBirth).toISOString(), // Ensure date is in ISO format
+        },
+      };
+
+      console.log("Formatted signup data:", formattedData); // Debugging: Log the formatted data
+
       const headers = { Authorization: `Bearer ${accessToken}` };
-      const response = await api.post("/api/auth/register", data, { headers });
+      const response = await api.post("/api/auth/register", formattedData, {
+        headers,
+      });
+
+      console.log("Signup response:", response.data); // Debugging: Log the response
+
+      // Display success toast
       toast.success("Signup successful!");
-      //   router.push("/login");
+
+      // Redirect to the previous page
+      navigate(-1); // Go back to the previous page
     } catch (error) {
-      console.error("Signup error:", error);
-      toast.error("Failed to sign up. Please try again.");
+      console.error("Signup error:", error); // Debugging: Log the error
+      const errorMessage =
+        (error as any).response?.data?.message ||
+        "Failed to sign up. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -129,10 +152,11 @@ export default function SignupPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="STUDENT">Student</SelectItem>
-                    <SelectItem value="HEALTHCARE_PROVIDER">
+                    {/* Uncomment these if needed */}
+                    {/* <SelectItem value="HEALTHCARE_PROVIDER">
                       Healthcare Provider
                     </SelectItem>
-                    <SelectItem value="ADMIN">Admin</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem> */}
                   </SelectContent>
                 </Select>
               </div>

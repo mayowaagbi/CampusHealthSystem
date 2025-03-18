@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { useAmbulanceRequestContext } from "../../context/AmbulanceRequestContext";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Table,
@@ -18,16 +17,114 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { useToast } from "../../hooks/use-toast";
+import axios from "axios"; // Import Axios
+import api from "../../api";
+interface AmbulanceRequest {
+  id: string;
+  userId: string;
+  status: "PENDING" | "RESOLVED" | "CANCELLED";
+  address: string;
+  user: {
+    profile: {
+      firstName: string;
+      lastName: string;
+      bloodType: string;
+      phone: string;
+    };
+  };
+}
 
 export default function AmbulanceRequestsPage() {
-  const { ambulanceRequests, resolveRequest, socket } =
-    useAmbulanceRequestContext();
   const { toast } = useToast();
+  const [ambulanceRequests, setAmbulanceRequests] = useState<
+    AmbulanceRequest[]
+  >([]);
+  const [loading, setLoading] = useState(true); // Add loading state
+  const [error, setError] = useState<string | null>(null); // Add error state
+
+  // Fetch ambulance requests on component mount
+  useEffect(() => {
+    const fetchAmbulanceRequests = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        if (!accessToken) {
+          throw new Error("Access token not found.");
+        }
+
+        const response = await api.get("/api/ambulance-requests", {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        // Assuming the response data is an array of ambulance requests
+        const requests = response.data;
+        setAmbulanceRequests(requests); // Update state with fetched requests
+        setLoading(false); // Set loading to false after fetching
+      } catch (error) {
+        console.error("Error fetching ambulance requests:", error);
+        setError("Failed to fetch ambulance requests.");
+        setLoading(false); // Set loading to false on error
+      }
+    };
+
+    fetchAmbulanceRequests();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Function to resolve a request
+  const resolveRequest = async (requestId: string) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        throw new Error("Access token not found.");
+      }
+
+      // Send a PATCH request to resolve the request
+      await api.patch(
+        `/api/ambulance-requests/${requestId}/resolve`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      // Update the local state to reflect the resolved request
+      setAmbulanceRequests((prevRequests) =>
+        prevRequests.map((request) =>
+          request.id === requestId
+            ? { ...request, status: "RESOLVED" }
+            : request
+        )
+      );
+
+      toast({
+        title: "Request Resolved",
+        description: "The ambulance request has been resolved.",
+      });
+    } catch (error) {
+      console.error("Error resolving request:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to resolve the ambulance request.",
+      });
+    }
+  };
 
   // Filter requests with statuses other than "PENDING"
   const nonPendingRequests = ambulanceRequests.filter(
     (request) => request.status !== "PENDING"
   );
+
+  if (loading) {
+    return <div>Loading...</div>; // Show loading indicator
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>; // Show error message
+  }
 
   return (
     <div className="flex flex-col min-h-screen">

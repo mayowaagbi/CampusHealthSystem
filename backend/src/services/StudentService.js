@@ -31,6 +31,24 @@ class StudentService {
       throw new Error("Failed to find student");
     }
   }
+  /**
+   * Find userId by studentId
+   */
+  async findUserIdByStudentId(studentId) {
+    console.log(
+      "[StudentService] Searching for userId with studentId:",
+      studentId
+    );
+
+    try {
+      // Use the model's method to get the userId
+      const userId = await StudentDetailsModel.getUserIdByStudentId(studentId);
+      return userId;
+    } catch (error) {
+      console.error("StudentService Error:", error);
+      throw new Error("Failed to find userId");
+    }
+  }
 
   /**
    * Get list of students (calls model method)

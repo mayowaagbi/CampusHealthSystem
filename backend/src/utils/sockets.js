@@ -21,7 +21,7 @@ const authenticateSocket = async (socket, next) => {
     const token =
       socket.handshake.auth?.token ||
       socket.handshake.headers?.authorization?.split(" ")[1];
-    console.log("Token:", token);
+    // console.log("Token:", token);
 
     if (!token) {
       console.error("Socket connection rejected: No token provided");
