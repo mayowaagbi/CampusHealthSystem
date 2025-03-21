@@ -10,6 +10,7 @@ const profileController = new ProfileController();
 router.use(authenticate);
 
 router.get("/", profileController.getProfile.bind(profileController));
+router.get("/:studentId/profile", profileController.getProfileById);
 router.put(
   "/",
   (req, res, next) => {

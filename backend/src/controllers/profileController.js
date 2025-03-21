@@ -60,6 +60,18 @@ class ProfileController {
       res.status(400).json({ error: error.message });
     }
   }
+  async getProfileById(req, res) {
+    try {
+      const { studentId } = req.params;
+      console.log(studentId);
+      // consr studentId = await StudentDetails.getStudentIdByUserId(userId);
+      const profile = await StudentDetails.getProfileByStudentId(studentId);
+      res.status(200).json(profile);
+    } catch (error) {
+      console.error("Error in getProfile:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = ProfileController;

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-// import axios from "axios";
 import {
   Card,
   CardContent,
@@ -36,6 +35,7 @@ import {
 import { Badge } from "../../components/ui/badge";
 import api from "../../api";
 import { StudentDetailsModal } from "../../components/StudentDetailsDailyModal"; // Import the modal component
+import { ProfileModal } from "../../components/ProfileModal"; // Import the ProfileModal component
 
 type StudentWithDetails = {
   id: string;
@@ -70,6 +70,8 @@ export default function PatientManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedStudent, setSelectedStudent] =
     useState<StudentWithDetails | null>(null);
+  const [viewDetailsModalOpen, setViewDetailsModalOpen] = useState(false);
+  const [viewProfileModalOpen, setViewProfileModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -320,30 +322,26 @@ export default function PatientManagementPage() {
                                     View Health Records
                                   </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    to={`/healthcare-provider/appointments/new?studentId=${student.id}`}
-                                    className="flex items-center"
-                                  >
-                                    <Calendar className="mr-2 h-4 w-4" />
-                                    Schedule Appointment
-                                  </Link>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                  <Link
-                                    to={`/healthcare-provider/alerts/new?studentId=${student.id}`}
-                                    className="flex items-center"
-                                  >
-                                    <AlertTriangle className="mr-2 h-4 w-4" />
-                                    Create Alert
-                                  </Link>
-                                </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => setSelectedStudent(student)}
+                                  onClick={() => {
+                                    setSelectedStudent(student);
+                                    setViewDetailsModalOpen(true);
+                                  }}
                                 >
                                   <div className="flex items-center">
                                     <MessageSquare className="mr-2 h-4 w-4" />
                                     View Details
+                                  </div>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedStudent(student);
+                                    setViewProfileModalOpen(true);
+                                  }}
+                                >
+                                  <div className="flex items-center">
+                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    View Profile
                                   </div>
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -360,11 +358,17 @@ export default function PatientManagementPage() {
         </motion.div>
       </main>
 
-      {/* Render the modal when a student is selected */}
-      {selectedStudent && (
+      {/* Render the modals conditionally */}
+      {selectedStudent && viewDetailsModalOpen && (
         <StudentDetailsModal
-          userId={selectedStudent.id} // Pass the userId to the modal
-          onClose={() => setSelectedStudent(null)}
+          userId={selectedStudent.id}
+          onClose={() => setViewDetailsModalOpen(false)}
+        />
+      )}
+      {selectedStudent && viewProfileModalOpen && (
+        <ProfileModal
+          userId={selectedStudent.id}
+          onClose={() => setViewProfileModalOpen(false)}
         />
       )}
     </div>

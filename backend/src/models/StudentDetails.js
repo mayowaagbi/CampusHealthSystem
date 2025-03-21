@@ -158,6 +158,44 @@ class StudentDetails extends BaseModel {
       throw new Error(`Failed to retrieve user ID: ${error.message}`);
     }
   }
+  async getProfileByStudentId(studentId) {
+    try {
+      console.log("Student ID:", studentId);
+
+      // Check if a record exists with the given studentId
+      const exists = await this.prisma.studentDetails.findFirst({
+        where: { id: studentId },
+      });
+
+      if (!exists) {
+        throw new Error(`No student found with ID: ${studentId}`);
+      }
+
+      const profile = await this.prisma.studentDetails.findUnique({
+        where: { id: studentId },
+        include: {
+          profile: {
+            include: {
+              emergencyContacts: true,
+            },
+          },
+        },
+      });
+
+      if (!profile) {
+        throw new Error("Profile not found");
+      }
+      // Ensure `emergencyContacts` is always an array
+      if (!profile.profile.emergencyContacts) {
+        profile.profile.emergencyContacts = [];
+      }
+
+      return profile;
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+      throw new Error("Failed to fetch profile");
+    }
+  }
 }
 
 module.exports = new StudentDetails();
