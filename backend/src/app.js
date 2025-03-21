@@ -7,6 +7,8 @@ const fileUpload = require("express-fileupload");
 const cookieParser = require("cookie-parser");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
+const fs = require("fs");
+const path = require("path");
 
 // Load environment variables
 config();
@@ -32,19 +34,26 @@ const studentRoutes = require("./routes/studentRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const alertRoutes = require("./routes/alertRoutes");
 const healthRouter = require("./routes/dailyHealthRoutes");
+
 // Import middleware
 const { authenticate } = require("./middleware/authMiddleware");
 const apiLimiter = require("./middleware/rateLimiter");
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { setupSocketHandlers, initialize } = require("./utils/sockets");
 const { authenticateSocket } = require("./utils/sockets");
-// import healthRouter from ;
+
 // Import utilities
 const logger = require("./utils/logger");
 
 // Initialize Express
 const app = express();
 const httpServer = createServer(app);
+
+// Ensure temporary directory exists
+const tempDir = path.join(__dirname, "temp");
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir, { recursive: true });
+}
 
 // Middleware pipeline
 app.use(helmet());
@@ -57,16 +66,16 @@ app.use(
   })
 );
 app.use(morgan("combined"));
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 app.use(cookieParser());
 app.use(apiLimiter);
 app.use(
   fileUpload({
-    limits: { fileSize: 5 * 1024 * 1024 },
-    abortOnLimit: true,
-    useTempFiles: true,
-    tempFileDir: "/tmp/",
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    abortOnLimit: true, // Return error if file size exceeds limit
+    useTempFiles: true, // Use temporary files for uploads
+    tempFileDir: tempDir, // Use custom temporary directory
   })
 );
 
@@ -133,9 +142,7 @@ httpServer.listen(PORT, () => {
   logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   logger.info(`Docs available at /api/docs`);
 });
-// io.on("connection", (socket) => {
-//   console.log("back Client connected:", socket.id);
-// });
+
 // Graceful shutdown
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received: Closing server");

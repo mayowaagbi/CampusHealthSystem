@@ -1,29 +1,33 @@
 const express = require("express");
-const multer = require("../config/multer");
-const {
-  uploadDocument,
-  getDocuments,
-  downloadDocument,
-  deleteDocument,
-  getAllRecords,
-} = require("../controllers/documentController"); // Import correctly
-const { authenticate, authorize } = require("../middleware/authMiddleware");
-
 const router = express.Router();
+const documentController = require("../controllers/documentController");
+const { authenticate } = require("../middleware/authMiddleware");
 
-// Upload route with proper middleware order
-router.post(
-  "/upload",
-  multer.single("document"), // Multer first
-  authenticate, // Authentication second
-  uploadDocument
-);
+// Log incoming requests
+router.use((req, res, next) => {
+  console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+  next();
+});
 
-// Apply authentication to other routes
+// Apply authentication to all routes
 router.use(authenticate);
-router.get("/", getDocuments);
-router.get("/download/:documentId", downloadDocument);
-router.delete("/:documentId", deleteDocument);
-router.get("/all", authorize("ADMIN", "PROVIDER"), getAllRecords);
+
+// Get all documents for the authenticated user
+router.get("/", documentController.getDocuments);
+
+// Upload a new document
+router.post("/upload", documentController.uploadDocument);
+
+// Download a specific document
+router.get("/download/:id", documentController.downloadDocument);
+
+// Delete a document
+router.delete("/:id", documentController.deleteDocument);
+
+// Log errors
+router.use((err, req, res, next) => {
+  console.error("Error in document routes:", err.message);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 module.exports = router;

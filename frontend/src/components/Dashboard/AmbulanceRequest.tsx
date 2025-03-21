@@ -9,13 +9,27 @@ import {
 } from "../../components/ui/card";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
+import api from "../../api";
 
 export default function AmbulanceRequest() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
   const COOLDOWN_DURATION = 10 * 60 * 1000;
+  const MAX_RETRIES = 3;
+
+  // Get the user's location with error handling and retries
+  const getLocation = async (): Promise<GeolocationPosition> => {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 15000, // 15 seconds timeout
+        maximumAge: 0, // Do not use cached location
+      });
+    });
+  };
 
   // Start the cooldown timer
   const startCooldown = () => {
@@ -32,9 +46,11 @@ export default function AmbulanceRequest() {
       });
     }, 1000);
   };
+
   const handleRequestAmbulance = async () => {
     setLoading(true);
     setError(null);
+    setRetryCount(0);
 
     try {
       // Check if geolocation is supported
@@ -42,16 +58,52 @@ export default function AmbulanceRequest() {
         throw new Error("Geolocation is not supported by your browser.");
       }
 
-      // Get the user's location with a timeout
-      const position = await new Promise<GeolocationPosition>(
-        (resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: true, // Use high accuracy mode
-            timeout: 10000, // 10 seconds timeout
-            maximumAge: 0, // Do not use cached location
-          });
+      let attempts = 0;
+      let position: GeolocationPosition | null = null;
+
+      // Try to get location with possible retries
+      while (!position && attempts < MAX_RETRIES) {
+        try {
+          position = await getLocation();
+          break; // If successful, exit the loop
+        } catch (locationError) {
+          attempts++;
+          setRetryCount(attempts);
+
+          if (attempts >= MAX_RETRIES) {
+            // All retries failed
+            if (locationError instanceof GeolocationPositionError) {
+              switch (locationError.code) {
+                case 1:
+                  throw new Error(
+                    "Location access denied. Please enable location services."
+                  );
+                case 2:
+                  throw new Error(
+                    "Position unavailable. Please try again in a different location."
+                  );
+                case 3:
+                  throw new Error(
+                    "Location request timed out. Please try again."
+                  );
+                default:
+                  throw new Error(`Location error: ${locationError.message}`);
+              }
+            } else {
+              throw new Error("Failed to get your location. Please try again.");
+            }
+          }
+
+          // Wait before retrying
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         }
-      );
+      }
+
+      if (!position) {
+        throw new Error(
+          "Unable to determine your location after multiple attempts."
+        );
+      }
 
       const { latitude, longitude } = position.coords;
       const accessToken = localStorage.getItem("accessToken");
@@ -61,8 +113,8 @@ export default function AmbulanceRequest() {
       }
 
       // Send the ambulance request
-      const response = await axios.post(
-        "http://localhost:3000/api/ambulance-requests",
+      const response = await api.post(
+        "/api/ambulance-requests",
         { latitude, longitude },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -103,7 +155,8 @@ export default function AmbulanceRequest() {
       setLoading(false);
     }
   };
-  const formatCooldownTime = (ms: any) => {
+
+  const formatCooldownTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
@@ -121,7 +174,7 @@ export default function AmbulanceRequest() {
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
-          variant="destructive" // Red button with white text
+          variant="destructive"
           onClick={handleRequestAmbulance}
           disabled={loading || cooldown}
           className={`w-full ${
@@ -131,7 +184,9 @@ export default function AmbulanceRequest() {
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Requesting Assistance...
+              {retryCount > 0
+                ? `Retrying (${retryCount}/${MAX_RETRIES})...`
+                : "Requesting Assistance..."}
             </>
           ) : cooldown ? (
             `Please wait (${formatCooldownTime(cooldownTime)})`
@@ -147,6 +202,16 @@ export default function AmbulanceRequest() {
         <div className="text-sm text-muted-foreground">
           <p>• Your precise location will be shared with emergency services</p>
           <p>• Keep your phone accessible for follow-up communication</p>
+          <p>
+            • Geocoding by{" "}
+            <a
+              href="https://www.openstreetmap.org"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              OpenStreetMap
+            </a>
+          </p>
         </div>
       </CardContent>
     </Card>

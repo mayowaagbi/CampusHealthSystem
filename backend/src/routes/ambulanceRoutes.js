@@ -7,7 +7,7 @@ module.exports = (io) => {
   router.use(authenticate);
 
   // Create a new ambulance request
-  router.post("/", (req, res) =>
+  router.post("/", authorize("STUDENT"), (req, res) =>
     AmbulanceController.createRequest(req, res, io)
   );
 

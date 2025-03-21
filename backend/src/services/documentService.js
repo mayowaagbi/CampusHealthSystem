@@ -1,15 +1,14 @@
-// services/documentService.js
 const MedicalDocumentModel = require("../models/MedicalDocument");
 
 class DocumentService {
-  async createDocument(studentId, fileData) {
+  async createDocument(studentId, file) {
     try {
       return await MedicalDocumentModel.create({
         studentId,
-        filename: fileData.originalname,
-        path: fileData.path,
-        mimetype: fileData.mimetype,
-        size: fileData.size,
+        filename: file.name,
+        path: file.tempFilePath,
+        mimetype: file.mimetype,
+        size: file.size,
       });
     } catch (error) {
       console.error("Create error:", error);
@@ -18,13 +17,8 @@ class DocumentService {
   }
 
   async getDocuments(studentId) {
-    // Changed parameter name
     try {
-      console.log("Fetching documents for student:", studentId);
-      return await MedicalDocumentModel.findMany({
-        where: { studentId }, // Changed from userId to studentId
-        orderBy: { uploadedAt: "desc" },
-      });
+      return await MedicalDocumentModel.findMany({ where: { studentId } });
     } catch (error) {
       console.error("Get documents error:", error);
       throw new Error("Failed to retrieve documents");
@@ -33,7 +27,6 @@ class DocumentService {
 
   async getDocumentById(documentId) {
     try {
-      console.log("Fetching document by ID:", documentId);
       return await MedicalDocumentModel.findById(documentId);
     } catch (error) {
       console.error("Get document by ID error:", error);
@@ -43,22 +36,10 @@ class DocumentService {
 
   async deleteDocument(documentId) {
     try {
-      console.log("Deleting document:", documentId);
       return await MedicalDocumentModel.delete(documentId);
     } catch (error) {
       console.error("Delete document error:", error);
       throw new Error("Failed to delete document");
-    }
-  }
-  async recentUploads(providerId) {
-    return MedicalDocumentModel.recentUploads(providerId);
-  }
-  async getAllHealthRecords() {
-    try {
-      return await MedicalDocumentModel.getAllHealthRecords();
-    } catch (error) {
-      console.error("Error in DocumentService:", error);
-      throw error; // Re-throw the error to the controller
     }
   }
 }

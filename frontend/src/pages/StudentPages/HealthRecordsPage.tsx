@@ -1,8 +1,8 @@
-// src/pages/StudentPages/StudentHealthRecordsPage.tsx
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../../api";
 import {
   Card,
   CardContent,
@@ -34,22 +34,20 @@ interface MedicalDocument {
 
 export default function StudentHealthRecordsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [records, setRecords] = useState<MedicalDocument[]>([]); // Ensure it's always an array
+  const [records, setRecords] = useState<MedicalDocument[]>([]);
   const [refresh, setRefresh] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   // Fetch records on component mount or refresh
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/documents",
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        const response = await api.get("/api/documents", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
 
         // Ensure response.data is an array before setting state
         if (Array.isArray(response.data)) {
@@ -70,7 +68,7 @@ export default function StudentHealthRecordsPage() {
     };
 
     fetchRecords();
-  }, [refresh]);
+  }, [refresh, toast]);
 
   // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,47 +79,65 @@ export default function StudentHealthRecordsPage() {
 
   // Handle file upload
   const handleUpload = async () => {
-    const formData = new FormData();
-    if (selectedFile) {
-      formData.append("document", selectedFile);
-    }
-
-    try {
-      console.log(`data: ${formData}`);
-      console.log(`${selectedFile}`);
-      await axios.post("http://localhost:3000/api/documents/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      });
-      toast({ title: "Success", description: "File uploaded successfully" });
-      setRefresh(!refresh);
-      setSelectedFile(null);
-    } catch (error) {
+    if (!selectedFile) {
       toast({
         title: "Error",
-        description: "Failed to upload file",
+        description: "Select a file",
         variant: "destructive",
       });
+      return;
     }
-  };
 
-  // Handle file download
-  const handleDownload = async (documentId: string) => {
+    setUploading(true);
+
+    const formData = new FormData();
+    console.log("Selected File:", selectedFile);
+    formData.append("document", selectedFile);
+
+    // Log FormData content
+    console.log("FormData content:");
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
     try {
-      const response = await axios.get(
-        ` http://localhost:3000/api/documents/download/${documentId}`,
+      const response = await axios.post(
+        "http://localhost:3000/api/documents/upload",
+        formData,
         {
-          responseType: "blob",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
 
-      // Log the response type to verify the file is correct
-      console.log("Downloaded file type:", response.headers["content-type"]);
+      toast({ title: "Success", description: "File uploaded successfully" });
+      setRefresh(!refresh);
+      setSelectedFile(null);
+      console.log("Upload response:", response.data);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Error",
+        description:
+          axios.isAxiosError(error) && error.response?.data?.message
+            ? error.response.data.message
+            : "Upload failed",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+  const handleDownload = async (documentId: string) => {
+    try {
+      const response = await api.get(`/api/documents/download/${documentId}`, {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
 
       // Create a URL for the blob response
       const blob = new Blob([response.data], {
@@ -129,7 +145,7 @@ export default function StudentHealthRecordsPage() {
       });
       const url = window.URL.createObjectURL(blob);
 
-      // Extract the filename (ensure it has an extension)
+      // Extract the filename
       const documentRecord = records.find((d) => d.id === documentId);
       const filename =
         documentRecord?.filename ||
@@ -143,7 +159,7 @@ export default function StudentHealthRecordsPage() {
       link.click();
 
       // Cleanup
-      link.remove();
+      link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download error:", error);
@@ -159,17 +175,15 @@ export default function StudentHealthRecordsPage() {
   const handleDelete = async (documentId: string) => {
     if (window.confirm("Are you sure you want to delete this document?")) {
       try {
-        await axios.delete(
-          `http://localhost:3000/api/documents/${documentId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          }
-        );
+        await api.delete(`/api/documents/${documentId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
         toast({ title: "Success", description: "File deleted successfully" });
         setRefresh(!refresh);
       } catch (error) {
+        console.error("Delete error:", error);
         toast({
           title: "Error",
           description: "Failed to delete file",
@@ -177,6 +191,13 @@ export default function StudentHealthRecordsPage() {
         });
       }
     }
+  };
+
+  // Format file size
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + " B";
+    else if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    else return (bytes / (1024 * 1024)).toFixed(2) + " MB";
   };
 
   return (
@@ -237,30 +258,65 @@ export default function StudentHealthRecordsPage() {
               <CardHeader>
                 <CardTitle>Upload New Record</CardTitle>
                 <CardDescription>
-                  Add a new health record to your file
+                  Add a new health record to your file. Accepted formats: PDF,
+                  JPEG, PNG (Max 10MB)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form className="space-y-4">
+                <form
+                  className="space-y-4"
+                  encType="multipart/form-data"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleUpload();
+                  }}
+                >
                   <div className="grid w-full max-w-sm items-center gap-1.5">
                     <Label htmlFor="document">Document</Label>
                     <Input
                       id="document"
+                      name="document"
                       type="file"
                       onChange={handleFileChange}
+                      accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
                     />
                   </div>
                   {selectedFile && (
                     <p className="text-sm text-gray-500">
-                      Selected file: {selectedFile.name}
+                      Selected file: {selectedFile.name} (
+                      {formatFileSize(selectedFile.size)})
                     </p>
                   )}
-                  <Button
-                    type="button"
-                    onClick={handleUpload}
-                    disabled={!selectedFile}
-                  >
-                    <FileUp className="mr-2 h-4 w-4" /> Upload Record
+                  <Button type="submit" disabled={!selectedFile || uploading}>
+                    {uploading ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Uploading...
+                      </>
+                    ) : (
+                      <>
+                        <FileUp className="mr-2 h-4 w-4" /> Upload Record
+                      </>
+                    )}
                   </Button>
                 </form>
               </CardContent>
@@ -284,14 +340,14 @@ export default function StudentHealthRecordsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {Array.isArray(records) && records.length > 0 ? (
+                    {records.length > 0 ? (
                       records.map((record) => (
                         <TableRow key={record.id}>
-                          <TableCell>{record.filename}</TableCell>
-                          <TableCell>{record.mimetype}</TableCell>
-                          <TableCell>
-                            {(record.size / 1024).toFixed(2)} KB
+                          <TableCell className="font-medium">
+                            {record.filename}
                           </TableCell>
+                          <TableCell>{record.mimetype}</TableCell>
+                          <TableCell>{formatFileSize(record.size)}</TableCell>
                           <TableCell>
                             {new Date(record.uploadedAt).toLocaleDateString()}
                           </TableCell>

@@ -12,12 +12,6 @@ class AmbulanceController {
   async createRequest(req, res) {
     try {
       // Check authorization first
-      if (req.user.role !== "student") {
-        return res.status(403).json({
-          success: false,
-          message: "Not authorized to create ambulance requests",
-        });
-      }
 
       const userId = req.user.id;
       const { latitude, longitude, address, details } = req.body;
