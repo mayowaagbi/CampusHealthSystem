@@ -42,6 +42,14 @@ class DocumentService {
       throw new Error("Failed to delete document");
     }
   }
+  async recentUploads() {
+    try {
+      return await MedicalDocumentModel.getRecentUploads();
+    } catch (error) {
+      console.error("Error fetching recent uploads:", error);
+      throw new Error("Failed to fetch recent uploads");
+    }
+  }
 }
 
 module.exports = new DocumentService();

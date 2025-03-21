@@ -94,7 +94,7 @@ export default function StudentDashboardPage() {
           <h2 className="text-2xl font-semibold mb-4">
             Mental Health Resources
           </h2>
-          <div className="flex flex-wrap justify-center gap-6 mb-8">
+          <div className="flex w-max flex-wrap justify-center gap-6 mb-8">
             <Card>
               <CardHeader>
                 <CardTitle>Mood Tracker</CardTitle>
@@ -104,15 +104,6 @@ export default function StudentDashboardPage() {
                 <MoodAndJournal />
               </CardContent>
             </Card>
-            {/* <Card>
-              <CardHeader>
-                <CardTitle>Journal</CardTitle>
-                <CardDescription>Express your thoughts</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <JournalEntry />
-              </CardContent>
-            </Card> */}
             <MentalHealthResources />
           </div>
 

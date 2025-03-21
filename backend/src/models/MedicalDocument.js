@@ -102,17 +102,40 @@ class MedicalDocumentModel extends BaseModel {
       throw error;
     }
   }
-  async recentUploads(providerId) {
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  // async recentUploads(providerId) {
+  //   const sevenDaysAgo = new Date();
+  //   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-    return this.prisma.medicalDocument.count({
-      where: {
-        student: { primaryCareProviderId: providerId },
-        uploadedAt: { gte: sevenDaysAgo },
-      },
-    });
+  //   return this.prisma.medicalDocument.count({
+  //     where: {
+  //       student: { primaryCareProviderId: providerId },
+  //       uploadedAt: { gte: sevenDaysAgo },
+  //     },
+  //   });
+  // }
+  async getRecentUploads() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Start of the day
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1); // Start of the next day
+
+      const uploads = await this.prisma.medicalDocument.count({
+        where: {
+          uploadedAt: {
+            gte: today, // Greater than or equal to today
+            lt: tomorrow, // Less than tomorrow
+          },
+        },
+      });
+
+      return uploads;
+    } catch (error) {
+      console.error("Error fetching recent uploads:", error);
+      throw new Error("Failed to fetch recent uploads");
+    }
   }
+
   async getAllHealthRecords() {
     try {
       return await this.prisma.medicalDocument.findMany({

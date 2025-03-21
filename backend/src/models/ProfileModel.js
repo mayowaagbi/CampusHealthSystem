@@ -51,6 +51,7 @@ class Profile extends BaseModel {
               email: true, // Include the email from the User table
             },
           },
+          emergencyContacts: true, // Include emergency contacts
         },
       });
 
@@ -81,34 +82,29 @@ class Profile extends BaseModel {
         notifySms: data.notifySms,
         notifyPush: data.notifyPush,
         emergencyContacts: {
-          updateMany:
-            data.emergencyContacts
-              ?.filter((contact) => contact.id && contact.relationship) // Ensure valid IDs and relationships
-              .map((contact) => ({
-                where: { id: contact.id },
-                data: {
-                  name: contact.name,
-                  phone: contact.phone,
-                  relationship: contact.relationship,
-                },
-              })) || [],
-          create:
-            data.emergencyContacts
-              ?.filter((contact) => !contact.id && contact.relationship) // Ensure new contacts have relationships
-              .map((contact) => ({
+          // Update existing contacts
+          updateMany: data.emergencyContacts
+            .filter((contact) => contact.id) // Only update contacts with an ID
+            .map((contact) => ({
+              where: { id: contact.id },
+              data: {
                 name: contact.name,
                 phone: contact.phone,
-                relationship: contact.relationship || "Unknown", // Provide a default value if missing
-              })) || [],
+                relationship: contact.relationship,
+              },
+            })),
+          // Create new contacts
+          create: data.emergencyContacts
+            .filter((contact) => !contact.id) // Only create contacts without an ID
+            .map((contact) => ({
+              name: contact.name,
+              phone: contact.phone,
+              relationship: contact.relationship || "Unknown", // Default value
+            })),
         },
-        // user: {
-        //   update: {
-        //     email: data.email,
-        //   },
-        // },
       },
       include: {
-        emergencyContacts: true,
+        emergencyContacts: true, // Include updated contacts in the response
       },
     });
   }

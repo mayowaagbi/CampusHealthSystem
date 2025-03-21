@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -5,43 +8,94 @@ import {
   CardTitle,
   CardDescription,
 } from "../ui/card";
-import { Link } from "react-router-dom";
-import { BookOpen, Heart, PhoneCall } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 export default function MentalHealthResources() {
+  interface Article {
+    title: string;
+    source: string;
+    url: string;
+  }
+
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchArticles() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await axios.get(
+          "https://newsapi.org/v2/top-headlines?country=us&category=health&apiKey=54b9dbfa5cec42d8ae0f99925d739e58"
+        );
+
+        // Extract only relevant article details
+        interface ApiResponse {
+          articles: ApiArticle[];
+        }
+
+        interface ApiArticle {
+          title: string;
+          source: {
+            name: string;
+          };
+          url: string;
+        }
+
+        const formattedArticles: Article[] = response.data.articles.map(
+          (article: ApiArticle) => ({
+            title: article.title,
+            source: article.source.name,
+            url: article.url,
+          })
+        );
+
+        setArticles(formattedArticles.slice(0, 5)); // Limit to 5 articles
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred");
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchArticles();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Mental Health Resources</CardTitle>
-        <CardDescription>Helpful tools and information</CardDescription>
+        <CardTitle>Latest Mental Health News</CardTitle>
+        <CardDescription>Stay updated with key health insights</CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="space-y-2">
-          <li>
-            <Link
-              to="/meditation"
-              className="flex items-center text-blue-600 hover:underline"
-            >
-              <BookOpen className="mr-2 h-4 w-4" /> Guided Meditations
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/stress-management"
-              className="flex items-center text-blue-600 hover:underline"
-            >
-              <Heart className="mr-2 h-4 w-4" /> Stress Management Tips
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/crisis-helpline"
-              className="flex items-center text-blue-600 hover:underline"
-            >
-              <PhoneCall className="mr-2 h-4 w-4" /> Crisis Helpline
-            </Link>
-          </li>
-        </ul>
+        {loading ? (
+          <p>Loading articles...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : (
+          <ul className="space-y-2">
+            {articles.map((article, index) => (
+              <li key={index} className="border-b pb-2">
+                <Link
+                  to={`/article?url=${encodeURIComponent(article.url)}`}
+                  className="flex items-center text-blue-600 hover:underline"
+                >
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  {article.title}
+                </Link>
+                <p className="text-xs text-gray-500">
+                  Source: {article.source}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
       </CardContent>
     </Card>
   );

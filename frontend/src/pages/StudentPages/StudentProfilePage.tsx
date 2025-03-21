@@ -11,6 +11,7 @@ import MedicalInformation from "./components/profile/MedicalInformation";
 import NotificationPreferences from "./components/profile/NotificationPreferences";
 import api from "../../api";
 interface EmergencyContactType {
+  id?: string;
   name: string;
   phone: string;
   relation?: string;
@@ -94,6 +95,37 @@ export default function StudentProfilePage() {
     setProfile(originalProfile);
   };
 
+  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
+  //   e.preventDefault();
+  //   if (!profile) return;
+
+  //   try {
+  //     const payload = {
+  //       ...profile,
+  //       emergencyContacts: profile.emergencyContacts.filter(
+  //         (ec) => ec.name && ec.phone
+  //       ),
+  //     };
+
+  //     console.log("Sending payload:", payload);
+  //     const accessToken = localStorage.getItem("accessToken");
+  //     if (!accessToken) {
+  //       throw new Error("Access token not found.");
+  //     }
+  //     const response = await axios.put<Profile>(
+  //       "http://localhost:3000/api/profile  ",
+  //       payload,
+  //       { headers: { Authorization: `Bearer ${accessToken}` } }
+  //     );
+  //     setProfile(response.data);
+  //     setOriginalProfile(response.data);
+  //     setIsEditing(false);
+  //     toast({ title: "Success", description: "Profile updated successfully" });
+  //   } catch (error) {
+  //     handleError(error, "Failed to update profile");
+  //   }
+  // };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!profile) return;
@@ -101,9 +133,14 @@ export default function StudentProfilePage() {
     try {
       const payload = {
         ...profile,
-        emergencyContacts: profile.emergencyContacts.filter(
-          (ec) => ec.name && ec.phone
-        ),
+        emergencyContacts: profile.emergencyContacts
+          .filter((ec) => ec.name && ec.phone) // Filter out empty contacts
+          .map((ec) => ({
+            id: ec.id || null, // Include ID if it exists
+            name: ec.name,
+            phone: ec.phone,
+            relationship: ec.relation || "Unknown", // Ensure a default value
+          })),
       };
 
       console.log("Sending payload:", payload);
@@ -112,7 +149,7 @@ export default function StudentProfilePage() {
         throw new Error("Access token not found.");
       }
       const response = await axios.put<Profile>(
-        "http://localhost:3000/api/profile  ",
+        "http://localhost:3000/api/profile",
         payload,
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
@@ -124,7 +161,6 @@ export default function StudentProfilePage() {
       handleError(error, "Failed to update profile");
     }
   };
-
   const handleError = (error: unknown, defaultMessage: string) => {
     const message = axios.isAxiosError(error)
       ? error.response?.data?.error || error.message
@@ -141,7 +177,7 @@ export default function StudentProfilePage() {
 
   const updateEmergencyContact = (
     index: number,
-    field: "name" | "phone" | "relation",
+    field: "name" | "phone" | "relationship",
     value: string
   ) => {
     setProfile((prev) => {

@@ -9,11 +9,20 @@ import { Input } from "../../../../components/ui/input";
 import { Label } from "../../../../components/ui/label";
 import { Button } from "../../../../components/ui/button";
 import { cn } from "../../../../lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
 interface EmergencyContactProps {
   contacts: Array<{
     name: string;
     phone: string;
-    relation?: string;
+    relationship?: string;
   }>;
   onChange: (
     index: number,
@@ -24,6 +33,16 @@ interface EmergencyContactProps {
   onRemove: (index: number) => void;
   isEditing: boolean;
 }
+
+// Predefined relationship options
+const relationshipOptions = [
+  { value: "Father", label: "Father" },
+  { value: "Mother", label: "Mother" },
+  { value: "Spouse", label: "Spouse" },
+  { value: "Sibling", label: "Sibling" },
+  { value: "Friend", label: "Friend" },
+  { value: "Other", label: "Other" },
+];
 
 export default function EmergencyContact({
   contacts,
@@ -83,16 +102,38 @@ export default function EmergencyContact({
             </div>
             <div className="space-y-2">
               <Label htmlFor={`relation-${index}`}>Relation</Label>
-              <Input
-                id={`relation-${index}`}
-                value={contact.relation || ""}
-                onChange={(e) => onChange(index, "relation", e.target.value)}
-                readOnly={!isEditing}
-                className={cn(
-                  !isEditing && "bg-muted/50 cursor-not-allowed",
-                  "transition-colors"
-                )}
-              />
+              {isEditing ? (
+                <Select
+                  value={contact.relationship || ""}
+                  onValueChange={(value) =>
+                    onChange(index, "relationship", value)
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a relationship" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Relationships</SelectLabel>
+                      {relationshipOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  id={`relation-${index}`}
+                  value={contact.relationship || ""}
+                  readOnly
+                  className={cn(
+                    "bg-muted/50 cursor-not-allowed",
+                    "transition-colors"
+                  )}
+                />
+              )}
             </div>
           </div>
         ))}
