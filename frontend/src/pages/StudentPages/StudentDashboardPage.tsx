@@ -104,9 +104,18 @@ export default function StudentDashboardPage() {
                 <MoodAndJournal />
               </CardContent>
             </Card>
-            <div className="w-full md:w-[45%] lg:w-[65%]">
-              <MentalHealthResources />
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Educational Resources</CardTitle>
+                <CardDescription>
+                  Recently added health tips and articles
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MentalHealthResources />
+                <div className="w-full md:w-[45%] lg:w-[65%]"></div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Emergency Contacts Section */}

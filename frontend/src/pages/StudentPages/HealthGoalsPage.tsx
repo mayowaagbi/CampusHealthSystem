@@ -23,7 +23,7 @@ export default function StudentHealthGoalsPage() {
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link
           className="flex items-center justify-center"
-          to="student/dashboard"
+          to="/student/dashboard"
         >
           <span className="sr-only">Campus Health Management System</span>
           <Heart className="h-6 w-6 text-primary" />

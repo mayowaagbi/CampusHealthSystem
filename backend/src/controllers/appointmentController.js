@@ -6,7 +6,7 @@ const { sendEmail } = require("../utils/mailer");
 const { sendAppointmentStatusEmail } = require("../utils/mailer");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const asyncHandler = require("../utils/asyncHandler");
-
+const ProfielModel = require("../models/ProfileModel");
 class AppointmentController {
   // Create a new appointment (only for students)
   createAppointment = asyncHandler(async (req, res) => {
@@ -221,7 +221,7 @@ class AppointmentController {
       const { id } = req.params;
       const { status } = req.body;
       const providerId = req.user.id;
-
+      const providerprofile = await ProfielModel.findByUserId(providerId);
       const updatedAppointment = await AppointmentService.updateStatus(
         id,
         status,
@@ -235,7 +235,7 @@ class AppointmentController {
           subject: `Appointment ${status}`,
           text: `Your appointment has been ${status.toLowerCase()}.\n\nDetails:\n
           Date: ${updatedAppointment.startTime}\n
-          Provider: ${updatedAppointment.provider.profile.firstName}`,
+          Provider: ${providerprofile.firstName}`,
         });
       }
 

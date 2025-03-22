@@ -267,31 +267,8 @@ export default function HealthcareProviderDashboard() {
                 Recently added health tips and articles
               </CardDescription>
             </CardHeader>
-            {/* <CardContent>
-                <ul className="space-y-4">
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      10 Tips for Managing Stress During Exams
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      The Importance of Sleep for Academic Performance
-                    </span>
-                  </li>
-                  <li className="flex items-center">
-                    <BookOpen className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">
-                      Nutrition Guide for College Students
-                    </span>
-                  </li>
-                </ul>
-              </CardContent>
-               */}
+
             <CardContent>
-              {" "}
               <MentalHealthResources />
             </CardContent>
           </Card>

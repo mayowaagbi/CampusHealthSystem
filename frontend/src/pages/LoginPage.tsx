@@ -155,9 +155,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-white dark:bg-black">
       {/* Header */}
-      <header className="px-4 lg:px-6 h-14 flex items-center">
+      <header className="px-4 lg:px-6 h-14 flex items-center bg-white dark:bg-black">
         <Link className="flex items-center justify-center" to="/">
           <motion.div
             initial={{ rotate: -180, opacity: 0 }}
@@ -170,7 +170,7 @@ export default function LoginPage() {
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="ml-2 text-lg font-bold"
+            className="ml-2 text-lg font-bold text-black dark:text-white"
           >
             Health Bridge
           </motion.span>
@@ -178,16 +178,18 @@ export default function LoginPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center">
+      <main className="flex-1 flex items-center justify-center bg-white dark:bg-black">
         <motion.div
-          className="w-full max-w-md p-6 space-y-6 bg-white rounded-lg shadow-lg"
+          className="w-full max-w-md p-6 space-y-6 bg-white dark:bg-black border border-white-500 rounded-lg shadow-lg"
           initial="initial"
           animate="animate"
           variants={fadeIn}
         >
           <div className="text-center">
             <Heart className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="mt-4 text-2xl font-bold">Login to Health Bridge</h1>
+            <h1 className="mt-4 text-2xl font-bold text-black dark:text-white">
+              Login to Health Bridge
+            </h1>
           </div>
 
           <Form {...form}>
@@ -198,11 +200,14 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel className="text-black dark:text-white">
+                      Email
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="example@healthbridge.com"
                         type="email"
+                        className="bg-white dark:bg-gray-700 text-black dark:text-white"
                         {...field}
                       />
                     </FormControl>
@@ -217,12 +222,15 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel className="text-black dark:text-white">
+                      Password
+                    </FormLabel>
                     <div className="relative">
                       <FormControl>
                         <Input
                           placeholder="Enter your password"
-                          type={showPassword ? "text" : "password"} // Toggle type
+                          type={showPassword ? "text" : "password"}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
                           {...field}
                         />
                       </FormControl>
@@ -232,9 +240,9 @@ export default function LoginPage() {
                         onClick={() => setShowPassword((prev) => !prev)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-5 w-5 text-gray-500" />
+                          <EyeOff className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         ) : (
-                          <Eye className="h-5 w-5 text-gray-500" />
+                          <Eye className="h-5 w-5 text-gray-500 dark:text-gray-400" />
                         )}
                       </button>
                     </div>

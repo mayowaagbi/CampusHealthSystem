@@ -3,12 +3,12 @@ const nodemailer = require("nodemailer");
 const logger = require("./logger");
 
 // Debugging: Log environment variables (Avoid logging passwords!)
-console.log("[Mailer] Environment Variables:", {
-  SMTP_HOST: process.env.SMTP_HOST,
-  SMTP_PORT: process.env.SMTP_PORT,
-  SMTP_USER: process.env.SMTP_USER,
-  EMAIL_FROM: process.env.EMAIL_FROM,
-});
+// console.log("[Mailer] Environment Variables:", {
+//   SMTP_HOST: process.env.SMTP_HOST,
+//   SMTP_PORT: process.env.SMTP_PORT,
+//   SMTP_USER: process.env.SMTP_USER,
+//   EMAIL_FROM: process.env.EMAIL_FROM,
+// });
 
 // Mail transporter setup
 const transporter = nodemailer.createTransport({
@@ -84,7 +84,7 @@ const generateStyledEmail = (title, message, appointment) => {
  */
 const sendAppointmentConfirmation = (user, appointment) => {
   const title = "Appointment Confirmed";
-  const message = `Hello ${user.name},<br>Your appointment with ${appointment.provider} has been confirmed.`;
+  const message = `Hello,<br>Your appointment with ${appointment.provider} has been confirmed.`;
 
   const html = generateStyledEmail(title, message, appointment);
 
@@ -99,9 +99,7 @@ const sendAppointmentConfirmation = (user, appointment) => {
  */
 const sendAppointmentStatusEmail = (user, appointment, status) => {
   const title = `Appointment ${status}`;
-  const message = `Hello ${user.firstName} ${
-    user.lastName
-  },<br>Your appointment with ${
+  const message = `Hello,<br>Your appointment with ${
     appointment.provider
   } has been <strong>${status.toLowerCase()}</strong>.`;
 

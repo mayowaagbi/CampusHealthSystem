@@ -10,7 +10,7 @@ import {
   ClipboardCheck,
   Users,
 } from "lucide-react";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 
 export default function TSPage() {
   const fadeIn = {

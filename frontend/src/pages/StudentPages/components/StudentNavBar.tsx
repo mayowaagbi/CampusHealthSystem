@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { Button } from "../../../components/ui/button";
 import { disconnectSocket } from "../../../hooks/sockets";
 import { Heart } from "lucide-react";
+import ThemeToggle from "../../../components/ThemeToggle";
 function StudentNavBar() {
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -20,6 +21,7 @@ function StudentNavBar() {
         <span className="ml-2 text-lg font-semibold">CHMS</span>
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6">
+        <ThemeToggle />
         <Link
           className="text-sm font-medium hover:underline underline-offset-4"
           to="/student/appointments"

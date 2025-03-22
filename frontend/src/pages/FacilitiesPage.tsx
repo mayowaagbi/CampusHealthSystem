@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { Building, Dumbbell, Leaf } from "lucide-react";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 
 export default function FacilitiesPage() {
   const fadeIn = {
@@ -20,7 +20,7 @@ export default function FacilitiesPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
+      <header className="">
         <Navbar />
       </header>
       <main className="flex-1">

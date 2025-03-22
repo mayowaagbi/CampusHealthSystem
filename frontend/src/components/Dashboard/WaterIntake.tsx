@@ -12,11 +12,21 @@ import {
 } from "../../components/ui/card";
 import api from "../../api";
 
-export default function WaterIntake() {
+interface WaterIntakeProps {
+  waterIntake: number;
+  waterGoal: number;
+  onChange: (amount: number) => void;
+}
+import { FC } from "react";
+
+const WaterIntake: FC<WaterIntakeProps> = ({
+  waterIntake,
+  waterGoal,
+  onChange,
+}) => {
   // waterIntake is stored in milliliters
-  const [waterIntake, setWaterIntake] = useState(0);
+  const [currentWaterIntake, setCurrentWaterIntake] = useState(0);
   const [loading, setLoading] = useState(false);
-  const waterGoal = 2500; // Fixed water goal in milliliters (2.5 L)
 
   // Fetch current water intake on mount
   useEffect(() => {
@@ -27,19 +37,20 @@ export default function WaterIntake() {
         const response = await api.get("/api/water", {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-        setWaterIntake(response.data.current || 0);
+        setCurrentWaterIntake(response.data.current || 0);
       } catch (error) {
         console.error("Error fetching water intake:", error);
       }
     };
+
     fetchWaterIntake();
   }, []);
 
   const handleWaterChange = async (amount: number) => {
-    const newTotal = waterIntake + amount;
+    const newTotal = currentWaterIntake + amount;
     console.log(
       "Current:",
-      waterIntake,
+      currentWaterIntake,
       "Amount:",
       amount,
       "New Total:",
@@ -61,7 +72,7 @@ export default function WaterIntake() {
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
       console.log("Server response:", response.data);
-      setWaterIntake(response.data.current);
+      setCurrentWaterIntake(response.data.current);
     } catch (error) {
       console.error("Error updating water intake:", error);
       alert("Failed to update water intake.");
@@ -128,7 +139,7 @@ export default function WaterIntake() {
               <Minus className="h-4 w-4" />
             </Button>
             <span className="text-2xl font-bold">
-              {(waterIntake / 1000).toFixed(1)}L
+              {(currentWaterIntake / 1000).toFixed(1)}L
             </span>
             <Button
               variant="outline"
@@ -143,12 +154,12 @@ export default function WaterIntake() {
             <div className="flex justify-between mb-1">
               <span className="text-sm font-medium">Daily Goal</span>
               <span className="text-sm font-medium">
-                {(waterIntake / 1000).toFixed(1)}L /{" "}
+                {(currentWaterIntake / 1000).toFixed(1)}L /{" "}
                 {(waterGoal / 1000).toFixed(1)}L
               </span>
             </div>
             <Progress
-              value={(waterIntake / waterGoal) * 100}
+              value={(currentWaterIntake / waterGoal) * 100}
               className="w-full"
             />
           </div>
@@ -156,4 +167,6 @@ export default function WaterIntake() {
       </CardContent>
     </Card>
   );
-}
+};
+
+export default WaterIntake;

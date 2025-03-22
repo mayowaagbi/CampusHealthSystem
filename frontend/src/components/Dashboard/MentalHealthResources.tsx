@@ -9,6 +9,7 @@ import {
   CardDescription,
 } from "../ui/card";
 import { BookOpen } from "lucide-react";
+import { LoadingSpinner } from "../LoadingSpinner";
 
 export default function MentalHealthResources() {
   interface Article {
@@ -73,22 +74,24 @@ export default function MentalHealthResources() {
         {/* <CardTitle>Latest Mental Health News</CardTitle>
         <CardDescription>Stay updated with key health insights</CardDescription> */}
       </CardHeader>
-      <CardContent>
+      <CardContent className="border-0">
         {loading ? (
-          <p>Loading articles...</p>
+          <LoadingSpinner />
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : (
           <ul className="space-y-2">
             {articles.map((article, index) => (
               <li key={index} className="border-b pb-2">
-                <Link
-                  to={`/article?url=${encodeURIComponent(article.url)}`}
+                <a
+                  href={article.url} // Use the external URL directly
+                  target="_blank" // Open in a new tab
+                  rel="noopener noreferrer" // Security best practice
                   className="flex items-center text-blue-600 hover:underline"
                 >
                   <BookOpen className="mr-2 h-4 w-4" />
                   {article.title}
-                </Link>
+                </a>
                 <p className="text-xs text-gray-500">
                   Source: {article.source}
                 </p>
