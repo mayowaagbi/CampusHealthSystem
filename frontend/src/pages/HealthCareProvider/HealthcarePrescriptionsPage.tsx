@@ -19,6 +19,8 @@ import { Button } from "../../components/ui/button";
 import { useToast } from "../../hooks/use-toast";
 import axios from "axios"; // Import Axios
 import api from "../../api";
+import { Heart } from "lucide-react";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 interface AmbulanceRequest {
   id: string;
   userId: string;
@@ -119,7 +121,7 @@ export default function AmbulanceRequestsPage() {
   );
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading indicator
+    return <LoadingSpinner />; // Show loading indicator
   }
 
   if (error) {
@@ -136,11 +138,7 @@ export default function AmbulanceRequestsPage() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">

@@ -70,8 +70,8 @@ export default function MentalHealthResources() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Latest Mental Health News</CardTitle>
-        <CardDescription>Stay updated with key health insights</CardDescription>
+        {/* <CardTitle>Latest Mental Health News</CardTitle>
+        <CardDescription>Stay updated with key health insights</CardDescription> */}
       </CardHeader>
       <CardContent>
         {loading ? (

@@ -25,9 +25,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import { ChevronDown, Search, Edit, Trash2, Send, Bell } from "lucide-react";
+import { ChevronDown, Search, Edit, Trash2, Send, Heart } from "lucide-react";
 import { CreateHealthAlertDialog } from "../../components/CreateHealthAlertDialog";
-import { CreateNotificationDialog } from "../../components/CreateNotificationDialog";
+// import { CreateNotificationDialog } from "../../components/CreateNotificationDialog";
 import { useToast } from "../../hooks/use-toast";
 import api from "../../api";
 
@@ -345,11 +345,7 @@ export default function AlertsPage() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">

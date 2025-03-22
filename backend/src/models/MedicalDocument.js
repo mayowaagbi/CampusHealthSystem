@@ -150,16 +150,16 @@ class MedicalDocumentModel extends BaseModel {
               },
             },
           },
-          uploadedBy: {
-            include: {
-              profile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                },
-              },
-            },
-          },
+          // uploadedBy: {
+          //   include: {
+          //     profile: {
+          //       select: {
+          //         firstName: true,
+          //         lastName: true,
+          //       },
+          //     },
+          //   },
+          // },
         },
       });
     } catch (error) {

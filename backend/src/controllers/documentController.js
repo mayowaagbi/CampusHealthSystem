@@ -97,6 +97,15 @@ class DocumentController {
         .json({ error: "Document deletion failed", details: error.message });
     }
   }
+  async getAllDocuments(req, res) {
+    try {
+      const documents = await DocumentService.getAllDocuments();
+      res.status(200).json(documents);
+    } catch (error) {
+      console.error("Error in getAllDocuments:", error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 module.exports = new DocumentController();

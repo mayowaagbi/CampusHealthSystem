@@ -38,7 +38,15 @@ export function UploadHealthRecordDialog({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [patients, setPatients] = useState([]); // Initialize as an empty array
+  interface Patient {
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  }
+
+  const [patients, setPatients] = useState<Patient[]>([]); // Initialize as an empty array
 
   const form = useForm({
     defaultValues: {

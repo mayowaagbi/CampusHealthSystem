@@ -31,11 +31,13 @@ import {
   MessageSquare,
   Sliders,
   AlertTriangle,
+  Heart,
 } from "lucide-react";
 import { Badge } from "../../components/ui/badge";
 import api from "../../api";
 import { StudentDetailsModal } from "../../components/StudentDetailsDailyModal"; // Import the modal component
 import { ProfileModal } from "../../components/ProfileModal"; // Import the ProfileModal component
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 
 type StudentWithDetails = {
   id: string;
@@ -136,11 +138,7 @@ export default function PatientManagementPage() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
@@ -249,7 +247,7 @@ export default function PatientManagementPage() {
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center">
-                        Loading...
+                        <LoadingSpinner />
                       </TableCell>
                     </TableRow>
                   ) : error ? (

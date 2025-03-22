@@ -50,6 +50,15 @@ class DocumentService {
       throw new Error("Failed to fetch recent uploads");
     }
   }
+  async getAllDocuments() {
+    try {
+      const documents = MedicalDocumentModel.getAllHealthRecords();
+      return documents;
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      throw new Error("Failed to fetch documents");
+    }
+  }
 }
 
 module.exports = new DocumentService();

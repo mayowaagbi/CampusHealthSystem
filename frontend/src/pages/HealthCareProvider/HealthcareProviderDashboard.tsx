@@ -21,6 +21,7 @@ import {
   Pill,
   AlertTriangle,
   BookOpen,
+  Heart,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -33,6 +34,7 @@ import {
   Legend,
 } from "recharts";
 import api from "../../api";
+import MentalHealthResources from "../../components/Dashboard/MentalHealthResources";
 export default function HealthcareProviderDashboard() {
   const [dashboardStats, setDashboardStats] = useState({
     totalStudents: 0,
@@ -61,18 +63,6 @@ export default function HealthcareProviderDashboard() {
       .get("/api/provider-dashboard/overview", { headers })
       .then((response) => setAppointmentData(response.data))
       .catch((error) => console.error("Appointments error:", error));
-
-    // // Fetch recent messages
-    // api
-    //   .get("/api/messages/recent")
-    //   .then((response) => setMessages(response.data))
-    //   .catch((error) => console.error("Messages error:", error));
-
-    // // Fetch educational resources
-    // axios
-    //   .get("/api/resources/recent")
-    //   .then((response) => setResources(response.data))
-    //   .catch((error) => console.error("Resources error:", error));
   }, []);
   const handleLogout = () => {
     localStorage.removeItem("accessToken"); // Clear the access token
@@ -91,11 +81,7 @@ export default function HealthcareProviderDashboard() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
@@ -254,19 +240,19 @@ export default function HealthcareProviderDashboard() {
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/healthcare-provider/health-records/upload">
+                  <Link to="/healthcare-provider/health-records">
                     <FileText className="mr-2 h-4 w-4" />
                     Upload Health Record
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/healthcare-provider/prescriptions/create">
+                  <Link to="/healthcare-provider/prescriptions">
                     <Pill className="mr-2 h-4 w-4" />
-                    Write Prescription
+                    Ambulance Request
                   </Link>
                 </Button>
                 <Button asChild variant="outline">
-                  <Link to="/healthcare-provider/alerts/create">
+                  <Link to="/healthcare-provider/alerts">
                     <AlertTriangle className="mr-2 h-4 w-4" />
                     Create Health Alert
                   </Link>
@@ -274,15 +260,14 @@ export default function HealthcareProviderDashboard() {
               </CardContent>
             </Card>
           </div>
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Educational Resources</CardTitle>
-                <CardDescription>
-                  Recently added health tips and articles
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+          <Card>
+            <CardHeader>
+              <CardTitle>Educational Resources</CardTitle>
+              <CardDescription>
+                Recently added health tips and articles
+              </CardDescription>
+            </CardHeader>
+            {/* <CardContent>
                 <ul className="space-y-4">
                   <li className="flex items-center">
                     <BookOpen className="mr-2 h-4 w-4 text-green-500" />
@@ -304,8 +289,12 @@ export default function HealthcareProviderDashboard() {
                   </li>
                 </ul>
               </CardContent>
-            </Card>
-          </div>
+               */}
+            <CardContent>
+              {" "}
+              <MentalHealthResources />
+            </CardContent>
+          </Card>
         </motion.div>
       </main>
     </div>

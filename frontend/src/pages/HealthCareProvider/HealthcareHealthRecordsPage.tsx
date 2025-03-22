@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-// import axios from "axios";
 import {
   Card,
   CardContent,
@@ -24,27 +23,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import { ChevronDown, Search, FileText, Download, Eye } from "lucide-react";
+import {
+  ChevronDown,
+  Search,
+  FileText,
+  Download,
+  Eye,
+  Heart,
+} from "lucide-react";
 import { toast } from "react-toastify";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import api from "../../api";
-
 interface HealthRecord {
   id: string;
-  student: {
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  };
-  uploadedBy: {
-    profile: {
-      firstName: string;
-      lastName: string;
-    };
-  };
   filename: string;
-  createdAt: string;
+  student: {
+    id: string;
+    profile: {
+      firstName: string;
+      lastName: string;
+    };
+  };
+  uploadedAt: string;
+  uploadedById: string;
 }
 
 export default function HealthRecordsPage() {
@@ -63,10 +64,13 @@ export default function HealthRecordsPage() {
         const response = await api.get("/api/documents/all", { headers });
 
         console.log("API Response:", response.data); // Debugging
-        setRecords(response.data);
+
+        // Ensure records is always an array
+        setRecords(Array.isArray(response.data) ? response.data : []);
       } catch (error) {
         console.error("Error fetching health records:", error);
         toast.error("Failed to load health records");
+        setError("Failed to load health records");
       } finally {
         setLoading(false);
       }
@@ -75,13 +79,16 @@ export default function HealthRecordsPage() {
     fetchRecords();
   }, []);
 
-  const filteredRecords = records.filter((record) =>
-    `${record.student?.profile?.firstName || ""} ${
-      record.student?.profile?.lastName || ""
-    }`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+  // Ensure records is an array before filtering
+  const filteredRecords = Array.isArray(records)
+    ? records.filter((record) =>
+        `${record.student?.profile?.firstName || ""} ${
+          record.student?.profile?.lastName || ""
+        }`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   if (loading) {
     return <LoadingSpinner />;
@@ -125,11 +132,7 @@ export default function HealthRecordsPage() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
@@ -190,9 +193,6 @@ export default function HealthRecordsPage() {
                     <span className="sr-only">Search</span>
                   </Button>
                 </div>
-                {/* <UploadHealthRecordDialog
-                  onUploadSuccess={() => window.location.reload()}
-                /> */}
               </div>
               <Table>
                 <TableHeader>
@@ -208,15 +208,15 @@ export default function HealthRecordsPage() {
                   {filteredRecords.map((record) => (
                     <TableRow key={record.id}>
                       <TableCell>
-                        {`${record.student.profile.firstName} ${record.student.profile.lastName}`}
+                        {`${record.student?.profile?.firstName || "Unknown"} ${
+                          record.student?.profile?.lastName || ""
+                        }`}
                       </TableCell>
                       <TableCell>{record.filename}</TableCell>
                       <TableCell>
-                        {new Date(record.createdAt).toLocaleDateString()}
+                        {new Date(record.uploadedAt).toLocaleDateString()}
                       </TableCell>
-                      <TableCell>
-                        {`${record.uploadedBy.profile.firstName} ${record.uploadedBy.profile.lastName}`}
-                      </TableCell>
+                      <TableCell>{record.uploadedById || "Unknown"}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

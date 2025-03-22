@@ -27,7 +27,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-import { ChevronDown, Search, CheckCircle, XCircle } from "lucide-react";
+import { ChevronDown, Search, CheckCircle, XCircle, Heart } from "lucide-react";
 import { toast } from "react-toastify";
 import { Badge } from "../../components/ui/badge";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
@@ -288,11 +288,7 @@ export default function AppointmentManagementPage() {
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider
           </span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS Provider</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">

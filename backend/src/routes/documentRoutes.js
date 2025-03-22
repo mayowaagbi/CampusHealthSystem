@@ -20,6 +20,7 @@ router.post("/upload", documentController.uploadDocument);
 
 // Download a specific document
 router.get("/download/:id", documentController.downloadDocument);
+router.get("/all", documentController.getAllDocuments);
 
 // Delete a document
 router.delete("/:id", documentController.deleteDocument);

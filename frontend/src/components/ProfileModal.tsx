@@ -18,17 +18,27 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import api from "../api";
 
-interface Profile {
-  firstName: string;
-  lastName: string;
-  phone: string;
-  bloodType?: string;
-  allergies?: string;
-  emergencyContacts?: Array<{
-    name: string;
+interface StudentDetails {
+  id: string;
+  profileId: string;
+  studentId: string;
+  insuranceNumber: string | null;
+  primaryCareProviderId: string | null;
+  profile: {
+    id: string;
+    firstName: string;
+    lastName: string;
     phone: string;
-    relationship?: string;
-  }>;
+    dateOfBirth: string;
+    bloodType?: string;
+    allergies?: string;
+    emergencyContacts: Array<{
+      id: string;
+      name: string;
+      phone: string;
+      relationship?: string;
+    }>;
+  };
 }
 
 interface StudentDetailsModalProps {
@@ -37,7 +47,9 @@ interface StudentDetailsModalProps {
 }
 
 export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [studentDetails, setStudentDetails] = useState<StudentDetails | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,11 +58,11 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
       try {
         const accessToken = localStorage.getItem("accessToken");
         if (!accessToken) throw new Error("Access token not found.");
-        const response = await api.get<Profile>(
+        const response = await api.get<StudentDetails>(
           `/api/profile/${userId}/profile`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
-        setProfile(response.data);
+        setStudentDetails(response.data);
         setError(null);
       } catch (error) {
         setError("Failed to fetch profile details");
@@ -64,14 +76,26 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
   }, [userId]);
 
   if (loading) return <div className="text-center">Loading profile...</div>;
-  if (!profile) return <div className="text-center">Profile not found</div>;
+  if (!studentDetails)
+    return <div className="text-center">Profile not found</div>;
+
+  // Destructure the nested profile data
+  const { profile } = studentDetails;
+  const {
+    firstName,
+    lastName,
+    phone,
+    bloodType,
+    allergies,
+    emergencyContacts,
+  } = profile;
 
   // Ensure `emergencyContacts` is always an array
-  const safeEmergencyContacts = profile.emergencyContacts || [];
+  const safeEmergencyContacts = emergencyContacts || [];
 
   return (
     <Dialog open={!!userId} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Student Profile Details</DialogTitle>
           <DialogDescription>
@@ -96,7 +120,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={profile.firstName}
+                    value={firstName}
                     readOnly
                     className="bg-muted/50 cursor-not-allowed"
                   />
@@ -105,7 +129,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={profile.lastName}
+                    value={lastName}
                     readOnly
                     className="bg-muted/50 cursor-not-allowed"
                   />
@@ -114,7 +138,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                   <Label htmlFor="phone">Phone</Label>
                   <Input
                     id="phone"
-                    value={profile.phone}
+                    value={phone}
                     readOnly
                     className="bg-muted/50 cursor-not-allowed"
                   />
@@ -138,7 +162,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                 ) : (
                   safeEmergencyContacts.map((contact, index) => (
                     <div
-                      key={index}
+                      key={contact.id} // Use contact.id as the key
                       className="space-y-4 border-b pb-4 last:border-0"
                     >
                       <div className="space-y-2">
@@ -185,7 +209,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                   <Label htmlFor="bloodType">Blood Type</Label>
                   <Input
                     id="bloodType"
-                    value={profile.bloodType || "N/A"}
+                    value={bloodType || "N/A"}
                     readOnly
                     className="bg-muted/50 cursor-not-allowed"
                   />
@@ -194,7 +218,7 @@ export function ProfileModal({ userId, onClose }: StudentDetailsModalProps) {
                   <Label htmlFor="allergies">Allergies</Label>
                   <Input
                     id="allergies"
-                    value={profile.allergies || "N/A"}
+                    value={allergies || "N/A"}
                     readOnly
                     className="bg-muted/50 cursor-not-allowed"
                   />

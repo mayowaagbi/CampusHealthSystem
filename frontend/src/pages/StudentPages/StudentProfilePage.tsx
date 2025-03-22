@@ -10,6 +10,7 @@ import EmergencyContact from "./components/profile/EmergencyContact";
 import MedicalInformation from "./components/profile/MedicalInformation";
 import NotificationPreferences from "./components/profile/NotificationPreferences";
 import api from "../../api";
+import { LoadingSpinner } from "../../components/LoadingSpinner";
 interface EmergencyContactType {
   id?: string;
   name: string;
@@ -215,7 +216,7 @@ export default function StudentProfilePage() {
     );
   };
 
-  if (loading) return <div className="p-4 text-center">Loading profile...</div>;
+  if (loading) return <LoadingSpinner />;
   if (!profile) return <div className="p-4 text-center">Profile not found</div>;
 
   return (
