@@ -9,6 +9,7 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import TSPage from "./pages/TSpage";
 import NotFound from "./pages/NotFound";
+import { Toaster } from "react-hot-toast";
 import { GlobalStateProvider } from "./context/GlobalState";
 import StudentDashboardPage from "./pages/StudentPages/StudentDashboardPage";
 import AdminDashboardPage from "./pages/AdminPages/AdminDashboard";
@@ -318,6 +319,8 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <GlobalStateProvider>
         <BrowserRouter>
+          {" "}
+          <Toaster position="bottom-right" />
           <div className="toast-container">
             {notifications.map((notification) => (
               <Toast

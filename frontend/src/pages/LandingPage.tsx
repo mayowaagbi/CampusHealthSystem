@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "../components/ui/button";
 import { Heart, ArrowRight, Activity, BookOpen, Users } from "lucide-react";
 import Navbar from "../components/Navbar";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 export default function LandingPage() {
   const fadeIn = {
     initial: { opacity: 0, y: 20 },

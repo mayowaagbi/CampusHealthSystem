@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-
 import { toast } from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { format, parse } from "date-fns";
@@ -38,6 +37,7 @@ import {
 import api from "../../api";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
 import { StudentAppointmentsHistoryTable } from "../../components/StudentAppointmentsHistoryTable";
+import { Heart } from "lucide-react";
 // Enums and Constants
 enum AppointmentStatus {
   PENDING = "PENDING",
@@ -233,6 +233,7 @@ export default function StudentAppointmentPage() {
       setSelectedAppointment(null);
       setIsConfirmDialogOpen(false);
       setPendingAppointment(null);
+      toast.success("Appointment processed successfully!");
     } catch (error: any) {
       console.error("[Confirm] Error processing appointment:", {
         message: error.message,
@@ -290,12 +291,11 @@ export default function StudentAppointmentPage() {
     <div className="flex flex-col min-h-screen">
       {/* Header */}
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" to="/">
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+        <Link
+          className="flex items-center justify-center"
+          to="student/dashboard"
+        >
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">

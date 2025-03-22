@@ -24,6 +24,8 @@ import {
 import { FileUp, Download, Trash } from "lucide-react";
 import { useToast } from "../../hooks/use-toast";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { Heart } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 interface MedicalDocument {
   id: string;
@@ -162,6 +164,7 @@ export default function StudentHealthRecordsPage() {
       // Cleanup
       link.parentNode?.removeChild(link);
       window.URL.revokeObjectURL(url);
+      toast({ title: "Success", description: " successfully Downloaded" });
     } catch (error) {
       console.error("Download error:", error);
       toast({
@@ -204,19 +207,18 @@ export default function StudentHealthRecordsPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" to="/">
+        <Link
+          className="flex items-center justify-center"
+          to="student/dashboard"
+        >
           <span className="sr-only">Campus Health Management System</span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
-            to="/student/dashboard"
+            to="student/dashboard"
           >
             Dashboard
           </Link>

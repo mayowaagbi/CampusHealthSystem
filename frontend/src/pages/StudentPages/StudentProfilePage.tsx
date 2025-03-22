@@ -11,6 +11,7 @@ import MedicalInformation from "./components/profile/MedicalInformation";
 import NotificationPreferences from "./components/profile/NotificationPreferences";
 import api from "../../api";
 import { LoadingSpinner } from "../../components/LoadingSpinner";
+import { Heart } from "lucide-react";
 interface EmergencyContactType {
   id?: string;
   name: string;
@@ -96,37 +97,6 @@ export default function StudentProfilePage() {
     setProfile(originalProfile);
   };
 
-  // const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-
-  //   e.preventDefault();
-  //   if (!profile) return;
-
-  //   try {
-  //     const payload = {
-  //       ...profile,
-  //       emergencyContacts: profile.emergencyContacts.filter(
-  //         (ec) => ec.name && ec.phone
-  //       ),
-  //     };
-
-  //     console.log("Sending payload:", payload);
-  //     const accessToken = localStorage.getItem("accessToken");
-  //     if (!accessToken) {
-  //       throw new Error("Access token not found.");
-  //     }
-  //     const response = await axios.put<Profile>(
-  //       "http://localhost:3000/api/profile  ",
-  //       payload,
-  //       { headers: { Authorization: `Bearer ${accessToken}` } }
-  //     );
-  //     setProfile(response.data);
-  //     setOriginalProfile(response.data);
-  //     setIsEditing(false);
-  //     toast({ title: "Success", description: "Profile updated successfully" });
-  //   } catch (error) {
-  //     handleError(error, "Failed to update profile");
-  //   }
-  // };
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!profile) return;
@@ -222,13 +192,12 @@ export default function StudentProfilePage() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" to="/">
+        <Link
+          className="flex items-center justify-center"
+          to="student/dashboard"
+        >
           <span className="sr-only">Campus Health Management System</span>
-          <img
-            alt="Logo"
-            className="h-6 w-6"
-            src="/placeholder.svg?height=24&width=24"
-          />
+          <Heart className="h-6 w-6 text-primary" />
           <span className="ml-2 text-lg font-semibold">CHMS</span>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">

@@ -17,9 +17,8 @@ import {
   FormMessage,
 } from "../components/ui/form";
 import { Input } from "../components/ui/input";
-import Footer from "../components/footer";
-import { Heart } from "lucide-react";
-import { Eye, EyeOff } from "lucide-react";
+import Footer from "../components/Footer";
+import { Heart, Eye, EyeOff } from "lucide-react";
 import { registerSocket } from "../hooks/sockets";
 
 // Zod schema for login validation
@@ -121,13 +120,11 @@ export default function LoginPage() {
           // Handle the error gracefully (e.g., log it or show a message to the user)
         }
       }
+
+      // Handle provider-specific logic
       if (decodedToken.role === "PROVIDER") {
         registerSocket("PROVIDER", decodedToken.id);
       }
-      // Handle provider-specific logic
-      // if (decodedToken.role === "PROVIDER") {
-      //   socket.emit("register-provider", user.id);
-      // }
 
       // Redirect based on role
       switch (decodedToken.role) {
@@ -145,6 +142,8 @@ export default function LoginPage() {
           break;
       }
 
+      // Show success toast
+      console.log("Login successful! Showing toast...");
       toast.success("Login successful!");
     } catch (error) {
       toast.error(

@@ -5,7 +5,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Heart, Mail, Phone, MapPin } from "lucide-react";
-import Footer from "../components/footer";
+import Footer from "../components/Footer";
 
 export default function ContactPage() {
   const [formStatus, setFormStatus] = useState<
@@ -79,9 +79,11 @@ export default function ContactPage() {
           >
             Contact
           </Link>
-          <Button variant="outline" size="sm">
-            Login
-          </Button>
+          <Link to="/login">
+            <Button variant="outline" size="sm">
+              Login
+            </Button>
+          </Link>
         </nav>
       </header>
       <main className="flex-1">

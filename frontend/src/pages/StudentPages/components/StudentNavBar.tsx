@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Button } from "../../../components/ui/Button";
+import { Button } from "../../../components/ui/button";
 import { disconnectSocket } from "../../../hooks/sockets";
+import { Heart } from "lucide-react";
 function StudentNavBar() {
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -13,13 +14,9 @@ function StudentNavBar() {
   };
   return (
     <>
-      <Link className="flex items-center justify-center" to="/">
+      <Link className="flex items-center justify-center" to="student/dashboard">
         <span className="sr-only">Campus Health Management System</span>
-        <img
-          alt="Logo"
-          className="h-6 w-6"
-          src="/placeholder.svg?height=24&width=24"
-        />
+        <Heart className="h-6 w-6 text-primary" />
         <span className="ml-2 text-lg font-semibold">CHMS</span>
       </Link>
       <nav className="ml-auto flex gap-4 sm:gap-6">

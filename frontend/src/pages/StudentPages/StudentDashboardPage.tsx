@@ -94,8 +94,8 @@ export default function StudentDashboardPage() {
           <h2 className="text-2xl font-semibold mb-4">
             Mental Health Resources
           </h2>
-          <div className="flex w-max flex-wrap justify-center gap-6 mb-8">
-            <Card>
+          <div className="flex flex-col md:flex-row flex-wrap justify-center gap-6 mb-8">
+            <Card className="w-full md:w-[45%] lg:w-[30%]">
               <CardHeader>
                 <CardTitle>Mood Tracker</CardTitle>
                 <CardDescription>Track your daily mood</CardDescription>
@@ -104,7 +104,9 @@ export default function StudentDashboardPage() {
                 <MoodAndJournal />
               </CardContent>
             </Card>
-            <MentalHealthResources />
+            <div className="w-full md:w-[45%] lg:w-[65%]">
+              <MentalHealthResources />
+            </div>
           </div>
 
           {/* Emergency Contacts Section */}
