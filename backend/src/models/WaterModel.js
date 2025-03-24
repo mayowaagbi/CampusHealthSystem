@@ -78,7 +78,7 @@ class WaterModel extends BaseModel {
     }
   }
 
-  static async upsertTarget(userId, date, target) {
+  async upsertTarget(userId, date, target) {
     return this.prisma.waterGoal.upsert({
       where: {
         userId_date: {

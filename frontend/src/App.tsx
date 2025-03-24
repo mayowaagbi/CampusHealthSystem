@@ -33,6 +33,7 @@ import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescription
 import { AmbulanceRequestProvider } from "./context/AmbulanceRequestContext";
 import Toast from "./components/toast/Toast";
 import { getSocket, connectSocket } from "./hooks/sockets";
+import UserSignupPage from "./pages/UserSignUpPage";
 
 const queryClient = new QueryClient();
 
@@ -196,8 +197,6 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        {" "}
-        {/* Wrap the app with ThemeProvider */}
         <GlobalStateProvider>
           <BrowserRouter>
             <Toaster position="bottom-right" />
@@ -220,6 +219,7 @@ export default function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/Terms&Services" element={<TSPage />} />
               <Route path="*" element={<NotFound />} />
+              <Route path="/usersignup" element={<UserSignupPage />} />
 
               {/* Student Pages */}
               <Route

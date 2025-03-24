@@ -78,6 +78,11 @@ function Navbar() {
             Login
           </Button>
         </Link>
+        <Link to="/usersignup">
+          <Button variant="outline" size="sm">
+            Signup
+          </Button>
+        </Link>
       </nav>
 
       {/* Mobile Menu (Conditional Rendering) */}
