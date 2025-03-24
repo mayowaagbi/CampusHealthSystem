@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import api from "../../api";
+import { toast } from "react-hot-toast";
 
 export default function AmbulanceRequest() {
   const [loading, setLoading] = useState(false);
@@ -25,8 +26,8 @@ export default function AmbulanceRequest() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
         enableHighAccuracy: true,
-        timeout: 15000, // 15 seconds timeout
-        maximumAge: 0, // Do not use cached location
+        timeout: 15000,
+        maximumAge: 0,
       });
     });
   };
@@ -118,7 +119,7 @@ export default function AmbulanceRequest() {
         { latitude, longitude },
         { headers: { Authorization: `Bearer ${accessToken}` } }
       );
-
+      toast.success(" Ambulance successfully requested!");
       console.log(
         "Ambulance request sent successfully!\n" +
           `Request ID: ${response.data.id}\n` +

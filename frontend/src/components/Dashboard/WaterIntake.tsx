@@ -58,10 +58,10 @@ const WaterIntake: FC<WaterIntakeProps> = ({
       "Goal:",
       waterGoal
     );
-    if (newTotal < 0 || newTotal > waterGoal) {
-      alert("Water intake cannot be negative or exceed the daily goal.");
-      return;
-    }
+    // if (newTotal < 0 || newTotal > waterGoal) {
+    //   alert("Water intake cannot be negative or exceed the daily goal.");
+    //   return;
+    // }
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("accessToken");
