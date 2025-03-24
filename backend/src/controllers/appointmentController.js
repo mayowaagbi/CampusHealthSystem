@@ -1,5 +1,5 @@
 const AppointmentService = require("../services/AppointmentService");
-const StudentService = require("../services/studentService");
+const StudentService = require("../services/StudentService");
 const ProviderService = require("../services/ProviderService");
 const SupportService = require("../services/SupportService");
 const { sendEmail } = require("../utils/mailer");
