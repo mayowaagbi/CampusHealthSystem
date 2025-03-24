@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const AmbulanceController = require("../controllers/AmbulanceController");
+const AmbulanceController = require("../controllers/ambulanceController");
 const { authenticate, authorize } = require("../middleware/authMiddleware");
 
 module.exports = (io) => {
