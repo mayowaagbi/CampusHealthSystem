@@ -20,7 +20,7 @@
 // src/routes/notificationRoutes.js
 const express = require("express");
 const router = express.Router();
-const NotificationController = require("../controllers/NotificationController");
+const NotificationController = require("../controllers/notificationController");
 const { authorize, authenticate } = require("../middleware/authMiddleware");
 
 router.use(authenticate);
