@@ -118,6 +118,7 @@ const HealthChatbot: React.FC<{ apiKey?: string }> = ({
                 "Provide accurate, concise health information. Never diagnose - " +
                 "always recommend consulting a professional for medical concerns.",
             },
+
             ...messages.map((m) => ({ role: m.role, content: m.content })),
             { role: "user", content: content.trim() },
           ],

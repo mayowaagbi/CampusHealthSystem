@@ -41,6 +41,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // If refresh fails, log the user out
         logout();
+        clearAuthData();
         return Promise.reject(refreshError);
       }
     }
@@ -64,4 +65,11 @@ axiosInstance.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+export const clearAuthData = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("Role"); // Clear the role
+
+  // Add any other auth-related items you store
+};
 export default api;

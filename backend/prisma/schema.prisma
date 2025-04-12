@@ -375,8 +375,8 @@ model AmbulanceRequest {
   id        String        @id @default(uuid())
   userId    String
   status    RequestStatus @default(PENDING)
-  latitude  Float
-  longitude Float
+  latitude  Float?
+  longitude Float?
   address   String?
   files     String[] // Array of file URLs
   createdAt DateTime      @default(now())

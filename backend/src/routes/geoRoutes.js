@@ -7,5 +7,6 @@ const router = express.Router();
 router.use(authenticate);
 router.post("/track", rateLimiter, geoController.processLocation);
 router.get("/progress", geoController.getProgress);
+router.post("/reset", geoController.resetStepCount);
 
 module.exports = router;

@@ -7,6 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import api from "../../api";
@@ -18,10 +19,12 @@ export default function AmbulanceRequest() {
   const [cooldown, setCooldown] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
   const [retryCount, setRetryCount] = useState(0);
+  const [showManualAddress, setShowManualAddress] = useState(false);
+  const [manualAddress, setManualAddress] = useState("");
+  const [locationDetails, setLocationDetails] = useState("");
   const COOLDOWN_DURATION = 10 * 60 * 1000;
-  const MAX_RETRIES = 3;
+  const MAX_RETRIES = 2; // Reduced to show manual input sooner
 
-  // Get the user's location with error handling and retries
   const getLocation = async (): Promise<GeolocationPosition> => {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -32,7 +35,6 @@ export default function AmbulanceRequest() {
     });
   };
 
-  // Start the cooldown timer
   const startCooldown = () => {
     setCooldown(true);
     setCooldownTime(COOLDOWN_DURATION);
@@ -48,112 +50,120 @@ export default function AmbulanceRequest() {
     }, 1000);
   };
 
+  const submitRequest = async (latitude?: number, longitude?: number) => {
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        throw new Error("Authentication required. Please log in again.");
+      }
+
+      const response = await api.post(
+        "/api/ambulance-requests",
+        {
+          latitude,
+          longitude,
+          address: manualAddress || undefined,
+          details: locationDetails,
+        },
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+
+      toast.success("Ambulance successfully requested!");
+      console.log("Ambulance request sent successfully!", response.data);
+      startCooldown();
+    } catch (error) {
+      console.error("Error requesting ambulance:", error);
+      setError(
+        (axios.isAxiosError(error) && error.response?.data?.error) ||
+          (error instanceof Error && error.message) ||
+          "Failed to request ambulance."
+      );
+      throw error;
+    }
+  };
+
   const handleRequestAmbulance = async () => {
     setLoading(true);
     setError(null);
     setRetryCount(0);
+    setShowManualAddress(false);
 
     try {
-      // Check if geolocation is supported
       if (!navigator.geolocation) {
         throw new Error("Geolocation is not supported by your browser.");
       }
 
-      let attempts = 0;
       let position: GeolocationPosition | null = null;
+      let attempts = 0;
 
-      // Try to get location with possible retries
       while (!position && attempts < MAX_RETRIES) {
         try {
           position = await getLocation();
-          break; // If successful, exit the loop
+          break;
         } catch (locationError) {
           attempts++;
           setRetryCount(attempts);
 
           if (attempts >= MAX_RETRIES) {
-            // All retries failed
-            if (locationError instanceof GeolocationPositionError) {
-              switch (locationError.code) {
-                case 1:
-                  throw new Error(
-                    "Location access denied. Please enable location services."
-                  );
-                case 2:
-                  throw new Error(
-                    "Position unavailable. Please try again in a different location."
-                  );
-                case 3:
-                  throw new Error(
-                    "Location request timed out. Please try again."
-                  );
-                default:
-                  throw new Error(`Location error: ${locationError.message}`);
-              }
-            } else {
-              throw new Error("Failed to get your location. Please try again.");
-            }
+            setShowManualAddress(true);
+            return;
           }
 
-          // Wait before retrying
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
 
       if (!position) {
-        throw new Error(
-          "Unable to determine your location after multiple attempts."
-        );
+        setShowManualAddress(true);
+        return;
       }
 
-      const { latitude, longitude } = position.coords;
-      const accessToken = localStorage.getItem("accessToken");
-
-      if (!accessToken) {
-        throw new Error("Authentication required. Please log in again.");
-      }
-
-      // Send the ambulance request
-      const response = await api.post(
-        "/api/ambulance-requests",
-        { latitude, longitude },
-        { headers: { Authorization: `Bearer ${accessToken}` } }
-      );
-      toast.success(" Ambulance successfully requested!");
-      console.log(
-        "Ambulance request sent successfully!\n" +
-          `Request ID: ${response.data.id}\n` +
-          `Status: ${response.data.status}`
-      );
-      startCooldown();
+      await submitRequest(position.coords.latitude, position.coords.longitude);
     } catch (error) {
-      console.error("Error requesting ambulance:", error);
-
-      if (error instanceof GeolocationPositionError) {
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setError(
-              "Location access denied. Please enable location services."
-            );
-            break;
-          case error.POSITION_UNAVAILABLE:
-            setError("Location information is unavailable.");
-            break;
-          case error.TIMEOUT:
-            setError("Location request timed out. Please try again.");
-            break;
-          default:
-            setError("Failed to retrieve your location.");
-        }
-      } else {
-        setError(
-          (axios.isAxiosError(error) && error.response?.data?.error) ||
-            (error instanceof Error && error.message) ||
-            "Failed to request ambulance."
-        );
-      }
+      handleLocationError(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleManualSubmit = async () => {
+    if (!manualAddress.trim()) {
+      setError("Please enter a valid address");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await submitRequest();
+    } catch (error) {
+      console.error("Error submitting manual request:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLocationError = (error: unknown) => {
+    console.error("Location error:", error);
+
+    if (error instanceof GeolocationPositionError) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          setError("Location access denied. Please enable location services.");
+          break;
+        case error.POSITION_UNAVAILABLE:
+          setError("Location information is unavailable.");
+          break;
+        case error.TIMEOUT:
+          setError("Location request timed out. Please try again.");
+          break;
+        default:
+          setError("Failed to retrieve your location.");
+      }
+    } else {
+      setError(
+        (error instanceof Error && error.message) ||
+          "Failed to request ambulance."
+      );
     }
   };
 
@@ -169,50 +179,95 @@ export default function AmbulanceRequest() {
       <CardHeader>
         <CardTitle>Emergency Ambulance Request</CardTitle>
         <CardDescription>
-          In case of emergency, click below to send your current location to
-          dispatch an ambulance.
+          In case of emergency, click below to send your location to dispatch an
+          ambulance.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Button
-          variant="destructive"
-          onClick={handleRequestAmbulance}
-          disabled={loading || cooldown}
-          className={`w-full ${
-            loading || cooldown ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {retryCount > 0
-                ? `Retrying (${retryCount}/${MAX_RETRIES})...`
-                : "Requesting Assistance..."}
-            </>
-          ) : cooldown ? (
-            `Please wait (${formatCooldownTime(cooldownTime)})`
-          ) : (
-            "Request Emergency Ambulance"
-          )}
-        </Button>
+        {!showManualAddress ? (
+          <>
+            <Button
+              variant="destructive"
+              onClick={handleRequestAmbulance}
+              disabled={loading || cooldown}
+              className={`w-full ${
+                loading || cooldown ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {retryCount > 0
+                    ? `Retrying (${retryCount}/${MAX_RETRIES})...`
+                    : "Requesting Assistance..."}
+                </>
+              ) : cooldown ? (
+                `Please wait (${formatCooldownTime(cooldownTime)})`
+              ) : (
+                "Request Emergency Ambulance"
+              )}
+            </Button>
 
-        {error && (
-          <div className="text-red-500 text-sm mt-2">Error: {error}</div>
+            {error && (
+              <div className="text-red-500 text-sm mt-2">Error: {error}</div>
+            )}
+          </>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Enter Your Address
+              </label>
+              <Input
+                value={manualAddress}
+                onChange={(e) => setManualAddress(e.target.value)}
+                placeholder="Street, City, Postal Code"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Additional Location Details (Optional)
+              </label>
+              <Input
+                value={locationDetails}
+                onChange={(e) => setLocationDetails(e.target.value)}
+                placeholder="Apartment number, landmarks, etc."
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowManualAddress(false)}
+                className="flex-1"
+              >
+                Back
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleManualSubmit}
+                disabled={loading}
+                className="flex-1"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Request"
+                )}
+              </Button>
+            </div>
+          </div>
         )}
 
         <div className="text-sm text-muted-foreground">
-          <p>• Your precise location will be shared with emergency services</p>
+          <p>• Your location will be shared with emergency services</p>
           <p>• Keep your phone accessible for follow-up communication</p>
-          <p>
-            • Geocoding by{" "}
-            <a
-              href="https://www.openstreetmap.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              OpenStreetMap
-            </a>
-          </p>
         </div>
       </CardContent>
     </Card>

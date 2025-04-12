@@ -23,6 +23,7 @@ import AmbulanceRequest from "../../components/Dashboard/AmbulanceRequest";
 import WeeklyHealthOverview from "../../components/Dashboard/WeeklyHealthOverview";
 import QuickLinks from "../../components/Dashboard/QuickLinks";
 import { MoodAndJournal } from "../../components/Dashboard/MoodAndJournal";
+import BMICalculator from "../../components/Dashboard/BMICalculator";
 
 export default function StudentDashboardPage() {
   const [waterIntake, setWaterIntake] = useState(1.5);
@@ -94,7 +95,7 @@ export default function StudentDashboardPage() {
           <h2 className="text-2xl font-semibold mb-4">
             Mental Health Resources
           </h2>
-          <div className="flex flex-row justify-center gap-4 mb-8 ">
+          <div className="flex flex-row flex-wrap justify-center gap-4 mb-8 ">
             {/* sm:flex-wrap */}
             <Card className="w-full md:w-[45%] lg:w-[30%]">
               <CardHeader>
@@ -124,6 +125,7 @@ export default function StudentDashboardPage() {
           <h2 className="text-2xl font-semibold mb-4">Ambulance Request</h2>
           <div className="grid gap-6 md:grid-cols-2 mb-8">
             <AmbulanceRequest />
+            <BMICalculator />
           </div>
 
           {/* Weekly Health Overview */}

@@ -14,7 +14,12 @@ class GeoModel extends BaseModel {
 
   async saveNewLocation(userId, location) {
     return await this.prisma.userLocation.create({
-      data: { userId, latitude: location.lat, longitude: location.lng },
+      data: {
+        userId,
+        latitude: location.lat,
+        longitude: location.lng,
+        timestamp: new Date(), // Ensure timestamp is set
+      },
     });
   }
 
@@ -28,6 +33,16 @@ class GeoModel extends BaseModel {
       create: { userId, steps, date: today, source: "GEO" },
     });
   }
+
+  // New method for resetting steps
+  async updateStepEntry(userId, date, stepsValue) {
+    return await this.prisma.stepEntry.upsert({
+      where: { userId_date: { userId, date } },
+      update: { steps: stepsValue },
+      create: { userId, steps: stepsValue, date, source: "RESET" },
+    });
+  }
+
   async getStepsByDate(userId, date) {
     console.log(`Fetching steps for ${userId} on ${date}`);
     try {
@@ -44,6 +59,7 @@ class GeoModel extends BaseModel {
       throw error;
     }
   }
+
   async updateDailyGoal(userId, date, target) {
     return this.prisma.stepEntry.upsert({
       where: {
