@@ -259,8 +259,8 @@ export default function LoginPage() {
           </Form>
 
           <div className="text-center text-sm">
-            <Link to="#" className="text-primary hover:underline">
-              Forgot password?
+            <Link to="/usersignup" className="text-primary hover:underline">
+              Don't have an account?
             </Link>
           </div>
         </motion.div>

@@ -93,8 +93,10 @@ const useGeolocationTracker = (accessToken: string) => {
 };
 
 export default function StepCount({ stepCount, stepGoal }: StepCountProps) {
-  const accessToken = "your-access-token"; // Replace with actual token retrieval logic
-  useGeolocationTracker(accessToken);
+  const accessToken = localStorage.getItem("accessToken" as string);
+  if (accessToken) {
+    useGeolocationTracker(accessToken);
+  }
 
   return (
     <Card>

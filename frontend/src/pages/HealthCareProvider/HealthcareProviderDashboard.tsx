@@ -46,6 +46,16 @@ export default function HealthcareProviderDashboard() {
   const navigate = useNavigate();
   // const [messages, setMessages] = useState([]);
   // const [resources, setResources] = useState([]);
+  const defaultData = [
+    { name: "Week 1", scheduled: 10, completed: 10 },
+    { name: "Week 2", scheduled: 21, completed: 3 },
+    { name: "Week 3", scheduled: 12, completed: 12 },
+    { name: "Week 4", scheduled: 20, completed: 10 },
+  ];
+  const chartData =
+    appointmentData && appointmentData.length > 0
+      ? appointmentData
+      : defaultData;
 
   useEffect(() => {
     // Fetch dashboard stats
@@ -204,7 +214,7 @@ export default function HealthcareProviderDashboard() {
               <CardContent>
                 <div className="h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={appointmentData}>
+                    <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />

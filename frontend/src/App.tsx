@@ -33,7 +33,9 @@ import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescription
 import { AmbulanceRequestProvider } from "./context/AmbulanceRequestContext";
 import Toast from "./components/toast/Toast";
 import { getSocket, connectSocket } from "./hooks/sockets";
+import { ErrorBoundary } from "react-error-boundary";
 import UserSignupPage from "./pages/UserSignUpPage";
+import HealthChatbot from "./components/HealthChatbot";
 
 const queryClient = new QueryClient();
 
@@ -102,7 +104,7 @@ export default function App() {
           userId: string;
           type: string;
           title: string;
-          content: string;
+          message: string;
           createdAt?: string;
         }
 
@@ -147,7 +149,7 @@ export default function App() {
               _id: notification.id,
               type: mappedType,
               title: notification.title,
-              message: notification.content,
+              message: notification.message,
               data: {
                 timestamp: notification.createdAt
                   ? new Date(notification.createdAt).getTime()
@@ -200,6 +202,22 @@ export default function App() {
         <GlobalStateProvider>
           <BrowserRouter>
             <Toaster position="bottom-right" />
+            {userRole === "STUDENT" ? (
+              <ErrorBoundary
+                fallbackRender={({ error, resetErrorBoundary }) => (
+                  <div role="alert">
+                    <p>Something went wrong:</p>
+                    <pre>{error.message}</pre>
+                    <button onClick={resetErrorBoundary}>Try again</button>
+                  </div>
+                )}
+              >
+                <HealthChatbot
+                  key={userRole}
+                  apiKey="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"
+                />
+              </ErrorBoundary>
+            ) : null}
             <div className="toast-container">
               {notifications.map((notification) => (
                 <Toast

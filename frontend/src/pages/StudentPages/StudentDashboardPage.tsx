@@ -65,7 +65,7 @@ export default function StudentDashboardPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
+      <header className="">
         <StudentNavBar />
       </header>
       <main className="flex-1 py-6 px-4 md:px-6">
@@ -94,7 +94,8 @@ export default function StudentDashboardPage() {
           <h2 className="text-2xl font-semibold mb-4">
             Mental Health Resources
           </h2>
-          <div className="flex flex-col md:flex-row flex-wrap justify-center gap-6 mb-8">
+          <div className="flex flex-row justify-center gap-4 mb-8 ">
+            {/* sm:flex-wrap */}
             <Card className="w-full md:w-[45%] lg:w-[30%]">
               <CardHeader>
                 <CardTitle>Mood Tracker</CardTitle>
@@ -113,7 +114,8 @@ export default function StudentDashboardPage() {
               </CardHeader>
               <CardContent>
                 <MentalHealthResources />
-                <div className="w-full md:w-[45%] lg:w-[65%]"></div>
+                {/* <div className="w-full md:w-[45%] lg:w-[65%]">
+                </div> */}
               </CardContent>
             </Card>
           </div>

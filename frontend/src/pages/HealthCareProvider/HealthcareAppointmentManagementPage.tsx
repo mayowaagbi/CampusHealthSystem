@@ -283,7 +283,7 @@ export default function AppointmentManagementPage() {
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link
           className="flex items-center justify-center"
-          to="/healthcare-provider"
+          to="/healthcare-provider/dashboard"
         >
           <span className="sr-only">
             Campus Health Management System - Healthcare Provider

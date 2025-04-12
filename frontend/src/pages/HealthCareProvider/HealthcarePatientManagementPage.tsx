@@ -311,7 +311,7 @@ export default function PatientManagementPage() {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent>
-                                <DropdownMenuItem asChild>
+                                {/* <DropdownMenuItem asChild>
                                   <Link
                                     to={`/healthcare-provider/students/${student.id}/records`}
                                     className="flex items-center"
@@ -319,7 +319,7 @@ export default function PatientManagementPage() {
                                     <FileText className="mr-2 h-4 w-4" />
                                     View Health Records
                                   </Link>
-                                </DropdownMenuItem>
+                                </DropdownMenuItem> */}
                                 <DropdownMenuItem
                                   onClick={() => {
                                     setSelectedStudent(student);
@@ -327,7 +327,7 @@ export default function PatientManagementPage() {
                                   }}
                                 >
                                   <div className="flex items-center">
-                                    <MessageSquare className="mr-2 h-4 w-4" />
+                                    <FileText className="mr-2 h-4 w-4" />
                                     View Details
                                   </div>
                                 </DropdownMenuItem>

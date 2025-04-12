@@ -240,6 +240,11 @@ export default function UserSignupPage() {
                   )}
                 </Button>
               </form>
+              <div className="text-center text-sm mt-4 ">
+                <Link to="/login" className="text-primary hover:underline ">
+                  Already have an account?
+                </Link>
+              </div>
             </CardContent>
           </Card>
         </motion.div>
