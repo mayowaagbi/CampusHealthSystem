@@ -329,13 +329,13 @@ After seeding the database, you can login with:
 
 **Healthcare Provider:**
 
-- Email: provider@campus.edu
-- Password: provider123
+- Email:myemailaddress
+- Password: password123
 
 **Student:**
 
 - Email: student@campus.edu
-- Password: student123
+- Password: password123
 
 ## 🧪 Testing
 
