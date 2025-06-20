@@ -13,7 +13,7 @@ interface Request {
 }
 
 const ProviderWebSocketHandler = () => {
-  const { isLoggedIn, userRole, accessToken } = useAuth();
+  const { isAuthenticated, user, token } = useAuth();
   const socket = getSocket();
 
   useEffect(() => {
@@ -22,10 +22,8 @@ const ProviderWebSocketHandler = () => {
     testButton.style.position = "fixed";
     testButton.style.bottom = "10px";
     testButton.style.right = "10px";
-    testButton.style.zIndex = "9999";
-
-    const handleTestClick = () => {
-      if (socket.connected) {
+    testButton.style.zIndex = "9999";    const handleTestClick = () => {
+      if (socket?.connected) {
         socket.emit("test-event", { message: "Testing from client" });
         toast.info("Test event sent to server");
       } else {
@@ -41,11 +39,10 @@ const ProviderWebSocketHandler = () => {
       document.body.removeChild(testButton);
     };
   }, [socket]);
-
   useEffect(() => {
-    if (!isLoggedIn || userRole !== "PROVIDER" || !accessToken) return;
+    if (!isAuthenticated || !user?.role || user.role !== "PROVIDER" || !token) return;
 
-    const decodedToken = jwtDecode<{ id: string }>(accessToken);
+    const decodedToken = jwtDecode<{ id: string }>(token);
     registerSocket("PROVIDER", decodedToken.id);
 
     const handleNewRequest = (request: Request) => {
@@ -66,14 +63,14 @@ const ProviderWebSocketHandler = () => {
         </div>,
         { autoClose: 10000 }
       );
-    };
-
+    };    if (!socket) return;
+    
     socket.on("new-ambulance-request", handleNewRequest);
 
     return () => {
       socket.off("new-ambulance-request", handleNewRequest);
     };
-  }, [isLoggedIn, userRole, accessToken, socket]);
+  }, [isAuthenticated, user, token, socket]);
 
   return (
     <div>

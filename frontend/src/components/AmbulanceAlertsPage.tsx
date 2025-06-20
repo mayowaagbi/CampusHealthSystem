@@ -1,5 +1,5 @@
-import React, { useContext, createContext } from "react";
-import { AmbulanceRequestContext } from "../context/AmbulanceRequestContext";
+import { useContext, createContext } from "react";
+import { useAmbulanceRequestContext } from "../context/AmbulanceRequestContext";
 
 // Define the type for an ambulance request
 interface AmbulanceRequest {

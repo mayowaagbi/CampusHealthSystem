@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import socket from "../hooks/sockets"; // Adjust the import path
+import { useEffect } from "react";
+import { getSocket } from "../hooks/sockets"; // Adjust the import path
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -13,6 +13,9 @@ interface Alert {
 
 const AlertNotification = () => {
   useEffect(() => {
+    const socket = getSocket();
+    if (!socket) return;
+    
     console.log("Socket object:", socket); // Debugging: Check the socket object
     console.log("Socket connected:", socket.connected);
 

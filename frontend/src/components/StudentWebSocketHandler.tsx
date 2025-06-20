@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import { getSocket } from "../hooks/sockets";
@@ -12,11 +12,11 @@ interface Alert {
 }
 
 const StudentWebSocketHandler = () => {
-  const { isLoggedIn, userRole } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const socket = getSocket();
 
   useEffect(() => {
-    if (!isLoggedIn || userRole !== "STUDENT") return;
+    if (!isAuthenticated || !user?.role || user.role !== "STUDENT") return;
 
     const handleNewAlert = (alert: Alert) => {
       toast.info(
@@ -31,14 +31,14 @@ const StudentWebSocketHandler = () => {
         </div>,
         { autoClose: 10000 }
       );
-    };
-
+    };    if (!socket) return;
+    
     socket.on("new-alert", handleNewAlert);
 
     return () => {
       socket.off("new-alert", handleNewAlert);
     };
-  }, [isLoggedIn, userRole, socket]);
+  }, [isAuthenticated, user, socket]);
 
   return null;
 };

@@ -29,9 +29,7 @@ import PrescriptionsPage from "./pages/HealthCareProvider/HealthcarePrescription
 import { AmbulanceRequestProvider } from "./context/AmbulanceRequestContext";
 import Toast from "./components/toast/Toast";
 import { getSocket, connectSocket } from "./hooks/sockets";
-import { ErrorBoundary } from "react-error-boundary";
 import UserSignupPage from "./pages/UserSignUpPage";
-import HealthChatbot from "./components/HealthChatbot";
 
 const queryClient = new QueryClient();
 
