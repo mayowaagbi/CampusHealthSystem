@@ -1,7 +1,12 @@
-const { Appointment, HealthRecord } = require("../models/Appointment");
+const { PrismaClient } = require("@prisma/client");
+
 class AnalyticsService {
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
   async getAppointmentStats(period) {
-    return Appointment.aggregate([
+    return this.prisma.appointment.aggregate([
       { $match: { createdAt: { $gte: period.start } } },
       {
         $group: {
@@ -12,9 +17,8 @@ class AnalyticsService {
       },
     ]);
   }
-
   async getHealthTrends() {
-    return HealthRecord.aggregate([
+    return this.prisma.healthRecord.aggregate([
       {
         $group: {
           _id: "$diagnosis",
@@ -28,4 +32,4 @@ class AnalyticsService {
   }
 }
 
-module.export = new AnalyticsService();
+module.exports = new AnalyticsService();

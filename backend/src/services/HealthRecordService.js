@@ -1,11 +1,16 @@
-const { HealthRecord } = require("../models/HealthRecord");
+const { PrismaClient } = require("@prisma/client");
 const MedicalDocument = require("../models/MedicalDocument");
 const { uploadFile } = require("../utils/storage");
 const { ApiError } = require("../utils/apiError");
 const logger = require("../utils/logger");
+
 class HealthRecordService {
+  constructor() {
+    this.prisma = new PrismaClient();
+  }
+
   async createHealthRecord(providerId, studentId, recordData) {
-    return HealthRecord.create({
+    return this.prisma.healthRecord.create({
       ...recordData,
       providerId,
       studentId,
@@ -22,8 +27,24 @@ class HealthRecordService {
     });
   }
   async recentUploads(providerId) {
-    return HealthRecordModel.recentUploads(providerId);
+    return this.prisma.healthRecord.findMany({
+      where: { providerId },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      include: {
+        documents: true,
+        student: {
+          include: {
+            profile: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
+    });
   }
 }
 
-module.export = new HealthRecordService();
+module.exports = new HealthRecordService();

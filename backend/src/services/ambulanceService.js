@@ -64,4 +64,4 @@ class AmbulanceService {
   }
 }
 
-module.exports = AmbulanceService;
+module.exports = new AmbulanceService();

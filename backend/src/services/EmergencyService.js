@@ -20,4 +20,4 @@ class EmergencyService {
   }
 }
 
-module.export = new EmergencyService();
+module.exports = new EmergencyService();

@@ -59,7 +59,12 @@ if (!fs.existsSync(tempDir)) {
 app.use(helmet());
 app.use(
   cors({
-    origin: ["http://localhost:5173"],
+    origin: [
+      "http://localhost:5173",
+      "https://localhost:5173",
+      process.env.FRONTEND_URL,
+      /\.railway\.app$/,
+    ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -85,7 +90,12 @@ const users = new Map();
 // Configure Socket.io
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      "http://localhost:5173",
+      "https://localhost:5173",
+      process.env.FRONTEND_URL,
+      /\.railway\.app$/,
+    ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -136,7 +146,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Server configuration
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;
 
 httpServer.listen(PORT, () => {
   logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);

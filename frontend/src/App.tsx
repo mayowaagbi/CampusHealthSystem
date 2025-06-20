@@ -4,26 +4,22 @@ import { Toaster } from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "./context/ThemeContext"; // Import the ThemeProvider
 import LandingPage from "./pages/LandingPage";
-import EducationPage from "./pages/EducationPage";
-import FacilitiesPage from "./pages/FacilitiesPage";
+
 import ServicesPage from "./pages/ServicesPage";
 import ContactPage from "./pages/ContactPage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import TSPage from "./pages/TSpage";
+
 import NotFound from "./pages/NotFound";
 import { GlobalStateProvider } from "./context/GlobalState";
 import StudentDashboardPage from "./pages/StudentPages/StudentDashboardPage";
-import AdminDashboardPage from "./pages/AdminPages/AdminDashboard";
+
 import StudentProfilePage from "./pages/StudentPages/StudentProfilePage";
 import StudentAppointmentPage from "./pages/StudentPages/StudentAppointmentsPage";
 import StudentHealthGoalsPage from "./pages/StudentPages/HealthGoalsPage";
 import StudentHealthRecordsPage from "./pages/StudentPages/HealthRecordsPage";
 import StudentNotificationsPage from "./pages/StudentPages/NotificationsPage";
-import SettingsPage from "./pages/AdminPages/SettingsPage";
-import AdminHealthRecordsPage from "./pages/AdminPages/AdminHealthRecordsPage";
-import AdminStudentsPage from "./pages/AdminPages/AdminStudentsPage";
-import AdminHealthAlertsPage from "./pages/AdminPages/AdminHealthAlertsPage";
+
 import HealthcareProviderDashboard from "./pages/HealthCareProvider/HealthcareProviderDashboard";
 import AppointmentManagementPage from "./pages/HealthCareProvider/HealthcareAppointmentManagementPage";
 import PatientManagementPage from "./pages/HealthCareProvider/HealthcarePatientManagementPage";
@@ -173,7 +169,7 @@ export default function App() {
           console.log("Refreshing notifications");
           socket.emit("getInitialNotifications");
         }
-      }, 30000);
+      }, 90000);
 
       return () => {
         socket.off("notification");
@@ -202,7 +198,7 @@ export default function App() {
         <GlobalStateProvider>
           <BrowserRouter>
             <Toaster position="bottom-right" />
-            {userRole === "STUDENT" ? (
+            {/* {userRole === "STUDENT" ? (
               <ErrorBoundary
                 fallbackRender={({ error, resetErrorBoundary }) => (
                   <div role="alert">
@@ -217,7 +213,7 @@ export default function App() {
                   apiKey="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"
                 />
               </ErrorBoundary>
-            ) : null}
+            ) : null} */}
             <div className="toast-container">
               {notifications.map((notification) => (
                 <Toast
@@ -230,12 +226,11 @@ export default function App() {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<LandingPage />} />
-              <Route path="/education" element={<EducationPage />} />
-              <Route path="/facilities" element={<FacilitiesPage />} />
+
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/login" element={<LoginPage />} />
-              <Route path="/Terms&Services" element={<TSPage />} />
+
               <Route path="*" element={<NotFound />} />
               <Route path="/usersignup" element={<UserSignupPage />} />
 
@@ -260,19 +255,6 @@ export default function App() {
               <Route
                 path="/student/notifications"
                 element={<StudentNotificationsPage />}
-              />
-
-              {/* Admin Pages */}
-              <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-              <Route path="/admin/settings" element={<SettingsPage />} />
-              <Route
-                path="/admin/health-records"
-                element={<AdminHealthRecordsPage />}
-              />
-              <Route path="/admin/students" element={<AdminStudentsPage />} />
-              <Route
-                path="/admin/health-alerts"
-                element={<AdminHealthAlertsPage />}
               />
 
               {/* Healthcare Pages */}

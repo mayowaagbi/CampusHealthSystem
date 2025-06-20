@@ -1,4 +1,4 @@
-const StudentService = require("../services/studentService");
+const StudentService = require("../services/StudentService");
 const documentService = require("../services/documentService");
 const AlertService = require("../services/AlertService");
 const AppointmentService = require("../services/AppointmentService");

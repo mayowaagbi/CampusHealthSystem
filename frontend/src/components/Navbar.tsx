@@ -13,7 +13,7 @@ function Navbar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-6 bg-white dark:bg-black shadow-md">
+    <div className="flex items-center justify-between p-6 bg-white dark:bg-black sticky border-b-2">
       {/* Logo */}
       <Link className="flex items-center justify-center" to="/">
         <motion.div
@@ -29,7 +29,7 @@ function Navbar() {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="ml-2 text-lg font-bold text-gray-900 dark:text-white"
         >
-          Campus Health System
+          HealthBridge
         </motion.span>
       </Link>
 
@@ -55,7 +55,7 @@ function Navbar() {
         >
           Services
         </Link>
-        <Link
+        {/* <Link
           className="text-sm font-medium hover:underline underline-offset-4 text-gray-900 dark:text-white"
           to="/facilities"
         >
@@ -66,7 +66,7 @@ function Navbar() {
           to="/education"
         >
           Education
-        </Link>
+        </Link> */}
         <Link
           className="text-sm font-medium hover:underline underline-offset-4 text-gray-900 dark:text-white"
           to="/contact"
@@ -97,7 +97,7 @@ function Navbar() {
             >
               Services
             </Link>
-            <Link
+            {/* <Link
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-900 dark:text-white"
               to="/facilities"
               onClick={toggleMenu}
@@ -110,7 +110,7 @@ function Navbar() {
               onClick={toggleMenu}
             >
               Education
-            </Link>
+            </Link> */}
             <Link
               className="text-sm font-medium hover:underline underline-offset-4 text-gray-900 dark:text-white"
               to="/contact"

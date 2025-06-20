@@ -81,10 +81,10 @@ const useGeolocationTracker = (accessToken: string) => {
     const { latitude, longitude, accuracy } = position.coords;
 
     // Skip positions with poor accuracy
-    if (accuracy > 40) {
-      console.log(`Ignoring position with poor accuracy: ${accuracy}m`);
-      return;
-    }
+    // if (accuracy > 50) {
+    //   console.log(`Ignoring position with poor accuracy: ${accuracy}m`);
+    //   return;
+    // }
 
     const newPosition = { latitude, longitude };
 

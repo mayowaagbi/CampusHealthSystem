@@ -1,4 +1,4 @@
-const StudentService = require("../services/studentService");
+const StudentService = require("../services/StudentService");
 const ProviderService = require("../services/ProviderService");
 const StudentController = {
   /**

@@ -1,6 +1,6 @@
 const { exec } = require("child_process");
 const { promisify } = require("util");
-const logger = require("./logger.js");
+const logger = require("./logger");
 const execAsync = promisify(exec);
 
 const createDatabaseBackup = async () => {

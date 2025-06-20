@@ -1,5 +1,5 @@
 const DocumentService = require("../services/documentService");
-const StudentService = require("../services/studentService");
+const StudentService = require("../services/StudentService");
 const fs = require("fs");
 const path = require("path");
 

@@ -1,12 +1,12 @@
 const AppointmentService = require("../services/AppointmentService");
 const StudentService = require("../services/StudentService");
 const ProviderService = require("../services/ProviderService");
-const SupportService = require("../services/SupportService");
+const SupportService = r      const providerprofile = await ProfileModel.findByUserId(providerId);quire("../services/SupportService");
 const { sendEmail } = require("../utils/mailer");
 const { sendAppointmentStatusEmail } = require("../utils/mailer");
 const { successResponse, errorResponse } = require("../utils/responseHandler");
 const asyncHandler = require("../utils/asyncHandler");
-const ProfielModel = require("../models/ProfileModel");
+const ProfileModel = require("../models/ProfileModel");
 class AppointmentController {
   // Create a new appointment (only for students)
   createAppointment = asyncHandler(async (req, res) => {
@@ -221,7 +221,7 @@ class AppointmentController {
       const { id } = req.params;
       const { status } = req.body;
       const providerId = req.user.id;
-      const providerprofile = await ProfielModel.findByUserId(providerId);
+      const providerprofile = await ProfileModel.findByUserId(providerId);
       const updatedAppointment = await AppointmentService.updateStatus(
         id,
         status,
