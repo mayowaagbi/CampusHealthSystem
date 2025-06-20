@@ -22,7 +22,8 @@ const ProviderWebSocketHandler = () => {
     testButton.style.position = "fixed";
     testButton.style.bottom = "10px";
     testButton.style.right = "10px";
-    testButton.style.zIndex = "9999";    const handleTestClick = () => {
+    testButton.style.zIndex = "9999";
+    const handleTestClick = () => {
       if (socket?.connected) {
         socket.emit("test-event", { message: "Testing from client" });
         toast.info("Test event sent to server");
@@ -40,7 +41,8 @@ const ProviderWebSocketHandler = () => {
     };
   }, [socket]);
   useEffect(() => {
-    if (!isAuthenticated || !user?.role || user.role !== "PROVIDER" || !token) return;
+    if (!isAuthenticated || !user?.role || user.role !== "PROVIDER" || !token)
+      return;
 
     const decodedToken = jwtDecode<{ id: string }>(token);
     registerSocket("PROVIDER", decodedToken.id);
@@ -63,8 +65,9 @@ const ProviderWebSocketHandler = () => {
         </div>,
         { autoClose: 10000 }
       );
-    };    if (!socket) return;
-    
+    };
+    if (!socket) return;
+
     socket.on("new-ambulance-request", handleNewRequest);
 
     return () => {

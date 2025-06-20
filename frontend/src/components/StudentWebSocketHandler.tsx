@@ -31,8 +31,9 @@ const StudentWebSocketHandler = () => {
         </div>,
         { autoClose: 10000 }
       );
-    };    if (!socket) return;
-    
+    };
+    if (!socket) return;
+
     socket.on("new-alert", handleNewAlert);
 
     return () => {

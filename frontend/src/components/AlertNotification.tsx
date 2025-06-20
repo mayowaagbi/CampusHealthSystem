@@ -15,7 +15,7 @@ const AlertNotification = () => {
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
-    
+
     console.log("Socket object:", socket); // Debugging: Check the socket object
     console.log("Socket connected:", socket.connected);
 
