@@ -188,42 +188,63 @@ docker build -t campus-health-frontend .
 docker run -p 5173:5173 campus-health-frontend
 ```
 
-## ☁️ Railway Deployment (Recommended)
+## ☁️ Cloud Deployment
 
-Railway is a modern cloud platform that makes deployment simple and automatic.
+Choose your preferred cloud platform for deployment:
 
-### Quick Railway Deploy
+### Render (Recommended)
 
-1. **Push to GitHub**: Ensure your code is in a GitHub repository
-2. **Go to Railway**: Visit [railway.app](https://railway.app) and sign in
-3. **New Project**: Click "New Project" → "Deploy from GitHub repo"
-4. **Deploy Backend**:
-   - Select your repo and choose `backend` folder
-   - Add environment variables (see RAILWAY.md for details)
-   - Add PostgreSQL database service
-5. **Deploy Frontend**:
-   - Add new service from same repo, choose `frontend` folder
-   - Configure frontend environment variables
+Render offers simple deployment with automatic builds and free tier.
 
-### Railway Environment Variables
+**Quick Deploy:**
+
+1. Push code to GitHub
+2. Create backend web service with PostgreSQL database
+3. Create frontend static site
+4. Configure environment variables
+
+📖 **See [RENDER-QUICK.md](./RENDER-QUICK.md) for 15-minute deployment guide**
+📖 **See [RENDER.md](./RENDER.md) for detailed Render deployment guide**
+
+### Cloud Platform Comparison
+
+| Feature             | Render          | Heroku       | Vercel      |
+| ------------------- | --------------- | ------------ | ----------- |
+| **Free Tier**       | ✅ 750hrs/month | ❌ Paid only | ✅ Generous |
+| **Auto Sleep**      | 15 min          | No           | No          |
+| **Database**        | PostgreSQL      | PostgreSQL   | External    |
+| **Custom Domains**  | ✅ Free         | ✅ Paid      | ✅ Free     |
+| **Build Time**      | Fast            | Moderate     | Very Fast   |
+| **Scaling**         | Manual          | Manual       | Auto        |
+| **Price (Starter)** | $7/month        | $7/month     | $20/month   |
+
+**Recommendation**:
+
+- **Render** for full-stack apps with database (recommended)
+- **Heroku** for enterprise features
+- **Vercel** for frontend-only or serverless apps
+
+## 🔧 Environment Configuration for Cloud
+
+### Render
 
 **Backend:**
 
 ```env
 NODE_ENV=production
-JWT_ACCESS_SECRET=your_32_character_secret
-JWT_REFRESH_SECRET=your_different_32_character_secret
-FRONTEND_URL=https://your-frontend.railway.app
+PORT=4000
+DATABASE_URL="postgresql://username:password@host:port/dbname"
+JWT_ACCESS_SECRET=your_very_long_random_access_secret_here_minimum_32_characters
+JWT_REFRESH_SECRET=your_very_long_random_refresh_secret_here_minimum_32_characters
+FRONTEND_URL=https://your-frontend-domain
 ```
 
 **Frontend:**
 
 ```env
-VITE_API_BASE_URL=https://your-backend.railway.app
-VITE_SOCKET_SERVER_URL=https://your-backend.railway.app
+VITE_API_BASE_URL=https://your-backend-domain
+VITE_SOCKET_SERVER_URL=https://your-backend-domain
 ```
-
-📖 **See [RAILWAY.md](./RAILWAY.md) for detailed Railway deployment guide**
 
 ## 🔧 Common Issues & Solutions
 

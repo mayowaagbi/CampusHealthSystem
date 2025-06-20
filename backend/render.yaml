@@ -1,0 +1,20 @@
+# Render Deployment Configuration
+# This file tells Render how to build and run your backend service
+
+# Build Command
+buildCommand: npm ci && npx prisma generate
+
+# Start Command
+startCommand: npm start
+
+# Environment
+env: node
+
+# Node.js version
+nodeVersion: 18
+
+# Auto-deploy
+autoDeploy: true
+
+# Health Check Path
+healthCheckPath: /health

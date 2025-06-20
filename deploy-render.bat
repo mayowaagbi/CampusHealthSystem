@@ -1,0 +1,49 @@
+@echo off
+REM Render Deployment Helper Script for Windows
+
+echo 🌐 Render Deployment Helper
+echo ==========================
+
+echo.
+echo 📋 Render Deployment Checklist:
+echo.
+echo 1. 📁 Push your code to GitHub
+echo 2. 🌐 Go to render.com and sign in
+echo 3. 🔧 Deploy Backend Web Service:
+echo    - New → Web Service
+echo    - Root Directory: backend
+echo    - Build: npm ci ^&^& npx prisma generate
+echo    - Start: npm start
+echo.
+echo 4. 🗄️  Create PostgreSQL Database:
+echo    - New → PostgreSQL
+echo    - Copy Internal Database URL
+echo.
+echo 5. ⚙️  Configure Backend Environment Variables:
+echo    NODE_ENV=production
+echo    DATABASE_URL=^<internal_database_url^>
+echo    JWT_ACCESS_SECRET=^<32_character_secret^>
+echo    JWT_REFRESH_SECRET=^<different_32_character_secret^>
+echo    FRONTEND_URL=https://your-frontend.onrender.com
+echo.
+echo 6. 🎨 Deploy Frontend Static Site:
+echo    - New → Static Site
+echo    - Root Directory: frontend
+echo    - Build: npm ci ^&^& npm run build
+echo    - Publish: dist
+echo.
+echo 7. ⚙️  Configure Frontend Environment Variables:
+echo    VITE_API_BASE_URL=https://your-backend.onrender.com
+echo    VITE_SOCKET_SERVER_URL=https://your-backend.onrender.com
+echo.
+echo 🔐 Generate JWT Secrets:
+echo Run this command to generate secure secrets:
+echo node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+echo.
+echo 📖 Detailed guides:
+echo   - Quick Start: RENDER-QUICK.md
+echo   - Full Guide: RENDER.md
+echo.
+echo 🌐 Render Dashboard: https://dashboard.render.com
+
+pause

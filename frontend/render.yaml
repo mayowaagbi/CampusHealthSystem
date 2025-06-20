@@ -1,0 +1,23 @@
+# Render Configuration for Frontend
+# This file tells Render how to build and serve your frontend
+
+# Build Command
+buildCommand: npm ci && npm run build
+
+# Publish Directory (where build files are)
+publishDir: dist
+
+# Environment
+env: static
+
+# Node.js version for build
+nodeVersion: 18
+
+# Auto-deploy
+autoDeploy: true
+
+# Redirects for SPA (Single Page Application)
+redirects:
+  - source: /*
+    destination: /index.html
+    type: rewrite
