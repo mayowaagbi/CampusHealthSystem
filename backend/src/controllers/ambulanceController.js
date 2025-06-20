@@ -1,4 +1,4 @@
-const AmbulanceService = require("../services/AmbulanceService");
+const AmbulanceService = require("../services/ambulanceService");
 const UserModel = require("../models/User");
 const activeRequests = new Map(); // Track active requests and their intervals
 const {
