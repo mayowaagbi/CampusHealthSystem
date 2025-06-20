@@ -1,7 +1,7 @@
 const AppointmentService = require("../services/AppointmentService");
 const StudentService = require("../services/StudentService");
 const ProviderService = require("../services/ProviderService");
-const SupportService = r      const providerprofile = await ProfileModel.findByUserId(providerId);quire("../services/SupportService");
+const SupportService = require("../services/SupportService");
 const { sendEmail } = require("../utils/mailer");
 const { sendAppointmentStatusEmail } = require("../utils/mailer");
 const { successResponse, errorResponse } = require("../utils/responseHandler");

@@ -2,7 +2,7 @@
 # This file tells Render how to build and run your backend service
 
 # Build Command
-buildCommand: npm ci && npx prisma generate
+buildCommand: npm ci && npx prisma generate && npx prisma migrate deploy
 
 # Start Command
 startCommand: npm start
